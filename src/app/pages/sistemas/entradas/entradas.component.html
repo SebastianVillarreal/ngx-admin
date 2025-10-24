@@ -1,0 +1,219 @@
+<div class="row">
+  <div class="col-12">
+    <nb-card>
+      <nb-card-header>Entradas | Formulario</nb-card-header>
+      <nb-card-body>
+  <form (submit)="$event.preventDefault()" novalidate>
+          <h6 class="section-title">Datos generales</h6>
+          <div class="row">
+            <div class="col-md-3">
+              <div class="form-group">
+                <label class="label">*Nota Entrada</label>
+                <input nbInput fullWidth type="text" placeholder="" [(ngModel)]="notaEntrada" name="notaEntrada" (keyup.enter)="onNotaEnter()">
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-group">
+                <label class="label">*Factura</label>
+                <input nbInput fullWidth type="text" placeholder="" [(ngModel)]="factura" name="facturaTxt">
+                <div class="mt-1"><nb-checkbox [(ngModel)]="facturaMarcada" name="factura">Factura</nb-checkbox></div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-group">
+                <label class="label">*# de Orden</label>
+                <input nbInput fullWidth type="text" placeholder="" [(ngModel)]="orden" name="orden">
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-group">
+                <label class="label">*Proveedor</label>
+                <input nbInput fullWidth type="text" placeholder="" [(ngModel)]="proveedor" name="proveedor">
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-4">
+              <div class="form-group">
+                <label class="label">Sucursal</label>
+                <input nbInput fullWidth type="text" placeholder="" [(ngModel)]="sucursal" name="sucursal" disabled>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label class="label">Estatus</label>
+                <input nbInput fullWidth type="text" placeholder="" [(ngModel)]="estatus" name="estatus" disabled>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label class="label">Entrada</label>
+                <input nbInput fullWidth type="text" placeholder="" [(ngModel)]="entrada" name="entrada" disabled>
+              </div>
+            </div>
+          </div>
+
+          <h6 class="section-title">Importes</h6>
+          <div class="row">
+            <div class="col-md-3">
+              <div class="form-group">
+                <label class="label">Sub-Total</label>
+                <input nbInput fullWidth class="number-input" type="number" placeholder="0.00" [(ngModel)]="subtotal" name="subtotal">
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-group">
+                <label class="label">IVA</label>
+                <input nbInput fullWidth class="number-input" type="number" placeholder="0.00" [(ngModel)]="iva" name="iva" disabled>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-group">
+                <label class="label">IEPS</label>
+                <input nbInput fullWidth class="number-input" type="number" placeholder="0.00" [(ngModel)]="ieps" name="ieps">
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-group">
+                <label class="label">Descuento</label>
+                <input nbInput fullWidth class="number-input" type="number" placeholder="0.00" [(ngModel)]="descuento" name="descuento">
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-3">
+              <div class="form-group">
+                <label class="label">Tasa Retención</label>
+                <input nbInput fullWidth class="number-input" type="number" placeholder="0.00" [(ngModel)]="tasaRetencion" name="tasaRetencion">
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-group">
+                <label class="label">Tasa Retención IVA</label>
+                <input nbInput fullWidth class="number-input" type="number" placeholder="0.00" [(ngModel)]="tasaRetencionIva" name="tasaRetencionIva">
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-group">
+                <label class="label">Monto Retención IVA</label>
+                <input nbInput fullWidth class="number-input" type="number" placeholder="0.00" [(ngModel)]="montoRetIva" name="montoRetIva">
+              </div>
+            </div>
+            <div class="col-md-3"></div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-3 offset-md-9">
+              <div class="form-group">
+                <label class="label">Total</label>
+                <input nbInput fullWidth class="number-input" type="number" placeholder="0.00" [(ngModel)]="total" name="total">
+              </div>
+            </div>
+          </div>
+
+          <div class="actions mt-2">
+            <button type="button" nbButton status="primary" class="mr-2" (click)="guardar()" [disabled]="saving">{{ saving ? 'Guardando…' : 'Guardar' }}</button>
+            <button type="button" nbButton status="info" class="mr-2">Rpt. Diferencias en Entradas</button>
+            <button type="button" nbButton status="success">Recepcion</button>
+          </div>
+        </form>
+      </nb-card-body>
+    </nb-card>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-12">
+    <nb-card>
+      <nb-card-header>Agregar Renglón | Formulario</nb-card-header>
+      <nb-card-body>
+        <form>
+          <div class="row">
+            <div class="col-md-3">
+              <div class="form-group">
+                <label class="label">*Código:</label>
+                <div class="input-with-icon">
+                  <nb-icon icon="search-outline" nbPrefix></nb-icon>
+                  <input nbInput fullWidth type="text" placeholder="Código">
+                </div>
+              </div>
+            </div>
+            <div class="col-md-5">
+              <div class="form-group">
+                <label class="label">*Descripción:</label>
+                <div class="input-with-icon">
+                  <nb-icon icon="search-outline" nbPrefix></nb-icon>
+                  <input nbInput fullWidth type="text" placeholder="Descripción">
+                </div>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <div class="form-group">
+                <label class="label">*Cantidad:</label>
+                <input nbInput fullWidth type="number" placeholder="0">
+              </div>
+            </div>
+            <div class="col-md-2">
+              <div class="form-group">
+                <label class="label">*Precio:</label>
+                <input nbInput fullWidth type="number" placeholder="0.00">
+              </div>
+            </div>
+          </div>
+        </form>
+      </nb-card-body>
+    </nb-card>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-12">
+    <nb-card>
+      <nb-card-header>Entradas | Tabla</nb-card-header>
+      <nb-card-body>
+        <div class="row mb-2">
+          <div class="col-md-4 ml-auto">
+            <input nbInput fullWidth placeholder="Buscar (código, descripción, U.M)" [(ngModel)]="filtro" name="filtroTabla">
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-striped table-bordered">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th (click)="changeSort('Codigo')" class="sortable">Artículo <nb-icon [icon]="sortIcon('Codigo')"></nb-icon></th>
+                <th (click)="changeSort('Descripcion')" class="sortable">Descripción <nb-icon [icon]="sortIcon('Descripcion')"></nb-icon></th>
+                <th (click)="changeSort('UnidadMedida')" class="sortable">U. M <nb-icon [icon]="sortIcon('UnidadMedida')"></nb-icon></th>
+                <th (click)="changeSort('Costo')" class="sortable">Costo <nb-icon [icon]="sortIcon('Costo')"></nb-icon></th>
+                <th (click)="changeSort('CostoFactura')" class="sortable">Costo Factura <nb-icon [icon]="sortIcon('CostoFactura')"></nb-icon></th>
+                <th (click)="changeSort('Descuento')" class="sortable">Descuento <nb-icon [icon]="sortIcon('Descuento')"></nb-icon></th>
+                <th (click)="changeSort('Cantidad')" class="sortable">Cantidad <nb-icon [icon]="sortIcon('Cantidad')"></nb-icon></th>
+                <th (click)="changeSort('SC')" class="sortable">SC <nb-icon [icon]="sortIcon('SC')"></nb-icon></th>
+                <th (click)="changeSort('CostoRenglon')" class="sortable">Total <nb-icon [icon]="sortIcon('CostoRenglon')"></nb-icon></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="!filasMostradas || filasMostradas.length === 0">
+                <td colspan="10" class="text-center text-muted">Sin datos por ahora</td>
+              </tr>
+              <tr *ngFor="let r of filasMostradas; let i = index; trackBy: trackByRenglon">
+                <td>{{ i + 1 }}</td>
+                <td>{{ r.Codigo }}</td>
+                <td>{{ r.Descripcion }}</td>
+                <td>{{ r.UnidadMedida }}</td>
+                <td class="text-right">{{ r.Costo | number:'1.2-2' }}</td>
+                <td class="text-right">{{ r.CostoFactura | number:'1.2-2' }}</td>
+                <td class="text-right">{{ r.Descuento | number:'1.2-2' }}</td>
+                <td class="text-right">{{ r.Cantidad | number:'1.0-2' }}</td>
+                <td>{{ r.SC }}</td>
+                <td class="text-right">{{ r.CostoRenglon | number:'1.2-2' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </nb-card-body>
+    </nb-card>
+  </div>
+</div>

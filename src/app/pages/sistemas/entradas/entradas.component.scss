@@ -1,0 +1,18 @@
+.actions button + button { margin-left: .5rem; }
+.input-with-icon [nbInput] { padding-left: 2rem; }
+.section-title {
+	margin: .25rem 0 .75rem;
+	font-weight: 600;
+	color: var(--text-hint-color);
+}
+.number-input {
+	text-align: right;
+}
+.sortable {
+	cursor: pointer;
+	white-space: nowrap;
+}
+.sortable nb-icon {
+	vertical-align: middle;
+	margin-left: .25rem;
+}

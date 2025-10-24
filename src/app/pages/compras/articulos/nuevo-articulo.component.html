@@ -1,0 +1,80 @@
+<nb-card>
+  <nb-card-header>Artículos | Nuevo</nb-card-header>
+  <nb-card-body>
+    <form [formGroup]="form" class="form-grid" (ngSubmit)="guardar()">
+      <!-- Columna 1 -->
+      <div class="col">
+        <label class="label">*Código:</label>
+        <input nbInput fullWidth formControlName="codigo" />
+
+        <label class="label mt">*Departamento:</label>
+        <nb-select fullWidth formControlName="departamento" placeholder="Seleccione...">
+          <nb-option *ngFor="let d of departamentos" [value]="d.Id">{{ d.Nombre }}</nb-option>
+        </nb-select>
+
+        <label class="label mt">*Precio Mayoreo C:</label>
+        <input nbInput fullWidth type="number" min="0" step="0.01" formControlName="precioMayoreoC" />
+
+        <label class="label mt">*Impuesto Dos:</label>
+        <input nbInput fullWidth type="number" min="0" step="0.01" formControlName="impuestoDos" />
+      </div>
+
+      <!-- Columna 2 -->
+      <div class="col">
+        <label class="label">*Codigo de barras:</label>
+        <input nbInput fullWidth formControlName="codigoBarras" />
+
+        <label class="label mt">*Familia:</label>
+        <nb-select fullWidth formControlName="familia" placeholder="Seleccione..." [disabled]="familias.length === 0">
+          <nb-option *ngFor="let f of familias" [value]="f.Id">{{ f.Nombre }}</nb-option>
+        </nb-select>
+
+        <label class="label mt">*Ultimo Costo:</label>
+        <input nbInput fullWidth type="number" min="0" step="0.01" formControlName="ultimoCosto" />
+
+        <label class="label mt">*Impuesto Tres:</label>
+        <input nbInput fullWidth type="number" min="0" step="0.01" formControlName="impuestoTres" />
+      </div>
+
+      <!-- Columna 3 -->
+      <div class="col">
+        <label class="label">*Descripcion:</label>
+        <input nbInput fullWidth formControlName="descripcion" />
+
+        <label class="label mt">*Precio Publico:</label>
+        <input nbInput fullWidth type="number" min="0" step="0.01" formControlName="precioPublico" />
+
+        <label class="label mt">*Clave Sat:</label>
+        <input nbInput fullWidth formControlName="claveSat" />
+
+        <div class="checkbox mt">
+          <nb-checkbox formControlName="inventariable">*Inventariable</nb-checkbox>
+        </div>
+      </div>
+
+      <!-- Columna 4 -->
+      <div class="col">
+        <label class="label">*Unidad Medida:</label>
+        <nb-select fullWidth formControlName="unidadMedida" placeholder="Seleccione...">
+          <nb-option *ngFor="let u of unidades" [value]="u.id">{{ u.name }} ({{ u.id }})</nb-option>
+        </nb-select>
+
+        <label class="label mt">*Precio Mayoreo:</label>
+        <input nbInput fullWidth type="number" min="0" step="0.01" formControlName="precioMayoreo" />
+
+        <label class="label mt">*Impuesto Uno:</label>
+        <input nbInput fullWidth type="number" min="0" step="0.01" formControlName="impuestoUno" />
+
+        <div class="mt">
+          <label class="label">Importador</label>
+          <input type="file" (change)="onArchivoSeleccionado($event)" />
+        </div>
+      </div>
+
+      <div class="actions">
+        <button nbButton status="info" type="button" (click)="cancelar()">Importar</button>
+        <button nbButton status="success" type="submit" [disabled]="cargando">Guardar</button>
+      </div>
+    </form>
+  </nb-card-body>
+</nb-card>

@@ -1,0 +1,31 @@
+.form-row {
+  display: grid;
+  grid-template-columns: 120px 1fr auto;
+  gap: 1rem;
+  align-items: center;
+}
+
+.tabla-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.right {
+  display: inline-flex;
+  align-items: center;
+}
+
+.label {
+  margin: 0;
+}
+
+.buscar-btn {
+  white-space: nowrap;
+}
+
+.help-text {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-hint-color);
+}

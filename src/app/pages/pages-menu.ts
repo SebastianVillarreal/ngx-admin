@@ -223,6 +223,26 @@ export const MENU_ITEMS: NbMenuItem[] = [
     ],
   },
   {
+    title: 'Sistemas',
+    icon: 'settings-2-outline',
+    children: [
+      {
+        title: 'Entradas',
+        link: '/pages/sistemas/entradas',
+      },
+    ],
+  },
+  {
+    title: 'Compras',
+    icon: 'shopping-bag-outline',
+    children: [
+      {
+        title: 'Artículos',
+        link: '/pages/compras/articulos',
+      },
+    ],
+  },
+  {
     title: 'Auth',
     icon: 'lock-outline',
     children: [
