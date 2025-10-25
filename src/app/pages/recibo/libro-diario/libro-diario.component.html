@@ -1,0 +1,106 @@
+<nb-card>
+  <nb-card-header>
+    Libro Diario | Filtros
+  </nb-card-header>
+  <nb-card-body>
+    <form [formGroup]="filtrosForm" class="filters-grid">
+      <div class="filter-item">
+        <label class="label">Fecha Inicial</label>
+        <nb-form-field>
+          <input nbInput placeholder="dd/mm/aaaa" formControlName="fechaInicial" [nbDatepicker]="dpInicio" />
+          <nb-datepicker #dpInicio></nb-datepicker>
+        </nb-form-field>
+      </div>
+      <div class="filter-item">
+        <label class="label">Fecha Final</label>
+        <nb-form-field>
+          <input nbInput placeholder="dd/mm/aaaa" formControlName="fechaFinal" [nbDatepicker]="dpFin" />
+          <nb-datepicker #dpFin></nb-datepicker>
+        </nb-form-field>
+      </div>
+      <div class="actions">
+        <button nbButton status="primary" (click)="onBuscar()">
+          <nb-icon icon="search-outline"></nb-icon>
+          Buscar
+        </button>
+      </div>
+    </form>
+  </nb-card-body>
+</nb-card>
+
+<nb-card>
+  <nb-card-header>
+    Libro Diario | Detalle
+  </nb-card-header>
+  <nb-card-body>
+    <div class="table-toolbar">
+      <div class="left">
+        <span>Mostrar</span>
+        <nb-select size="small" [(selected)]="pageSize">
+          <nb-option *ngFor="let s of pageSizeOptions" [value]="s">{{ s }}</nb-option>
+        </nb-select>
+        <span>registros</span>
+      </div>
+      <div class="right">
+        <span>Buscar:</span>
+        <input nbInput size="small" placeholder="Texto a buscar" [(ngModel)]="search" />
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Folio</th>
+            <th>C.F</th>
+            <th>Nota</th>
+            <th>Proveedor</th>
+            <th>Recibo</th>
+            <th>Orden/Cot</th>
+            <th>Factura</th>
+            <th class="text-right">Total</th>
+            <th>Obsrv</th>
+            <th>Suc.</th>
+            <th>Quemar</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of rows">
+            <td>{{ r.folio }}</td>
+            <td>
+              <button nbButton size="tiny" status="danger">CF</button>
+            </td>
+            <td>
+              <button nbButton size="tiny" status="danger" appearance="outline">Nota Cargo</button>
+            </td>
+            <td>{{ r.proveedor }}</td>
+            <td>{{ r.recibo }}</td>
+            <td>{{ r.ordenCot }}</td>
+            <td>{{ r.factura }}</td>
+            <td class="text-right">{{ r.total | number:'1.2-2' }}</td>
+            <td>{{ r.obsrv }}</td>
+            <td>{{ r.suc }}</td>
+            <td>
+              <button nbButton size="tiny" ghost status="primary">
+                <nb-icon icon="arrow-right"></nb-icon>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-footer">
+      <div class="left">Mostrando registros de 1 al {{ pageSize }} de un total de {{ rows.length }} registros</div>
+      <div class="right pagination">
+        <button nbButton size="tiny" appearance="outline">Anterior</button>
+        <nb-button-group size="tiny">
+          <button nbButton status="primary">1</button>
+          <button nbButton>2</button>
+          <button nbButton>3</button>
+        </nb-button-group>
+        <button nbButton size="tiny" appearance="outline">Siguiente</button>
+      </div>
+    </div>
+  </nb-card-body>
+</nb-card>

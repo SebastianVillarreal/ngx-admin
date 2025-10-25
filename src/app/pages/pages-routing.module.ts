@@ -15,9 +15,19 @@ const routes: Routes = [{
       component: ECommerceComponent,
     },
     {
+      path: 'cuentas-por-pagar',
+      loadChildren: () => import('./cuentas-por-pagar/cuentas-por-pagar.module')
+        .then(m => m.CuentasPorPagarModule),
+    },
+    {
       path: 'compras',
       loadChildren: () => import('./compras/compras.module')
         .then(m => m.ComprasModule),
+    },
+    {
+      path: 'recibo',
+      loadChildren: () => import('./recibo/recibo.module')
+        .then(m => m.ReciboModule),
     },
     {
       path: 'sistemas',

@@ -13,5 +13,13 @@ if (environment.production) {
   enableProdMode();
 }
 
-platformBrowserDynamic().bootstrapModule(AppModule)
+platformBrowserDynamic()
+  .bootstrapModule(AppModule)
+  .then(() => {
+    // Oculta el spinner global de carga definido en index.html (#nb-global-spinner)
+    const spinner = document.getElementById('nb-global-spinner');
+    if (spinner) {
+      spinner.style.display = 'none';
+    }
+  })
   .catch(err => console.error(err));

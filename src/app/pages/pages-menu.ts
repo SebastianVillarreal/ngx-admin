@@ -8,6 +8,16 @@ export const MENU_ITEMS: NbMenuItem[] = [
     home: true,
   },
   {
+    title: 'Recibo',
+    icon: 'file-text-outline',
+    children: [
+      {
+        title: 'Libro diario',
+        link: '/pages/recibo/libro-diario',
+      },
+    ],
+  },
+  {
     title: 'IoT Dashboard',
     icon: 'home-outline',
     link: '/pages/iot-dashboard',
@@ -239,6 +249,20 @@ export const MENU_ITEMS: NbMenuItem[] = [
       {
         title: 'Artículos',
         link: '/pages/compras/articulos',
+      },
+    ],
+  },
+  {
+    title: 'Cuentas por pagar',
+    icon: 'credit-card-outline',
+    children: [
+      {
+        title: 'Pagos SPEI',
+        link: '/pages/cuentas-por-pagar/pagos-spei',
+      },
+      {
+        title: 'Lista Pagos SPEI',
+        link: '/pages/cuentas-por-pagar/pagos-spei/lista',
       },
     ],
   },

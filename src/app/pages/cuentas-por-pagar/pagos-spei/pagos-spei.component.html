@@ -1,0 +1,228 @@
+<div class="row">
+  <div class="col-12">
+    <nb-card>
+      <nb-card-header>Pagos</nb-card-header>
+      <nb-card-body>
+        <div class="row g-3">
+          <div class="col-md-3 col-lg-2">
+            <label class="label" for="fechaInicio">*Fecha:</label>
+            <input nbInput fullWidth id="fechaInicio" placeholder="dd/mm/aaaa" [nbDatepicker]="dpInicio" [formControl]="form.controls.fechaInicio">
+            <nb-datepicker #dpInicio></nb-datepicker>
+          </div>
+          <div class="col-md-3 col-lg-2">
+            <label class="label" for="fechaFin">*Fecha Final:</label>
+            <input nbInput fullWidth id="fechaFin" placeholder="dd/mm/aaaa" [nbDatepicker]="dpFin" [formControl]="form.controls.fechaFin">
+            <nb-datepicker #dpFin></nb-datepicker>
+          </div>
+          <div class="col-md-3 col-lg-2">
+            <label class="label" for="fechaPago">*Fecha Pago:</label>
+            <input nbInput fullWidth id="fechaPago" placeholder="dd/mm/aaaa" [nbDatepicker]="dpPago" [formControl]="form.controls.fechaPago">
+            <nb-datepicker #dpPago></nb-datepicker>
+          </div>
+          <div class="col-md-3 col-lg-2">
+            <label class="label" for="sucursal">*Sucursal:</label>
+            <nb-select id="sucursal" fullWidth [formControl]="form.controls.sucursal">
+              <nb-option *ngFor="let s of sucursales" [value]="s.id">{{ s.nombre }}</nb-option>
+            </nb-select>
+          </div>
+          <div class="col-md-3 col-lg-2">
+            <label class="label" for="formaPago">*Forma Pago:</label>
+            <nb-select id="formaPago" fullWidth [formControl]="form.controls.formaPago">
+              <nb-option value="SPEI">SPEI</nb-option>
+            </nb-select>
+          </div>
+          <div class="col-md-6">
+            <label class="label" for="proveedor">*Proveedor:</label>
+            <nb-select id="proveedor" fullWidth [formControl]="form.controls.proveedor">
+              <nb-option *ngFor="let p of proveedores" [value]="p.id">{{ p.nombre }}</nb-option>
+            </nb-select>
+          </div>
+          <div class="col-md-2">
+            <label class="label" for="total">*Total:</label>
+            <input nbInput fullWidth id="total" [formControl]="form.controls.total" placeholder="0" disabled>
+          </div>
+          <div class="col-md-4 d-flex align-items-end gap-2">
+            <button nbButton status="primary" class="me-2" (click)="buscar()">Buscar</button>
+            <button nbButton status="success" (click)="generarPagos()">Generar Pagos</button>
+          </div>
+        </div>
+      </nb-card-body>
+    </nb-card>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-12">
+    <nb-card>
+      <nb-card-header>
+        <div class="d-flex flex-wrap justify-content-between align-items-center w-100">
+          <div>
+            <strong>Pagos | Lista Pendientes</strong>
+          </div>
+          <div class="d-flex align-items-center">
+            <span class="me-2">Buscar:</span>
+            <input nbInput placeholder="" style="max-width: 240px;">
+          </div>
+        </div>
+      </nb-card-header>
+      <nb-card-body>
+        <div class="d-flex align-items-center mb-3">
+          <span class="me-2">Mostrar</span>
+          <nb-select size="small" [selected]="pageSize" (selectedChange)="setPageSize($event)" class="me-2" style="width: 100px;">
+            <nb-option *ngFor="let size of pageSizes" [value]="size">{{ size === -1 ? 'Todos' : size }}</nb-option>
+          </nb-select>
+          <span>registros</span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th><nb-checkbox [(ngModel)]="allSelected" (ngModelChange)="toggleAll($event)"></nb-checkbox></th>
+                <th (click)="setSort('id')" class="sortable">Id <nb-icon *ngIf="sortColumn==='id'" [icon]="sortDirection==='asc' ? 'arrow-up-outline' : 'arrow-down-outline'"></nb-icon></th>
+                <th (click)="setSort('proveedorId')" class="sortable">Proveedor <nb-icon *ngIf="sortColumn==='proveedorId'" [icon]="sortDirection==='asc' ? 'arrow-up-outline' : 'arrow-down-outline'"></nb-icon></th>
+                <th (click)="setSort('nombreProveedor')" class="sortable">Nombre Proveedor <nb-icon *ngIf="sortColumn==='nombreProveedor'" [icon]="sortDirection==='asc' ? 'arrow-up-outline' : 'arrow-down-outline'"></nb-icon></th>
+                <th (click)="setSort('numeroNota')" class="sortable">Número Nota <nb-icon *ngIf="sortColumn==='numeroNota'" [icon]="sortDirection==='asc' ? 'arrow-up-outline' : 'arrow-down-outline'"></nb-icon></th>
+                <th (click)="setSort('factura')" class="sortable">Factura <nb-icon *ngIf="sortColumn==='factura'" [icon]="sortDirection==='asc' ? 'arrow-up-outline' : 'arrow-down-outline'"></nb-icon></th>
+                <th (click)="setSort('totalFactura')" class="sortable">Total Factura <nb-icon *ngIf="sortColumn==='totalFactura'" [icon]="sortDirection==='asc' ? 'arrow-up-outline' : 'arrow-down-outline'"></nb-icon></th>
+                <th (click)="setSort('nc')" class="sortable">NC <nb-icon *ngIf="sortColumn==='nc'" [icon]="sortDirection==='asc' ? 'arrow-up-outline' : 'arrow-down-outline'"></nb-icon></th>
+                <th (click)="setSort('descuento')" class="sortable">Descuento <nb-icon *ngIf="sortColumn==='descuento'" [icon]="sortDirection==='asc' ? 'arrow-up-outline' : 'arrow-down-outline'"></nb-icon></th>
+                <th (click)="setSort('retencion')" class="sortable">Retención <nb-icon *ngIf="sortColumn==='retencion'" [icon]="sortDirection==='asc' ? 'arrow-up-outline' : 'arrow-down-outline'"></nb-icon></th>
+                <th (click)="setSort('cartaFaltante')" class="sortable">Carta Faltante <nb-icon *ngIf="sortColumn==='cartaFaltante'" [icon]="sortDirection==='asc' ? 'arrow-up-outline' : 'arrow-down-outline'"></nb-icon></th>
+                <th (click)="setSort('total')" class="sortable">Total <nb-icon *ngIf="sortColumn==='total'" [icon]="sortDirection==='asc' ? 'arrow-up-outline' : 'arrow-down-outline'"></nb-icon></th>
+                <th (click)="setSort('fechaEntrada')" class="sortable">Fecha Entrada <nb-icon *ngIf="sortColumn==='fechaEntrada'" [icon]="sortDirection==='asc' ? 'arrow-up-outline' : 'arrow-down-outline'"></nb-icon></th>
+                <th (click)="setSort('fechaVence')" class="sortable">Fecha Vence <nb-icon *ngIf="sortColumn==='fechaVence'" [icon]="sortDirection==='asc' ? 'arrow-up-outline' : 'arrow-down-outline'"></nb-icon></th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let r of pageRows">
+                <td>
+                  <nb-checkbox [ngModel]="selection[r.id] || false" (ngModelChange)="onToggle(r.id, $event)"></nb-checkbox>
+                </td>
+                <td>{{ r.id }}</td>
+                <td>{{ r.proveedorId }}</td>
+                <td>{{ r.nombreProveedor }}</td>
+                <td>{{ r.numeroNota }}</td>
+                <td>{{ r.factura }}</td>
+                <td>{{ r.totalFactura | currency:'MXN':'symbol':'1.2-2' }}</td>
+                <td>{{ r.nc | currency:'MXN':'symbol':'1.2-2' }}</td>
+                <td>{{ r.descuento | currency:'MXN':'symbol':'1.2-2' }}</td>
+                <td>{{ r.retencion | currency:'MXN':'symbol':'1.2-2' }}</td>
+                <td>{{ r.cartaFaltante | currency:'MXN':'symbol':'1.2-2' }}</td>
+                <td>
+                  {{ r.total | currency:'MXN':'symbol':'1.2-2' }}
+                </td>
+                <td>{{ r.fechaEntrada }}</td>
+                <td>{{ r.fechaVence }}</td>
+                <td>
+                  <button nbButton size="tiny" status="info">Múltiple</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="d-flex justify-content-between align-items-center mt-2">
+            <div>
+              Página {{ page }} de {{ totalPages }} · Mostrando {{ displayedCount }} de {{ totalCount }} registros
+            </div>
+            <div class="d-flex gap-2">
+              <button nbButton size="tiny" [disabled]="page<=1" (click)="gotoPage(page-1)">Anterior</button>
+              <button nbButton size="tiny" [disabled]="page>=totalPages" (click)="gotoPage(page+1)">Siguiente</button>
+            </div>
+          </div>
+        </div>
+      </nb-card-body>
+    </nb-card>
+  </div>
+</div>
+
+<!-- Segunda sección: Notas de Cargo (izquierda) y Totales (derecha) -->
+<div class="row">
+  <div class="col-md-8 col-12">
+    <nb-card>
+      <nb-card-header>
+        <strong>Pagos | Lista Notas Cargo</strong>
+      </nb-card-header>
+      <nb-card-body>
+        <div class="d-flex align-items-center mb-3">
+          <span class="me-2">Mostrar</span>
+          <nb-select size="small" [selected]="pageSizeNC" (selectedChange)="setPageSizeNC($event)" class="me-2" style="width: 100px;">
+            <nb-option [value]="10">10</nb-option>
+            <nb-option [value]="25">25</nb-option>
+            <nb-option [value]="50">50</nb-option>
+            <nb-option [value]="100">100</nb-option>
+            <nb-option [value]="-1">Todos</nb-option>
+          </nb-select>
+          <span>registros</span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Proveedor</th>
+                <th>Sucursal</th>
+                <th>Remisión</th>
+                <th>SubTotal</th>
+                <th>Ieps</th>
+                <th>Iva</th>
+                <th>Total</th>
+                <th>Fecha</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let n of pageRowsNC; let i = index">
+                <td>{{ (pageNC - 1) * pageSizeNC + i + 1 }}</td>
+                <td>{{ n.proveedor }}</td>
+                <td>{{ n.sucursal }}</td>
+                <td>{{ n.remision }}</td>
+                <td>{{ n.subtotal | currency:'MXN':'symbol':'1.2-2' }}</td>
+                <td>{{ n.ieps | currency:'MXN':'symbol':'1.2-2' }}</td>
+                <td>{{ n.iva | currency:'MXN':'symbol':'1.2-2' }}</td>
+                <td>{{ n.total | currency:'MXN':'symbol':'1.2-2' }}</td>
+                <td>{{ n.fecha }}</td>
+              </tr>
+              <tr *ngIf="pageRowsNC.length === 0">
+                <td colspan="9" class="text-center">Ningún dato disponible en esta tabla =(</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="d-flex justify-content-between align-items-center mt-2">
+            <div>
+              Mostrando registros del {{ startIndexNC }} al {{ endIndexNC }} de un total de {{ totalCountNC }} registros
+            </div>
+            <div class="d-flex gap-2">
+              <button nbButton size="tiny" [disabled]="pageNC<=1" (click)="gotoPageNC(pageNC-1)">Anterior</button>
+              <button nbButton size="tiny" [disabled]="pageNC>=totalPagesNC" (click)="gotoPageNC(pageNC+1)">Siguiente</button>
+            </div>
+          </div>
+        </div>
+      </nb-card-body>
+    </nb-card>
+  </div>
+
+  <div class="col-md-4 col-12">
+    <nb-card>
+      <nb-card-header><strong>Totales</strong></nb-card-header>
+      <nb-card-body>
+        <div class="totales-grid">
+          <div>Sub Total x Pagar:</div>
+          <div class="text-end">{{ totalSubTotalXPagar | currency:'MXN':'symbol':'1.2-2' }}</div>
+
+          <div>Total de Notas:</div>
+          <div class="text-end">{{ totalNotas | currency:'MXN':'symbol':'1.2-2' }}</div>
+
+          <div>Notas por Aplicar:</div>
+          <div class="text-end">{{ totalNotasPorAplicar | currency:'MXN':'symbol':'1.2-2' }}</div>
+
+          <div>Descuento:</div>
+          <div class="text-end">{{ totalDescuento | currency:'MXN':'symbol':'1.2-2' }}</div>
+
+          <div class="fw-bold">Total a Pagar:</div>
+          <div class="text-end fw-bold">{{ totalAPagar | currency:'MXN':'symbol':'1.2-2' }}</div>
+        </div>
+      </nb-card-body>
+    </nb-card>
+  </div>
+</div>
