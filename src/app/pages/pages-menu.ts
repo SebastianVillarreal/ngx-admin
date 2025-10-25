@@ -240,6 +240,10 @@ export const MENU_ITEMS: NbMenuItem[] = [
         title: 'Entradas',
         link: '/pages/sistemas/entradas',
       },
+      {
+        title: 'Ofertas',
+        link: '/pages/sistemas/ofertas',
+      },
     ],
   },
   {

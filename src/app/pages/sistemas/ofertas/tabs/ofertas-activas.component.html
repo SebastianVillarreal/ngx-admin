@@ -1,0 +1,55 @@
+<div class="row">
+  <div class="col-12">
+    <nb-card>
+      <nb-card-header class="d-flex align-items-center justify-content-between">
+        <span>Ofertas Activas</span>
+        <div class="search-box">
+          <label class="mr-2">Buscar:</label>
+          <input nbInput placeholder="" [(ngModel)]="search" (keyup)="onSearchKeyup()" />
+        </div>
+      </nb-card-header>
+      <nb-card-body>
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th style="width: 80px">#</th>
+                <th>Descripción</th>
+                <th style="width: 160px">Fecha Inicio</th>
+                <th style="width: 160px">Fecha Fin</th>
+                <th style="width: 260px">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="!loading && (!items || items.length === 0)">
+                <td colspan="5" class="text-center text-muted">Sin registros</td>
+              </tr>
+              <tr *ngFor="let it of items">
+                <td>{{ it.Id }}</td>
+                <td>{{ it.Descripcion }}</td>
+                <td>{{ it.FechaInicio }}</td>
+                <td>{{ it.FechaFin }}</td>
+                <td>
+                  <button nbButton size="tiny" status="danger" class="mr-2" (click)="detalle(it)">Detalle</button>
+                  <button nbButton size="tiny" status="danger" class="mr-2" (click)="eliminar(it)">Eliminar</button>
+                  <button nbButton size="tiny" status="danger" (click)="etiquetas(it)">Etiquetas</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="d-flex align-items-center justify-content-between mt-2">
+          <div class="text-muted">
+            Mostrando registros del {{ showingFrom }} al {{ showingTo }} de un total de {{ total }} registros
+          </div>
+          <div class="paginator">
+            <button nbButton size="tiny" ghost (click)="prev()" [disabled]="page === 1">Anterior</button>
+            <button nbButton size="tiny" [status]="page === p ? 'primary' : 'basic'" *ngFor="let p of [].constructor(totalPages); let i = index" (click)="goto(i+1)">{{ i + 1 }}</button>
+            <button nbButton size="tiny" ghost (click)="next()" [disabled]="page === totalPages">Siguiente</button>
+          </div>
+        </div>
+      </nb-card-body>
+    </nb-card>
+  </div>
+</div>

@@ -18,6 +18,13 @@
           <nb-datepicker #dpFin></nb-datepicker>
         </nb-form-field>
       </div>
+      <div class="filter-item">
+        <label class="label">Sucursal</label>
+        <nb-select formControlName="sucursal">
+          <nb-option [value]="1">Matriz</nb-option>
+          <!-- Agregar más sucursales aquí cuando estén disponibles -->
+        </nb-select>
+      </div>
       <div class="actions">
         <button nbButton status="primary" (click)="onBuscar()">
           <nb-icon icon="search-outline"></nb-icon>
@@ -36,14 +43,14 @@
     <div class="table-toolbar">
       <div class="left">
         <span>Mostrar</span>
-        <nb-select size="small" [(selected)]="pageSize">
+        <nb-select size="small" [selected]="pageSize" (selectedChange)="setPageSize($event)">
           <nb-option *ngFor="let s of pageSizeOptions" [value]="s">{{ s }}</nb-option>
         </nb-select>
         <span>registros</span>
       </div>
       <div class="right">
         <span>Buscar:</span>
-        <input nbInput size="small" placeholder="Texto a buscar" [(ngModel)]="search" />
+        <input nbInput size="small" placeholder="Texto a buscar" [(ngModel)]="search" (ngModelChange)="currentPage = 1" />
       </div>
     </div>
 
@@ -65,7 +72,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let r of rows">
+          <tr *ngFor="let r of pagedRows">
             <td>{{ r.folio }}</td>
             <td>
               <button nbButton size="tiny" status="danger">CF</button>
@@ -91,15 +98,23 @@
     </div>
 
     <div class="table-footer">
-      <div class="left">Mostrando registros de 1 al {{ pageSize }} de un total de {{ rows.length }} registros</div>
+      <div class="left">
+        Mostrando registros de
+        {{ (currentPage - 1) * pageSize + 1 }}
+        al
+  {{ endIndex }}
+        de un total de {{ filteredRows.length }} registros
+      </div>
       <div class="right pagination">
-        <button nbButton size="tiny" appearance="outline">Anterior</button>
+        <button nbButton size="tiny" appearance="outline" (click)="prevPage()" [disabled]="currentPage === 1">Anterior</button>
         <nb-button-group size="tiny">
-          <button nbButton status="primary">1</button>
-          <button nbButton>2</button>
-          <button nbButton>3</button>
+          <button nbButton *ngFor="let p of pages"
+                  [status]="p === currentPage ? 'primary' : 'basic'"
+                  (click)="goToPage(p)">
+            {{ p }}
+          </button>
         </nb-button-group>
-        <button nbButton size="tiny" appearance="outline">Siguiente</button>
+        <button nbButton size="tiny" appearance="outline" (click)="nextPage()" [disabled]="currentPage === totalPages">Siguiente</button>
       </div>
     </div>
   </nb-card-body>

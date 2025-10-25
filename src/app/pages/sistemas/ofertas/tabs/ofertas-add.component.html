@@ -1,0 +1,60 @@
+<form (submit)="$event.preventDefault()" novalidate>
+  <div class="row">
+    <div class="col-md-3">
+      <div class="form-group">
+        <label class="label">*Nombre:</label>
+        <input nbInput fullWidth type="text" placeholder="" [(ngModel)]="nombre" name="nombre">
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="form-group">
+        <label class="label">*Fecha Inicial:</label>
+        <input nbInput fullWidth type="date" [(ngModel)]="fechaInicial" name="fechaInicial">
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="form-group">
+        <label class="label">*Fecha Final:</label>
+        <input nbInput fullWidth type="date" [(ngModel)]="fechaFinal" name="fechaFinal">
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="form-group">
+        <label class="label">*Sucursal:</label>
+        <nb-select fullWidth placeholder="Seleccione una opcion" [(selected)]="sucursalId" [disabled]="cargandoSucursales">
+          <nb-option *ngFor="let s of sucursales" [value]="s.id">{{ s.nombre }}</nb-option>
+        </nb-select>
+      </div>
+    </div>
+  </div>
+
+  <div class="row align-items-end">
+    <div class="col-md-6">
+      <div class="form-group">
+        <label class="label">*Archivo:</label>
+        <input type="file" class="form-control-file" (change)="onArchivoChange($event)">
+      </div>
+    </div>
+    <div class="col-md-6 text-right">
+      <button nbButton status="danger" (click)="guardar()" [disabled]="guardando">{{ guardando ? 'Guardando…' : 'Guardar' }}</button>
+    </div>
+  </div>
+
+  <div class="row mt-2">
+    <div class="col-12">
+      <label class="label d-inline-block mr-3">*Dias de la semana:</label>
+      <nb-checkbox [(ngModel)]="seleccionTodos" name="allDays" (checkedChange)="onSelectTodosChange()">Seleccionar Todos</nb-checkbox>
+    </div>
+  </div>
+
+  <div class="row mt-1">
+    <div class="col-12 dias-lista">
+      <nb-checkbox *ngFor="let d of dias" class="mr-3" [(ngModel)]="seleccionDias[d.key]" name="dia_{{d.key}}" (checkedChange)="onDiaChange()">
+        {{ d.label }}
+      </nb-checkbox>
+    </div>
+  </div>
+</form>
