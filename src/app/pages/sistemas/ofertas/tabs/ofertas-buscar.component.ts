@@ -34,7 +34,9 @@ interface ApiResponse<T> {
                 <div class="col-md-3">
                   <div class="form-group">
                     <label class="label">*Sucursal:</label>
-                    <input nbInput fullWidth type="text" [(ngModel)]="sucursal" name="sucursal" />
+                    <nb-select fullWidth placeholder="Seleccione..." [(selected)]="sucursal" name="sucursal">
+                      <nb-option *ngFor="let opt of sucursalOptions" [value]="opt.value">{{ opt.label }}</nb-option>
+                    </nb-select>
                   </div>
                 </div>
                 <div class="col-md-3">
@@ -106,6 +108,10 @@ export class OfertasBuscarComponent {
   constructor(private http: HttpClient) {}
 
   sucursal = '';
+  readonly sucursalOptions = [
+    { value: '1', label: 'Sucursal 1' },
+    { value: '2', label: 'Sucursal 2' },
+  ];
   fechaIni = '';
   fechaFin = '';
   codigo = '';

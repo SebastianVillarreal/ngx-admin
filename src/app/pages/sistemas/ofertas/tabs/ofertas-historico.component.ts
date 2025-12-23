@@ -1,9 +1,26 @@
 import { Component } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 
-interface Sucursal { id: number; nombre: string; }
-interface HistItem { Id: number; Descripcion: string; FechaInicio: string; FechaFin: string; }
+interface HistItem {
+  Oferta: number;
+  Descripcion: string;
+  FechaInicial: string;
+  FechaFinal: string;
+  Tipo: number;
+  Descuento: number;
+  Dias: string | null;
+  Sucursales: string | null;
+}
+
+interface ApiResponse<T> {
+  StatusCode: number;
+  success: boolean;
+  message?: string;
+  response?: {
+    data?: T[];
+  };
+}
 
 @Component({
   selector: 'ngx-ofertas-historico',
@@ -17,8 +34,8 @@ interface HistItem { Id: number; Descripcion: string; FechaInicio: string; Fecha
                 <div class="col-md-3">
                   <div class="form-group">
                     <label class="label">*Sucursal:</label>
-                    <nb-select fullWidth placeholder="Seleccione..." [(selected)]="sucursalId" [disabled]="cargandoSucursales">
-                      <nb-option *ngFor="let s of sucursales" [value]="s.id">{{ s.nombre }}</nb-option>
+                    <nb-select fullWidth placeholder="Seleccione..." [(selected)]="sucursalId" name="sucursalId">
+                      <nb-option *ngFor="let opt of sucursalOptions" [value]="opt.value">{{ opt.label }}</nb-option>
                     </nb-select>
                   </div>
                 </div>
@@ -44,22 +61,28 @@ interface HistItem { Id: number; Descripcion: string; FechaInicio: string; Fecha
               <table class="table table-striped">
                 <thead>
                   <tr>
-                    <th style="width: 80px">#</th>
+                    <th style="width: 80px">Oferta</th>
                     <th>Descripción</th>
-                    <th style="width: 160px">Fecha Inicio</th>
-                    <th style="width: 160px">Fecha Fin</th>
+                    <th style="width: 140px">Fecha Inicial</th>
+                    <th style="width: 140px">Fecha Final</th>
+                    <th style="width: 80px">Tipo</th>
+                    <th style="width: 110px">Descuento</th>
+                    <th>Sucursales</th>
                     <th style="width: 260px">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr *ngIf="!loading && (!items || items.length === 0)">
-                    <td colspan="5" class="text-center text-muted">Sin resultados</td>
+                    <td colspan="8" class="text-center text-muted">Sin resultados</td>
                   </tr>
                   <tr *ngFor="let it of items">
-                    <td>{{ it.Id }}</td>
+                    <td>{{ it.Oferta }}</td>
                     <td>{{ it.Descripcion }}</td>
-                    <td>{{ it.FechaInicio }}</td>
-                    <td>{{ it.FechaFin }}</td>
+                    <td>{{ it.FechaInicial }}</td>
+                    <td>{{ it.FechaFinal }}</td>
+                    <td>{{ it.Tipo }}</td>
+                    <td>{{ it.Descuento | number: '1.2-2' }}</td>
+                    <td>{{ it.Sucursales || '—' }}</td>
                     <td>
                       <button nbButton size="tiny" status="danger" class="mr-2" (click)="detalle(it)">Detalle</button>
                       <button nbButton size="tiny" status="danger" class="mr-2" (click)="eliminar(it)">Eliminar</button>
@@ -76,28 +99,17 @@ interface HistItem { Id: number; Descripcion: string; FechaInicio: string; Fecha
   `,
 })
 export class OfertasHistoricoComponent {
-  constructor(private http: HttpClient) { this.cargarSucursales(); }
+  constructor(private http: HttpClient) {}
 
-  sucursalId: number | null = null;
-  sucursales: Sucursal[] = [];
-  cargandoSucursales = false;
+  sucursalId = '';
+  readonly sucursalOptions = [
+    { value: '1', label: 'Sucursal 1' },
+    { value: '2', label: 'Sucursal 2' },
+  ];
   fechaIni = '';
   fechaFin = '';
   loading = false;
   items: HistItem[] = [];
-
-  private cargarSucursales() {
-    this.cargandoSucursales = true;
-    this.http.get<{ response?: { data?: Array<{ IdSucursal: number; Nombre: string }> } }>(`${environment.apiBase}/GetSucursales`)
-      .subscribe({
-        next: (res) => {
-          const data = res?.response?.data || [];
-          this.sucursales = data.map(s => ({ id: s.IdSucursal, nombre: s.Nombre }));
-        },
-        error: () => {},
-        complete: () => this.cargandoSucursales = false,
-      });
-  }
 
   buscar() {
     if (!this.sucursalId || !this.fechaIni || !this.fechaFin) {
@@ -105,15 +117,22 @@ export class OfertasHistoricoComponent {
       return;
     }
     this.loading = true;
-    const params = new HttpParams()
-      .set('sucursalId', String(this.sucursalId))
-      .set('fechaIni', this.fechaIni)
-      .set('fechaFin', this.fechaFin);
+    const payload = {
+      IdSucursal: this.sucursalId,
+      FechaInicial: this.fechaIni,
+      FechaFinal: this.fechaFin,
+    };
 
-    this.http.get<{ response?: { data?: HistItem[] } }>(`${environment.apiBase}/Ofertas/Historico`, { params })
+    this.http.post<ApiResponse<HistItem>>(`${environment.apiBase}/GetHistoricoOfertas`, payload)
       .subscribe({
-        next: (res) => this.items = res?.response?.data || [],
-        error: () => this.items = [],
+        next: (res) => {
+          const ok = res?.success === true && res?.StatusCode === 200;
+          const data = (ok ? res.response?.data : res?.response?.data) ?? [];
+          this.items = Array.isArray(data) ? data : [];
+        },
+        error: () => {
+          this.items = [];
+        },
         complete: () => this.loading = false,
       });
   }
