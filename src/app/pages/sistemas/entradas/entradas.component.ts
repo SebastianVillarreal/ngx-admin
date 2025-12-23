@@ -25,6 +25,38 @@ interface ValoresEntradaResponse {
   };
 }
 
+interface RenglonEntrada {
+  Entrada: number;
+  Renglon: number;
+  Cantidad: number;
+  Costo: number;
+  CostoFactura: number;
+  CostoRenglon: number;
+  Codigo: string;
+  Descripcion: string;
+  UnidadMedida: string;
+  CostoOrden: number;
+  id: number;
+  Descuento: number;
+  SC: string;
+}
+
+interface EditableRenglonCampos {
+  costoFactura: string;
+  cantidad: string;
+}
+
+interface UpdateRenglonResponse {
+  StatusCode: number;
+  success: boolean;
+  message: string;
+  response?: {
+    data?: boolean;
+  };
+}
+
+type CampoEditable = 'CostoFactura' | 'Cantidad';
+
 @Component({
   selector: 'ngx-entradas',
   templateUrl: './entradas.component.html',
@@ -56,28 +88,16 @@ export class EntradasComponent {
   idSucursal = 0;
   saving = false;
   // Tabla de renglones
-  renglones: Array<{
-    Entrada: number;
-    Renglon: number;
-    Cantidad: number;
-    Costo: number;
-    CostoFactura: number;
-    CostoRenglon: number;
-    Codigo: string;
-    Descripcion: string;
-    UnidadMedida: string;
-    CostoOrden: number;
-    id: number;
-    Descuento: number;
-    SC: string;
-  }> = [];
+  renglones: RenglonEntrada[] = [];
+  edicionesRenglones: Record<number, EditableRenglonCampos> = {};
+  actualizandoRenglones: Record<number, boolean> = {};
 
   // Filtro y ordenamiento
   filtro = '';
-  sortCol: keyof EntradasComponent['renglones'][number] | '' = '';
+  sortCol: keyof RenglonEntrada | '' = '';
   sortDir: 'asc' | 'desc' = 'asc';
 
-  get filasMostradas() {
+  get filasMostradas(): RenglonEntrada[] {
     const term = (this.filtro || '').toLowerCase();
     const filtered = term
       ? this.renglones.filter(r =>
@@ -115,7 +135,11 @@ export class EntradasComponent {
     return this.sortDir === 'asc' ? 'arrow-upward-outline' : 'arrow-downward-outline';
   }
 
-  trackByRenglon = (_: number, r: { Renglon: number }) => r.Renglon;
+  trackByRenglon = (_: number, r: RenglonEntrada) => r.Renglon;
+
+  isRenglonActualizando(renglonId: number): boolean {
+    return !!this.actualizandoRenglones[renglonId];
+  }
 
   onNotaEnter(): void {
     const nota = (this.notaEntrada || '').trim();
@@ -172,13 +196,179 @@ export class EntradasComponent {
           if (!res?.success || res.StatusCode !== 200) {
             console.warn('Renglones no exitoso', res);
             this.renglones = [];
+            this.sincronizarCamposEditables();
             return;
           }
-          this.renglones = (res.response?.data as any[]) || [];
+          this.renglones = (res.response?.data as RenglonEntrada[]) || [];
+          this.sincronizarCamposEditables();
         },
         error: (err) => {
           console.error('Error obteniendo renglones', err);
           this.renglones = [];
+          this.sincronizarCamposEditables();
+        },
+      });
+  }
+
+  onCostoFacturaBlur(renglon: RenglonEntrada): void {
+    const buffer = this.obtenerBufferEditable(renglon);
+    const parsed = this.parseDecimalInput(buffer.costoFactura);
+    if (parsed === null) {
+      this.toastr.warning('Ingresa un costo de factura válido', 'Aviso');
+      buffer.costoFactura = this.formatearNumeroEditable(renglon.CostoFactura);
+      return;
+    }
+
+    if (this.isSameNumber(renglon.CostoFactura, parsed)) {
+      buffer.costoFactura = this.formatearNumeroEditable(parsed);
+      return;
+    }
+
+    const valorAnterior = renglon.CostoFactura;
+    this.aplicarCambiosRenglon(renglon, { CostoFactura: parsed });
+    buffer.costoFactura = this.formatearNumeroEditable(parsed);
+    this.notificarEdicion(renglon, 'CostoFactura', parsed, valorAnterior);
+  }
+
+  onCantidadBlur(renglon: RenglonEntrada): void {
+    const buffer = this.obtenerBufferEditable(renglon);
+    const parsed = this.parseDecimalInput(buffer.cantidad);
+    if (parsed === null) {
+      this.toastr.warning('Ingresa una cantidad válida', 'Aviso');
+      buffer.cantidad = this.formatearNumeroEditable(renglon.Cantidad);
+      return;
+    }
+
+    if (this.isSameNumber(renglon.Cantidad, parsed)) {
+      buffer.cantidad = this.formatearNumeroEditable(parsed);
+      return;
+    }
+
+    const valorAnterior = renglon.Cantidad;
+    this.aplicarCambiosRenglon(renglon, { Cantidad: parsed });
+    buffer.cantidad = this.formatearNumeroEditable(parsed);
+    this.notificarEdicion(renglon, 'Cantidad', parsed, valorAnterior);
+  }
+
+  private sincronizarCamposEditables(): void {
+    const buffers: Record<number, EditableRenglonCampos> = {};
+    this.renglones.forEach((r) => {
+      buffers[r.Renglon] = {
+        costoFactura: this.formatearNumeroEditable(r.CostoFactura),
+        cantidad: this.formatearNumeroEditable(r.Cantidad),
+      };
+    });
+    this.edicionesRenglones = buffers;
+    this.actualizandoRenglones = {};
+  }
+
+  private obtenerBufferEditable(renglon: RenglonEntrada): EditableRenglonCampos {
+    if (!this.edicionesRenglones[renglon.Renglon]) {
+      this.edicionesRenglones[renglon.Renglon] = {
+        costoFactura: this.formatearNumeroEditable(renglon.CostoFactura),
+        cantidad: this.formatearNumeroEditable(renglon.Cantidad),
+      };
+    }
+    return this.edicionesRenglones[renglon.Renglon];
+  }
+
+  private formatearNumeroEditable(valor: number | null | undefined): string {
+    if (valor === null || valor === undefined || Number.isNaN(valor)) {
+      return '';
+    }
+    return `${valor}`;
+  }
+
+  private parseDecimalInput(value: string | null | undefined): number | null {
+    if (value === undefined || value === null) {
+      return null;
+    }
+    const normalized = value.replace(/\s+/g, '').replace(/,/g, '.');
+    if (!normalized) {
+      return null;
+    }
+    const parsed = Number(normalized);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  private aplicarCambiosRenglon(renglon: RenglonEntrada, cambios: Partial<RenglonEntrada>): void {
+    Object.assign(renglon, cambios);
+    renglon.CostoRenglon = this.recalcularTotalRenglon(renglon);
+  }
+
+  private recalcularTotalRenglon(renglon: RenglonEntrada): number {
+    const costoBase = (renglon.CostoFactura ?? renglon.Costo ?? 0);
+    const cantidad = renglon.Cantidad ?? 0;
+    const total = costoBase * cantidad;
+    return Number.isFinite(total) ? total : 0;
+  }
+
+  private isSameNumber(actual: number | null | undefined, incoming: number): boolean {
+    return Math.abs((actual ?? 0) - incoming) < 0.0001;
+  }
+
+  private setEstadoActualizacion(renglonId: number, estado: boolean): void {
+    if (estado) {
+      this.actualizandoRenglones[renglonId] = true;
+    } else {
+      delete this.actualizandoRenglones[renglonId];
+    }
+  }
+
+  private numeroParaApi(valor: number | null | undefined): string {
+    const numero = Number(valor ?? 0);
+    return Number.isFinite(numero) ? numero.toFixed(2) : '0.00';
+  }
+
+  private crearPayloadActualizacion(renglon: RenglonEntrada) {
+    return {
+      Costo: this.numeroParaApi(renglon.CostoFactura),
+      Cantidad: this.numeroParaApi(renglon.Cantidad),
+      Id: String(renglon.id ?? renglon.Renglon ?? ''),
+      Descuento: this.numeroParaApi(renglon.Descuento),
+    };
+  }
+
+  private revertirEdicionRenglon(renglon: RenglonEntrada, campo: CampoEditable, valorAnterior: number): void {
+    if (campo === 'CostoFactura') {
+      this.aplicarCambiosRenglon(renglon, { CostoFactura: valorAnterior });
+      const buffer = this.obtenerBufferEditable(renglon);
+      buffer.costoFactura = this.formatearNumeroEditable(valorAnterior);
+    } else {
+      this.aplicarCambiosRenglon(renglon, { Cantidad: valorAnterior });
+      const buffer = this.obtenerBufferEditable(renglon);
+      buffer.cantidad = this.formatearNumeroEditable(valorAnterior);
+    }
+  }
+
+  private notificarEdicion(
+    renglon: RenglonEntrada,
+    campo: CampoEditable,
+    valor: number,
+    valorAnterior: number | null | undefined,
+  ): void {
+    const renglonId = renglon.Renglon;
+    this.setEstadoActualizacion(renglonId, true);
+    const payload = this.crearPayloadActualizacion(renglon);
+
+    this.http
+      .post<UpdateRenglonResponse>(`${environment.apiBase}/UpdateRenglonEntrada`, payload)
+      .subscribe({
+        next: (res) => {
+          const ok = res?.success && res.StatusCode === 200 && res.response?.data === true;
+          if (!ok) {
+            this.toastr.danger('No fue posible actualizar el renglón', 'Error');
+            this.revertirEdicionRenglon(renglon, campo, valorAnterior ?? valor);
+          }
+        },
+        error: (err) => {
+          console.error('Error actualizando renglón', err);
+          this.toastr.danger('Error de comunicación al actualizar el renglón', 'Error');
+          this.revertirEdicionRenglon(renglon, campo, valorAnterior ?? valor);
+          this.setEstadoActualizacion(renglonId, false);
+        },
+        complete: () => {
+          this.setEstadoActualizacion(renglonId, false);
         },
       });
   }

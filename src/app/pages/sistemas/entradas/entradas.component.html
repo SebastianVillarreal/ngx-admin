@@ -204,9 +204,41 @@
                 <td>{{ r.Descripcion }}</td>
                 <td>{{ r.UnidadMedida }}</td>
                 <td class="text-right">{{ r.Costo | number:'1.2-2' }}</td>
-                <td class="text-right">{{ r.CostoFactura | number:'1.2-2' }}</td>
+                <td class="text-right">
+                  <ng-container *ngIf="edicionesRenglones[r.Renglon] as edicion; else costoFacturaLectura">
+                    <input
+                      nbInput
+                      fullWidth
+                      type="text"
+                      class="table-edit-input text-right"
+                      name="costoFactura{{ r.Renglon }}"
+                      [(ngModel)]="edicion.costoFactura"
+                      [ngModelOptions]="{ standalone: true }"
+                      (blur)="onCostoFacturaBlur(r)"
+                      (keyup.enter)="onCostoFacturaBlur(r)"
+                      [disabled]="isRenglonActualizando(r.Renglon)"
+                    />
+                  </ng-container>
+                  <ng-template #costoFacturaLectura>{{ r.CostoFactura | number:'1.2-2' }}</ng-template>
+                </td>
                 <td class="text-right">{{ r.Descuento | number:'1.2-2' }}</td>
-                <td class="text-right">{{ r.Cantidad | number:'1.0-2' }}</td>
+                <td class="text-right">
+                  <ng-container *ngIf="edicionesRenglones[r.Renglon] as edicion; else cantidadLectura">
+                    <input
+                      nbInput
+                      fullWidth
+                      type="text"
+                      class="table-edit-input text-right"
+                      name="cantidad{{ r.Renglon }}"
+                      [(ngModel)]="edicion.cantidad"
+                      [ngModelOptions]="{ standalone: true }"
+                      (blur)="onCantidadBlur(r)"
+                      (keyup.enter)="onCantidadBlur(r)"
+                      [disabled]="isRenglonActualizando(r.Renglon)"
+                    />
+                  </ng-container>
+                  <ng-template #cantidadLectura>{{ r.Cantidad | number:'1.0-2' }}</ng-template>
+                </td>
                 <td>{{ r.SC }}</td>
                 <td class="text-right">{{ r.CostoRenglon | number:'1.2-2' }}</td>
               </tr>
