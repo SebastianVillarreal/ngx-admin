@@ -13,22 +13,28 @@
           <table class="table table-striped">
             <thead>
               <tr>
-                <th style="width: 80px">#</th>
+                <th style="width: 80px">Oferta</th>
                 <th>Descripción</th>
-                <th style="width: 160px">Fecha Inicio</th>
-                <th style="width: 160px">Fecha Fin</th>
+                <th style="width: 140px">Fecha Inicial</th>
+                <th style="width: 140px">Fecha Final</th>
+                <th style="width: 80px">Tipo</th>
+                <th style="width: 110px">Descuento</th>
+                <th>Sucursales</th>
                 <th style="width: 260px">Acciones</th>
               </tr>
             </thead>
             <tbody>
               <tr *ngIf="!loading && (!items || items.length === 0)">
-                <td colspan="5" class="text-center text-muted">Sin registros</td>
+                <td colspan="8" class="text-center text-muted">Sin registros</td>
               </tr>
               <tr *ngFor="let it of items">
-                <td>{{ it.Id }}</td>
+                <td>{{ it.Oferta }}</td>
                 <td>{{ it.Descripcion }}</td>
-                <td>{{ it.FechaInicio }}</td>
-                <td>{{ it.FechaFin }}</td>
+                <td>{{ it.FechaInicial }}</td>
+                <td>{{ it.FechaFinal }}</td>
+                <td>{{ it.Tipo }}</td>
+                <td>{{ it.Descuento | number: '1.2-2' }}</td>
+                <td>{{ it.Sucursales || '—' }}</td>
                 <td>
                   <button nbButton size="tiny" status="danger" class="mr-2" (click)="detalle(it)">Detalle</button>
                   <button nbButton size="tiny" status="danger" class="mr-2" (click)="eliminar(it)">Eliminar</button>

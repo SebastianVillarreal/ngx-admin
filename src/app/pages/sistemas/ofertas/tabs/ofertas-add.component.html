@@ -34,8 +34,9 @@
   <div class="row align-items-end">
     <div class="col-md-6">
       <div class="form-group">
-        <label class="label">*Archivo:</label>
-        <input type="file" class="form-control-file" (change)="onArchivoChange($event)">
+  <label class="label">*Archivo:</label>
+  <input type="file" class="form-control-file" accept=".xlsx,.xls" (change)="onArchivoChange($event)">
+  <small *ngIf="archivo" class="text-muted">{{ archivo.name }}</small>
       </div>
     </div>
     <div class="col-md-6 text-right">
