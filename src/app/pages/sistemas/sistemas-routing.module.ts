@@ -7,6 +7,7 @@ import { OfertasAddComponent } from './ofertas/tabs/ofertas-add.component';
 import { OfertasActivasComponent } from './ofertas/tabs/ofertas-activas.component';
 import { OfertasBuscarComponent } from './ofertas/tabs/ofertas-buscar.component';
 import { OfertasHistoricoComponent } from './ofertas/tabs/ofertas-historico.component';
+import { SolicitudEtiquetsComponent } from './solicitud-de-etiquets/solicitud-de-etiquets.component';
 
 const routes: Routes = [
   {
@@ -27,6 +28,10 @@ const routes: Routes = [
           { path: 'historico', component: OfertasHistoricoComponent },
           { path: '', redirectTo: 'agregar', pathMatch: 'full' },
         ],
+      },
+      {
+        path: 'solicitud-de-etiquets',
+        component: SolicitudEtiquetsComponent,
       },
       {
         path: '',

@@ -1,0 +1,147 @@
+<div class="solicitud-layout">
+  <nb-card>
+    <nb-card-header>Solicitud Etiquetas | Formulario</nb-card-header>
+    <nb-card-body>
+      <form
+        #generalForm="ngForm"
+        class="panel-form"
+        (ngSubmit)="guardarSolicitud(generalForm)"
+        novalidate>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="generalSucursal">*Sucursal</label>
+            <nb-select
+              fullWidth
+              id="generalSucursal"
+              name="sucursal"
+              placeholder="Sucursal"
+              [(ngModel)]="solicitudGeneral.sucursal"
+              required>
+              <nb-option *ngFor="let sucursal of sucursales" [value]="sucursal">
+                {{ sucursal }}
+              </nb-option>
+            </nb-select>
+          </div>
+          <div class="form-group">
+            <label for="generalDescripcion">*Descripción</label>
+            <input
+              nbInput
+              fullWidth
+              id="generalDescripcion"
+              name="descripcion"
+              placeholder="Descripción"
+              [(ngModel)]="solicitudGeneral.descripcion"
+              required />
+          </div>
+        </div>
+        <div class="form-actions">
+          <button nbButton status="primary" type="submit" [disabled]="guardando">Guardar</button>
+          <button nbButton status="warning" type="button" (click)="finalizarSolicitud(generalForm)">Finalizar</button>
+        </div>
+      </form>
+    </nb-card-body>
+  </nb-card>
+
+  <nb-card>
+    <nb-card-header>Solicitud Etiquetas | Formulario Detalle</nb-card-header>
+    <nb-card-body>
+      <form
+        #detalleForm="ngForm"
+        class="panel-form"
+        (ngSubmit)="guardarDetalle(detalleForm)"
+        novalidate>
+        <div class="form-grid detalle-grid">
+          <div class="form-group">
+            <label for="detalleFolio">*Folio</label>
+            <input
+              nbInput
+              fullWidth
+              id="detalleFolio"
+              name="folio"
+              [(ngModel)]="detalle.folio"
+              readonly />
+          </div>
+
+          <div class="form-group">
+            <label for="detalleCodigo">*Código</label>
+            <div class="input-with-button">
+              <button nbButton status="danger" type="button">
+                <nb-icon icon="search-outline"></nb-icon>
+              </button>
+              <input
+                nbInput
+                fullWidth
+                id="detalleCodigo"
+                name="codigo"
+                placeholder="Código"
+                [(ngModel)]="detalle.codigo"
+                required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="detalleDescripcion">*Descripción</label>
+            <div class="input-with-button">
+              <button nbButton status="danger" type="button">
+                <nb-icon icon="search-outline"></nb-icon>
+              </button>
+              <input
+                nbInput
+                fullWidth
+                id="detalleDescripcion"
+                name="detalleDescripcion"
+                placeholder="Descripción"
+                [(ngModel)]="detalle.descripcion"
+                required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="detalleCantidad">*Cantidad</label>
+            <input
+              nbInput
+              fullWidth
+              id="detalleCantidad"
+              name="cantidad"
+              type="number"
+              min="1"
+              [(ngModel)]="detalle.cantidad"
+              required />
+          </div>
+        </div>
+        <div class="form-actions">
+          <button nbButton status="primary" type="submit" [disabled]="guardandoDetalle">Guardar</button>
+        </div>
+      </form>
+    </nb-card-body>
+  </nb-card>
+
+  <nb-card>
+    <nb-card-header>Solicitud Etiquetas | Tabla Detalle</nb-card-header>
+    <nb-card-body>
+      <div class="tabla-detalle">
+        <table class="detalle-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Código</th>
+              <th>Descripción</th>
+              <th>Cantidad</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="!detalles.length">
+              <td colspan="4" class="empty-state">Sin registros capturados</td>
+            </tr>
+            <tr *ngFor="let item of detalles; trackBy: trackByFolio; let i = index">
+              <td>{{ i + 1 }}</td>
+              <td>{{ item.codigo }}</td>
+              <td>{{ item.descripcion }}</td>
+              <td>{{ item.cantidad }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </nb-card-body>
+  </nb-card>
+</div>

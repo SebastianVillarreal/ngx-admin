@@ -244,6 +244,10 @@ export const MENU_ITEMS: NbMenuItem[] = [
         title: 'Ofertas',
         link: '/pages/sistemas/ofertas',
       },
+      {
+        title: 'Solicitud de etiquets',
+        link: '/pages/sistemas/solicitud-de-etiquets',
+      },
     ],
   },
   {
