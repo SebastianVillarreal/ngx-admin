@@ -1,0 +1,143 @@
+<div class="sub-menu">
+  <button
+    nbButton
+    size="small"
+    ghost
+    routerLink="/pages/sistemas/solicitud-de-etiquets"
+    routerLinkActive="active"
+    [routerLinkActiveOptions]="{ exact: true }">
+    Formulario
+  </button>
+  <button
+    nbButton
+    size="small"
+    ghost
+    routerLink="/pages/sistemas/solicitud-de-etiquets/lista"
+    routerLinkActive="active">
+    Lista de solicitudes
+  </button>
+</div>
+
+<nb-card>
+  <nb-card-header>Solicitudes registradas</nb-card-header>
+  <nb-card-body>
+    <div class="tabla-detalle">
+      <table class="detalle-table">
+        <thead>
+          <tr>
+            <th>Folio</th>
+            <th>Descripción</th>
+            <th>Usuario</th>
+            <th>Sucursal</th>
+            <th>Fecha</th>
+            <th class="estado-col">Estado</th>
+            <th>Detalle</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="loading">
+            <td colspan="7" class="empty-state">Cargando solicitudes...</td>
+          </tr>
+          <tr *ngIf="!loading && !solicitudes.length">
+            <td colspan="7" class="empty-state">Sin solicitudes registradas</td>
+          </tr>
+          <tr *ngFor="let solicitud of solicitudes; trackBy: trackByFolio">
+            <td>{{ solicitud.Id }}</td>
+            <td>{{ solicitud.Descripcion }}</td>
+            <td>{{ solicitud.Usuario }}</td>
+            <td>{{ solicitud.Sucursal }}</td>
+            <td>{{ solicitud.Fecha }}</td>
+            <td>{{ solicitud.Estatus }}</td>
+            <td>
+              <button nbButton size="tiny" status="info" (click)="abrirDetalle(solicitud)">
+                Ver detalle
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </nb-card-body>
+</nb-card>
+
+<ng-template #detalleModal let-ref="dialogRef">
+  <nb-card class="detalle-modal">
+    <nb-card-header>
+      <div class="modal-header">
+        <h4>Detalle Folios Etiquetas</h4>
+        <button nbButton size="tiny" ghost status="basic" (click)="ref.close()">✕</button>
+      </div>
+    </nb-card-header>
+    <nb-card-body>
+      <div class="modal-form-grid">
+        <div class="form-group">
+          <label>*Folio:</label>
+          <input nbInput fullWidth [value]="selectedSolicitud?.Id || ''" readonly />
+        </div>
+        <div class="form-group">
+          <label>*Fecha Precio:</label>
+          <input
+            nbInput
+            fullWidth
+            type="date"
+            [(ngModel)]="fechaPrecio"
+            name="fechaPrecio"
+            [ngModelOptions]="{ standalone: true }"
+          />
+        </div>
+        <div class="form-group">
+          <label>*Formato Etiquetas:</label>
+          <nb-select
+            fullWidth
+            placeholder="Seleccione una opción"
+            [(selected)]="formatoEtiquetas"
+            [ngModelOptions]="{ standalone: true }">
+            <nb-option *ngFor="let formato of formatosDisponibles" [value]="formato">
+              {{ formato }}
+            </nb-option>
+          </nb-select>
+        </div>
+      </div>
+
+      <div class="detalle-tabla-wrapper">
+        <table class="detalle-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Código</th>
+              <th>Descripción</th>
+              <th>Cantidad</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="detalleLoading">
+              <td colspan="4" class="empty-state">Cargando renglones...</td>
+            </tr>
+            <tr *ngIf="!detalleLoading && !detallesFolio.length">
+              <td colspan="4" class="empty-state">Sin detalles para este folio</td>
+            </tr>
+            <tr *ngFor="let detalle of detallesFolio; let i = index">
+              <td>{{ i + 1 }}</td>
+              <td>{{ detalle.Codigo }}</td>
+              <td>{{ detalle.Descripcion }}</td>
+              <td>
+                <input
+                  nbInput
+                  type="number"
+                  min="0"
+                  [ngModel]="detalle.Cantidad"
+                  [ngModelOptions]="{ standalone: true }"
+                  (ngModelChange)="onCantidadChange(detalle, $event)"
+                />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </nb-card-body>
+    <nb-card-footer class="modal-footer">
+      <button nbButton ghost status="basic" (click)="ref.close()">Cerrar</button>
+      <button nbButton status="success" (click)="generarArchivo(ref)">Generar archivo</button>
+    </nb-card-footer>
+  </nb-card>
+</ng-template>

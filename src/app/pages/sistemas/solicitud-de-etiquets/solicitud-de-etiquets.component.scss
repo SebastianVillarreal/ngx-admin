@@ -8,6 +8,17 @@
   gap: 1.5rem;
 }
 
+.sub-menu {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.sub-menu button.active {
+  background-color: var(--color-primary-default, #3366ff);
+  color: #fff;
+}
+
 .panel-form {
   display: flex;
   flex-direction: column;
