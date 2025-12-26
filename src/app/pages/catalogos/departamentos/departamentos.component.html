@@ -1,0 +1,119 @@
+<nb-card>
+  <nb-card-header class="card-header">
+    <div>
+      <h2 class="title">Departamentos</h2>
+      <p class="subtitle">Catálogo maestro proveniente del servicio corporativo.</p>
+    </div>
+    <div class="header-actions">
+      <button
+        nbButton
+        status="success"
+        size="small"
+        (click)="exportToExcel()"
+        [disabled]="loading || !filteredDepartamentos.length"
+      >
+        <nb-icon icon="download-outline"></nb-icon>
+        Exportar Excel
+      </button>
+      <button nbButton status="primary" size="small" (click)="loadDepartamentos()" [disabled]="loading">
+        <nb-icon icon="refresh-outline"></nb-icon>
+        Actualizar
+      </button>
+    </div>
+  </nb-card-header>
+
+  <nb-card-body>
+    <div class="state" *ngIf="loading">
+      <nb-spinner status="primary"></nb-spinner>
+      <span>Cargando información, por favor espera…</span>
+    </div>
+
+    <nb-alert status="danger" *ngIf="!loading && errorMessage">
+      <div class="alert-content">
+        <span>{{ errorMessage }}</span>
+        <button nbButton status="danger" size="tiny" outline (click)="loadDepartamentos()">
+          Reintentar
+        </button>
+      </div>
+    </nb-alert>
+
+    <div class="table-container" *ngIf="!loading && !errorMessage">
+      <div class="controls">
+        <div class="search-control">
+          <nb-icon icon="search-outline"></nb-icon>
+          <input
+            nbInput
+            fullWidth
+            type="text"
+            placeholder="Buscar por clave, nombre o agrupación"
+            [(ngModel)]="searchTerm"
+            (ngModelChange)="onSearch($event)"
+          />
+        </div>
+        <div class="page-size-control">
+          <label>Registros por página</label>
+          <nb-select size="small" [selected]="pageSize" (selectedChange)="changePageSize($event)">
+            <nb-option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</nb-option>
+          </nb-select>
+        </div>
+      </div>
+
+      <ng-container *ngIf="paginatedDepartamentos.length; else emptyState">
+        <table class="departamentos-table">
+          <thead>
+            <tr>
+              <th>Clave</th>
+              <th>Nombre</th>
+              <th>Agrupación</th>
+              <th class="acciones">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let departamento of paginatedDepartamentos; trackBy: trackById">
+              <td>{{ departamento.Clave }}</td>
+              <td>{{ departamento.Nombre }}</td>
+              <td>{{ departamento.Agrupacion || 'Sin agrupación' }}</td>
+              <td class="acciones">
+                <button nbButton size="tiny" status="basic" hero (click)="onView(departamento)">
+                  <nb-icon icon="eye-outline"></nb-icon>
+                </button>
+                <button nbButton size="tiny" status="warning" hero (click)="onEdit(departamento)">
+                  <nb-icon icon="edit-2-outline"></nb-icon>
+                </button>
+                <button nbButton size="tiny" status="danger" hero (click)="onDelete(departamento)">
+                  <nb-icon icon="trash-2-outline"></nb-icon>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </ng-container>
+
+      <ng-template #emptyState>
+        <div class="empty-state">
+          <nb-icon icon="inbox-outline"></nb-icon>
+          <p>No encontramos resultados que coincidan con tu búsqueda.</p>
+        </div>
+      </ng-template>
+
+      <div class="pagination-bar" *ngIf="totalItems">
+        <span>Mostrando {{ rangeStart }} - {{ rangeEnd }} de {{ totalItems }} registros</span>
+        <div class="pagination-controls">
+          <button nbButton size="tiny" status="basic" (click)="goToPreviousPage()" [disabled]="page === 1">
+            <nb-icon icon="arrow-back-outline"></nb-icon>
+          </button>
+          <span>Página {{ page }} de {{ totalPages }}</span>
+          <button
+            nbButton
+            size="tiny"
+            status="basic"
+            (click)="goToNextPage()"
+            [disabled]="page === totalPages"
+          >
+            <nb-icon icon="arrow-forward-outline"></nb-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nb-card-body>
+</nb-card>

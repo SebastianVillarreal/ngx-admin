@@ -7,6 +7,11 @@ export const MENU_ITEMS: NbMenuItem[] = [
     link: '/pages/dashboard',
     home: true,
   },
+    {
+    title: 'IoT Dashboard',
+    icon: 'home-outline',
+    link: '/pages/iot-dashboard',
+  },
   {
     title: 'Recibo',
     icon: 'file-text-outline',
@@ -17,10 +22,28 @@ export const MENU_ITEMS: NbMenuItem[] = [
       },
     ],
   },
+
   {
-    title: 'IoT Dashboard',
-    icon: 'home-outline',
-    link: '/pages/iot-dashboard',
+    title: 'Catalogos',
+    icon: 'settings-2-outline',
+    children: [
+      {
+        title: 'Familias',
+        link: '/pages/catalogos/familias',
+      },
+      {
+        title: 'Departamentos',
+        link: '/pages/catalogos/departamentos',
+      },
+      {
+        title: 'Médicos',
+        link: '/pages/catalogos/medicos',
+      },
+      {
+        title: 'Sucursales',
+        link: '/pages/sistemas/solicitud-de-etiquets',
+      },
+    ],
   },
   {
     title: 'FEATURES',
@@ -250,24 +273,7 @@ export const MENU_ITEMS: NbMenuItem[] = [
       },
     ],
   },
-  {
-    title: 'Catalogos',
-    icon: 'settings-2-outline',
-    children: [
-      {
-        title: 'Entradas',
-        link: '/pages/sistemas/entradas',
-      },
-      {
-        title: 'Ofertas',
-        link: '/pages/sistemas/ofertas',
-      },
-      {
-        title: 'Solicitud de etiquets',
-        link: '/pages/sistemas/solicitud-de-etiquets',
-      },
-    ],
-  },
+  
   {
     title: 'Compras',
     icon: 'shopping-bag-outline',
