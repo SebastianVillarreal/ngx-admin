@@ -251,6 +251,24 @@ export const MENU_ITEMS: NbMenuItem[] = [
     ],
   },
   {
+    title: 'Catalogos',
+    icon: 'settings-2-outline',
+    children: [
+      {
+        title: 'Entradas',
+        link: '/pages/sistemas/entradas',
+      },
+      {
+        title: 'Ofertas',
+        link: '/pages/sistemas/ofertas',
+      },
+      {
+        title: 'Solicitud de etiquets',
+        link: '/pages/sistemas/solicitud-de-etiquets',
+      },
+    ],
+  },
+  {
     title: 'Compras',
     icon: 'shopping-bag-outline',
     children: [
