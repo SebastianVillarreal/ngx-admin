@@ -1,0 +1,133 @@
+<nb-card>
+  <nb-card-header class="card-header">
+    <div>
+      <h2 class="title">Clientes</h2>
+      <p class="subtitle">Listado de clientes y condiciones de crédito.</p>
+    </div>
+    <div class="header-actions">
+      <button
+        nbButton
+        status="success"
+        size="small"
+        (click)="exportToExcel()"
+        [disabled]="loading || !clientes.length"
+      >
+        <nb-icon icon="download-outline"></nb-icon>
+        Exportar Excel
+      </button>
+      <button nbButton status="info" size="small" (click)="onRefresh()" [disabled]="loading">
+        <nb-icon icon="refresh-outline"></nb-icon>
+        Actualizar
+      </button>
+    </div>
+  </nb-card-header>
+
+  <nb-card-body>
+    <div class="state" *ngIf="loading">
+      <nb-spinner status="primary"></nb-spinner>
+      <span>Cargando información, por favor espera…</span>
+    </div>
+
+    <nb-alert status="danger" *ngIf="!loading && errorMessage">
+      <div class="alert-content">
+        <span>{{ errorMessage }}</span>
+        <button nbButton status="danger" size="tiny" outline (click)="onRefresh()">
+          Reintentar
+        </button>
+      </div>
+    </nb-alert>
+
+    <div class="table-container" *ngIf="!loading && !errorMessage">
+      <div class="controls">
+        <div class="search-control">
+          <nb-icon icon="search-outline"></nb-icon>
+          <input
+            nbInput
+            fullWidth
+            placeholder="Buscar por nombre"
+            [(ngModel)]="searchTerm"
+            (keyup.enter)="onSearch()"
+          />
+          <button nbButton status="primary" size="small" (click)="onSearch()" [disabled]="loading">
+            Buscar
+          </button>
+        </div>
+        <div class="page-size-control">
+          <label>Registros por página</label>
+          <nb-select size="small" [selected]="pageSize" (selectedChange)="changePageSize($event)">
+            <nb-option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</nb-option>
+          </nb-select>
+        </div>
+      </div>
+
+      <ng-container *ngIf="paginatedClientes.length; else emptyState">
+        <table class="clientes-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>RFC</th>
+              <th>Correo</th>
+              <th>Dirección</th>
+              <th>Teléfono</th>
+              <th>Banco</th>
+              <th>Cuenta</th>
+              <th>Comentarios</th>
+              <th>CFDI</th>
+              <th>Estatus</th>
+              <th class="acciones">Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let cliente of paginatedClientes; trackBy: trackById">
+              <td>{{ cliente.Id }}</td>
+              <td>{{ cliente.Nombre }}</td>
+              <td>{{ cliente.Rfc }}</td>
+              <td>{{ cliente.Correo || 'N/A' }}</td>
+              <td>{{ resolveDireccion(cliente) }}</td>
+              <td>{{ resolveTelefono(cliente) }}</td>
+              <td>{{ cliente.Banco || 'N/A' }}</td>
+              <td>{{ cliente.Cuenta || 'N/A' }}</td>
+              <td>{{ cliente.Comentarios || 'Sin comentarios' }}</td>
+              <td>{{ cliente.Cfdi || 'N/A' }}</td>
+              <td>
+                <nb-checkbox [checked]="cliente.IdEstatus === 1" disabled (checkedChange)="onToggleEstatus(cliente)"></nb-checkbox>
+              </td>
+              <td class="acciones">
+                <button nbButton size="tiny" status="warning" (click)="onEdit(cliente)">
+                  <nb-icon icon="edit-2-outline"></nb-icon>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </ng-container>
+
+      <ng-template #emptyState>
+        <div class="empty-state">
+          <nb-icon icon="inbox-outline"></nb-icon>
+          <p>No se encontraron clientes para el criterio proporcionado.</p>
+        </div>
+      </ng-template>
+
+      <div class="pagination-bar" *ngIf="totalItems">
+        <span>Mostrando {{ rangeStart }} - {{ rangeEnd }} de {{ totalItems }} registros</span>
+        <div class="pagination-controls">
+          <button nbButton size="tiny" status="basic" (click)="goToPreviousPage()" [disabled]="page === 1">
+            <nb-icon icon="arrow-back-outline"></nb-icon>
+          </button>
+          <span>Página {{ page }} de {{ totalPages }}</span>
+          <button
+            nbButton
+            size="tiny"
+            status="basic"
+            (click)="goToNextPage()"
+            [disabled]="page === totalPages"
+          >
+            <nb-icon icon="arrow-forward-outline"></nb-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nb-card-body>
+</nb-card>

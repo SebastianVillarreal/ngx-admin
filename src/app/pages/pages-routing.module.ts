@@ -20,6 +20,11 @@ const routes: Routes = [{
         .then(m => m.CuentasPorPagarModule),
     },
     {
+      path: 'cuentas-por-cobrar',
+      loadChildren: () => import('./cuentas-por-cobrar/cuentas-por-cobrar.module')
+        .then(m => m.CuentasPorCobrarModule),
+    },
+    {
       path: 'compras',
       loadChildren: () => import('./compras/compras.module')
         .then(m => m.ComprasModule),
