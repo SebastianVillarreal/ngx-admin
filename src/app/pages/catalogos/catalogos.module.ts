@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NbAlertModule, NbBadgeModule, NbButtonModule, NbCardModule, NbIconModule, NbInputModule, NbSelectModule, NbSpinnerModule } from '@nebular/theme';
 
 import { ThemeModule } from '../../@theme/theme.module';
@@ -14,6 +14,7 @@ import { MedicosComponent } from './medicos/medicos.component';
   imports: [
     CommonModule,
     FormsModule,
+    ReactiveFormsModule,
     ThemeModule,
     CatalogosRoutingModule,
     NbCardModule,

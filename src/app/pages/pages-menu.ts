@@ -13,17 +13,6 @@ export const MENU_ITEMS: NbMenuItem[] = [
     link: '/pages/iot-dashboard',
   },
   {
-    title: 'Recibo',
-    icon: 'file-text-outline',
-    children: [
-      {
-        title: 'Libro diario',
-        link: '/pages/recibo/libro-diario',
-      },
-    ],
-  },
-
-  {
     title: 'Catalogos',
     icon: 'settings-2-outline',
     children: [
@@ -45,6 +34,18 @@ export const MENU_ITEMS: NbMenuItem[] = [
       },
     ],
   },
+  {
+    title: 'Recibo',
+    icon: 'file-text-outline',
+    children: [
+      {
+        title: 'Libro diario',
+        link: '/pages/recibo/libro-diario',
+      },
+    ],
+  },
+
+  
   {
     title: 'FEATURES',
     group: true,

@@ -27,9 +27,21 @@ interface MedicosApiResponse {
   };
 }
 
+export interface CreateMedicoRequest {
+  Numero: string;
+  Cedula: string;
+  Nombre: string;
+  ApPaterno: string;
+  ApMaterno: string;
+  Domicilio: string;
+  Telefono: string;
+  TelefonoCasa: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class MedicosService {
   private readonly endpoint = `${environment.apiBase}/GetMedicos`;
+  private readonly insertEndpoint = `${environment.apiBase}/InsertMedico`;
 
   constructor(private readonly http: HttpClient) {}
 
@@ -39,6 +51,16 @@ export class MedicosService {
       catchError((error) => {
         console.error('MedicosService error', error);
         return throwError(() => new Error('No se pudo obtener la información de médicos'));
+      }),
+    );
+  }
+
+  createMedico(payload: CreateMedicoRequest): Observable<void> {
+    return this.http.post(this.insertEndpoint, payload).pipe(
+      map(() => undefined),
+      catchError((error) => {
+        console.error('MedicosService create error', error);
+        return throwError(() => new Error('No se pudo registrar el médico.'));
       }),
     );
   }

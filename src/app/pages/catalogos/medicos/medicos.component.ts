@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import * as XLSX from 'xlsx';
 
-import { MedicosService, Medico } from './medicos.service';
+import { MedicosService, Medico, CreateMedicoRequest } from './medicos.service';
 
 @Component({
   selector: 'ngx-catalogos-medicos',
@@ -18,8 +19,24 @@ export class MedicosComponent implements OnInit {
   page = 1;
   pageSize = 10;
   readonly pageSizeOptions = [5, 10, 20, 50];
+  createForm: FormGroup;
+  creating = false;
+  createError = '';
+  createSuccess = '';
+  private readonly emptyCreateFormValue: CreateMedicoRequest = {
+    Numero: '',
+    Cedula: '',
+    Nombre: '',
+    ApPaterno: '',
+    ApMaterno: '',
+    Domicilio: '',
+    Telefono: '',
+    TelefonoCasa: '',
+  };
 
-  constructor(private readonly medicosService: MedicosService) {}
+  constructor(private readonly fb: FormBuilder, private readonly medicosService: MedicosService) {
+    this.createForm = this.buildCreateForm();
+  }
 
   ngOnInit(): void {
     this.loadMedicos();
@@ -40,6 +57,30 @@ export class MedicosComponent implements OnInit {
       error: (err) => {
         this.loading = false;
         this.errorMessage = err?.message ?? 'Ocurrió un problema al recuperar los datos.';
+      },
+    });
+  }
+
+  submitNewMedico(): void {
+    this.createSuccess = '';
+    this.createError = '';
+    if (this.createForm.invalid) {
+      this.createForm.markAllAsTouched();
+      return;
+    }
+
+    this.creating = true;
+    const payload = this.createForm.value as CreateMedicoRequest;
+    this.medicosService.createMedico(payload).subscribe({
+      next: () => {
+        this.creating = false;
+        this.createSuccess = 'Médico registrado correctamente.';
+        this.resetCreateForm();
+        this.loadMedicos();
+      },
+      error: (err) => {
+        this.creating = false;
+        this.createError = err?.message ?? 'No se pudo registrar el médico.';
       },
     });
   }
@@ -131,6 +172,15 @@ export class MedicosComponent implements OnInit {
     return 'danger';
   }
 
+  hasFieldError(controlName: keyof CreateMedicoRequest): boolean {
+    const control = this.createForm.get(controlName);
+    return !!control && control.invalid && (control.dirty || control.touched);
+  }
+
+  get isSubmitDisabled(): boolean {
+    return this.creating || this.createForm.invalid;
+  }
+
   onView(medico: Medico): void {
     console.log('Ver médico', medico);
   }
@@ -174,5 +224,22 @@ export class MedicosComponent implements OnInit {
 
     const start = (this.page - 1) * this.pageSize;
     this.paginatedMedicos = this.filteredMedicos.slice(start, start + this.pageSize);
+  }
+
+  private buildCreateForm(): FormGroup {
+    return this.fb.group({
+      Numero: [this.emptyCreateFormValue.Numero, [Validators.required]],
+      Cedula: [this.emptyCreateFormValue.Cedula, [Validators.required]],
+      Nombre: [this.emptyCreateFormValue.Nombre, [Validators.required]],
+      ApPaterno: [this.emptyCreateFormValue.ApPaterno, [Validators.required]],
+      ApMaterno: [this.emptyCreateFormValue.ApMaterno],
+      Domicilio: [this.emptyCreateFormValue.Domicilio, [Validators.required]],
+      Telefono: [this.emptyCreateFormValue.Telefono],
+      TelefonoCasa: [this.emptyCreateFormValue.TelefonoCasa],
+    });
+  }
+
+  resetCreateForm(): void {
+    this.createForm.reset(this.emptyCreateFormValue);
   }
 }

@@ -23,6 +23,72 @@
   </nb-card-header>
 
   <nb-card-body>
+    <section class="create-section">
+      <div>
+        <h3 class="section-title">Registrar nuevo médico</h3>
+        <p class="section-subtitle">Completa la información para agregar médicos al catálogo.</p>
+      </div>
+
+      <nb-alert status="success" *ngIf="createSuccess">
+        {{ createSuccess }}
+      </nb-alert>
+
+      <nb-alert status="danger" *ngIf="createError">
+        {{ createError }}
+      </nb-alert>
+
+      <form [formGroup]="createForm" (ngSubmit)="submitNewMedico()" class="create-form">
+        <div class="form-grid">
+          <div class="form-field">
+            <label>Número *</label>
+            <input nbInput fullWidth formControlName="Numero" placeholder="Ej. 101" />
+            <span class="field-error" *ngIf="hasFieldError('Numero')">El número es obligatorio.</span>
+          </div>
+          <div class="form-field">
+            <label>Cédula *</label>
+            <input nbInput fullWidth formControlName="Cedula" placeholder="Ej. 1153182" />
+            <span class="field-error" *ngIf="hasFieldError('Cedula')">La cédula es obligatoria.</span>
+          </div>
+          <div class="form-field">
+            <label>Nombre *</label>
+            <input nbInput fullWidth formControlName="Nombre" placeholder="Nombre(s)" />
+            <span class="field-error" *ngIf="hasFieldError('Nombre')">El nombre es obligatorio.</span>
+          </div>
+          <div class="form-field">
+            <label>Apellido paterno *</label>
+            <input nbInput fullWidth formControlName="ApPaterno" placeholder="Apellido paterno" />
+            <span class="field-error" *ngIf="hasFieldError('ApPaterno')">El apellido paterno es obligatorio.</span>
+          </div>
+          <div class="form-field">
+            <label>Apellido materno</label>
+            <input nbInput fullWidth formControlName="ApMaterno" placeholder="Apellido materno" />
+          </div>
+          <div class="form-field domicilio">
+            <label>Domicilio *</label>
+            <textarea nbInput rows="2" formControlName="Domicilio" placeholder="Dirección completa"></textarea>
+            <span class="field-error" *ngIf="hasFieldError('Domicilio')">El domicilio es obligatorio.</span>
+          </div>
+          <div class="form-field">
+            <label>Teléfono móvil</label>
+            <input nbInput fullWidth formControlName="Telefono" placeholder="10 dígitos" />
+          </div>
+          <div class="form-field">
+            <label>Teléfono casa</label>
+            <input nbInput fullWidth formControlName="TelefonoCasa" placeholder="10 dígitos" />
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button nbButton status="primary" type="submit" [disabled]="isSubmitDisabled">
+            {{ creating ? 'Guardando…' : 'Registrar médico' }}
+          </button>
+          <button nbButton status="basic" type="button" (click)="resetCreateForm()" [disabled]="creating">
+            Limpiar
+          </button>
+        </div>
+      </form>
+    </section>
+
     <div class="state" *ngIf="loading">
       <nb-spinner status="primary"></nb-spinner>
       <span>Cargando información, por favor espera…</span>
