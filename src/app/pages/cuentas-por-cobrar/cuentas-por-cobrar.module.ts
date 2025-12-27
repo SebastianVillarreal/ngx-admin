@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
   NbAlertModule,
   NbButtonModule,
@@ -16,11 +16,14 @@ import { ThemeModule } from '../../@theme/theme.module';
 import { CuentasPorCobrarRoutingModule } from './cuentas-por-cobrar-routing.module';
 import { CuentasPorCobrarComponent } from './cuentas-por-cobrar.component';
 import { ClientesComponent } from './clientes/clientes.component';
+import { CreditosComponent } from './creditos/creditos.component';
+import { CreditosDetalleComponent } from './creditos/detalle/creditos-detalle.component';
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
+    ReactiveFormsModule,
     ThemeModule,
     CuentasPorCobrarRoutingModule,
     NbCardModule,
@@ -32,6 +35,6 @@ import { ClientesComponent } from './clientes/clientes.component';
     NbCheckboxModule,
     NbSelectModule,
   ],
-  declarations: [CuentasPorCobrarComponent, ClientesComponent],
+  declarations: [CuentasPorCobrarComponent, ClientesComponent, CreditosComponent, CreditosDetalleComponent],
 })
 export class CuentasPorCobrarModule {}

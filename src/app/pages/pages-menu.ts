@@ -70,6 +70,14 @@ export const MENU_ITEMS: NbMenuItem[] = [
         title: 'Clientes',
         link: '/pages/cuentas-por-cobrar/clientes',
       },
+      {
+        title: 'Separados',
+        link: '/pages/cuentas-por-cobrar/clientes',
+      },
+      {
+        title: 'Creditos',
+        link: '/pages/cuentas-por-cobrar/creditos',
+      },
     ],
   },
 

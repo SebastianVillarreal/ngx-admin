@@ -1,0 +1,121 @@
+<nb-card>
+  <nb-card-header class="card-header">
+    <div>
+      <h2 class="title">Créditos</h2>
+      <p class="subtitle">Resumen de clientes con saldos vigentes por sucursal.</p>
+    </div>
+    <div class="header-actions">
+      <button
+        nbButton
+        status="success"
+        size="small"
+        (click)="exportToExcel()"
+        [disabled]="loading || !filteredCreditos.length"
+      >
+        <nb-icon icon="download-outline"></nb-icon>
+        Exportar Excel
+      </button>
+      <button nbButton status="info" size="small" (click)="onRefresh()" [disabled]="loading">
+        <nb-icon icon="refresh-outline"></nb-icon>
+        Actualizar
+      </button>
+    </div>
+  </nb-card-header>
+
+  <nb-card-body>
+    <div class="state" *ngIf="loading">
+      <nb-spinner status="primary"></nb-spinner>
+      <span>Cargando información, por favor espera…</span>
+    </div>
+
+    <nb-alert status="danger" *ngIf="!loading && errorMessage">
+      <div class="alert-content">
+        <span>{{ errorMessage }}</span>
+        <button nbButton status="danger" size="tiny" outline (click)="loadCreditos()">
+          Reintentar
+        </button>
+      </div>
+    </nb-alert>
+
+    <div class="table-container" *ngIf="!loading && !errorMessage">
+      <div class="controls">
+        <div class="search-control">
+          <nb-icon icon="search-outline"></nb-icon>
+          <input
+            nbInput
+            fullWidth
+            type="text"
+            placeholder="Buscar por cliente, RFC o teléfono"
+            [(ngModel)]="searchTerm"
+            (ngModelChange)="onSearch($event)"
+          />
+        </div>
+        <div class="page-size-control">
+          <label>Registros por página</label>
+          <nb-select size="small" [selected]="pageSize" (selectedChange)="changePageSize($event)">
+            <nb-option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</nb-option>
+          </nb-select>
+        </div>
+      </div>
+
+      <ng-container *ngIf="paginatedCreditos.length; else emptyState">
+        <table class="creditos-table">
+          <thead>
+            <tr>
+              <th>Tickets</th>
+              <th>Cliente</th>
+              <th>RFC</th>
+              <th>Monto</th>
+              <th>Deuda</th>
+              <th>Teléfono</th>
+              <th>Comentarios</th>
+              <th class="acciones">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let credito of paginatedCreditos; trackBy: trackById">
+              <td>{{ credito.Tickets }}</td>
+              <td>{{ credito.Nombre }}</td>
+              <td>{{ credito.Rfc || 'N/A' }}</td>
+              <td>{{ credito.Monto | currency: 'MXN':'symbol-narrow' }}</td>
+              <td>{{ credito.Deuda | currency: 'MXN':'symbol-narrow' }}</td>
+              <td>{{ credito.Telefono || 'N/A' }}</td>
+              <td>{{ credito.Comentarios || 'Sin comentarios' }}</td>
+              <td class="acciones">
+                <button nbButton size="tiny" status="warning" (click)="openDetalle(credito)">
+                  Ver detalle
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </ng-container>
+
+      <ng-template #emptyState>
+        <div class="empty-state">
+          <nb-icon icon="inbox-outline"></nb-icon>
+          <p>No hay créditos registrados para los criterios seleccionados.</p>
+        </div>
+      </ng-template>
+
+      <div class="pagination-bar" *ngIf="totalItems">
+        <span>Mostrando {{ rangeStart }} - {{ rangeEnd }} de {{ totalItems }} registros</span>
+        <div class="pagination-controls">
+          <button nbButton size="tiny" status="basic" (click)="goToPreviousPage()" [disabled]="page === 1">
+            <nb-icon icon="arrow-back-outline"></nb-icon>
+          </button>
+          <span>Página {{ page }} de {{ totalPages }}</span>
+          <button
+            nbButton
+            size="tiny"
+            status="basic"
+            (click)="goToNextPage()"
+            [disabled]="page === totalPages"
+          >
+            <nb-icon icon="arrow-forward-outline"></nb-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nb-card-body>
+</nb-card>

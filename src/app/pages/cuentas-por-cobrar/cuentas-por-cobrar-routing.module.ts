@@ -3,6 +3,8 @@ import { RouterModule, Routes } from '@angular/router';
 
 import { CuentasPorCobrarComponent } from './cuentas-por-cobrar.component';
 import { ClientesComponent } from './clientes/clientes.component';
+import { CreditosComponent } from './creditos/creditos.component';
+import { CreditosDetalleComponent } from './creditos/detalle/creditos-detalle.component';
 
 const routes: Routes = [
   {
@@ -12,6 +14,14 @@ const routes: Routes = [
       {
         path: 'clientes',
         component: ClientesComponent,
+      },
+      {
+        path: 'creditos',
+        component: CreditosComponent,
+      },
+      {
+        path: 'creditos/detalle/:id',
+        component: CreditosDetalleComponent,
       },
       {
         path: '',

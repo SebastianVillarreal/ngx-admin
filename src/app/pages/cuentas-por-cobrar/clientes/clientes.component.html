@@ -1,3 +1,132 @@
+<nb-card class="form-card">
+  <nb-card-header class="card-header">
+    <div>
+      <h2 class="title">Nuevo cliente</h2>
+      <p class="subtitle">Completa la información para registrar un cliente.</p>
+    </div>
+    <button
+      nbButton
+      status="primary"
+      size="small"
+      (click)="submitCliente()"
+      [disabled]="submitting || editingClienteLoading"
+    >
+      <nb-icon [icon]="editingClienteId ? 'checkmark-outline' : 'save-outline'"></nb-icon>
+      {{ editingClienteId ? 'Actualizar' : 'Guardar' }}
+    </button>
+  </nb-card-header>
+  <nb-card-body>
+    <nb-alert status="success" *ngIf="submitSuccess">
+      {{ submitSuccess }}
+    </nb-alert>
+    <nb-alert status="danger" *ngIf="submitError">
+      {{ submitError }}
+    </nb-alert>
+    <nb-alert status="info" *ngIf="editingClienteId">
+      <div class="alert-content">
+        <span>
+          Editando {{ editingClienteNombre || ('cliente #' + editingClienteId) }}. Realiza los ajustes necesarios y
+          presiona Actualizar.
+        </span>
+        <button nbButton status="info" size="tiny" outline (click)="cancelEdit()">Cancelar edición</button>
+      </div>
+    </nb-alert>
+    <div class="form-state" *ngIf="editingClienteLoading">
+      <nb-spinner status="primary"></nb-spinner>
+      <span>Cargando información del cliente…</span>
+    </div>
+
+    <form [formGroup]="clienteForm" (ngSubmit)="submitCliente()" class="form-grid">
+      <div class="form-field">
+        <label>Nombre*</label>
+        <input nbInput fullWidth formControlName="Nombre" placeholder="Nombre completo" />
+      </div>
+      <div class="form-field">
+        <label>RFC*</label>
+        <input nbInput fullWidth formControlName="rfc" placeholder="RFC" />
+      </div>
+      <div class="form-field">
+        <label>Condición de pago</label>
+        <input nbInput fullWidth formControlName="condicionPago" placeholder="Condición de pago" />
+      </div>
+      <div class="form-field">
+        <label>Límite de crédito</label>
+        <input nbInput fullWidth formControlName="limiteCredito" placeholder="Límite de crédito" />
+      </div>
+      <div class="form-field">
+        <label>Correo</label>
+        <input nbInput fullWidth formControlName="correo" placeholder="correo@dominio.com" />
+      </div>
+      <div class="form-field">
+        <label>Dirección</label>
+        <input nbInput fullWidth formControlName="direccion" placeholder="Calle y número" />
+      </div>
+      <div class="form-field">
+        <label>Teléfono</label>
+        <input nbInput fullWidth formControlName="telefono" placeholder="Número telefónico" />
+      </div>
+      <div class="form-field">
+        <label>Código postal</label>
+        <input nbInput fullWidth formControlName="codPostal" placeholder="Código postal" />
+      </div>
+      <div class="form-field">
+        <label>Ciudad</label>
+        <input nbInput fullWidth formControlName="ciudad" placeholder="Ciudad" />
+      </div>
+      <div class="form-field">
+        <label>Colonia</label>
+        <input nbInput fullWidth formControlName="colonia" placeholder="Colonia" />
+      </div>
+      <div class="form-field">
+        <label>Representante</label>
+        <input nbInput fullWidth formControlName="representante" placeholder="Representante" />
+      </div>
+      <div class="form-field">
+        <label>Banco</label>
+        <input nbInput fullWidth formControlName="banco" placeholder="Banco" />
+      </div>
+      <div class="form-field">
+        <label>Cuenta</label>
+        <input nbInput fullWidth formControlName="cuenta" placeholder="Cuenta" />
+      </div>
+      <div class="form-field">
+        <label>Comentarios</label>
+        <input nbInput fullWidth formControlName="comentarios" placeholder="Notas adicionales" />
+      </div>
+      <div class="form-field">
+        <label>Usuario*</label>
+        <input nbInput fullWidth formControlName="usuario" placeholder="Usuario que registra" />
+      </div>
+      <div class="form-field">
+        <label>Contacto</label>
+        <input nbInput fullWidth formControlName="contacto" placeholder="Persona contacto" />
+      </div>
+      <div class="form-field">
+        <label>Aval</label>
+        <input nbInput fullWidth formControlName="Aval" placeholder="Nombre del aval" />
+      </div>
+      <div class="form-field">
+        <label>Teléfono aval</label>
+        <input nbInput fullWidth formControlName="TelefonoAval" placeholder="Teléfono del aval" />
+      </div>
+      <div class="form-field">
+        <label>Uso de CFDI</label>
+        <nb-select fullWidth formControlName="Cfdi" placeholder="Selecciona">
+          <nb-option value="">Selecciona una opción</nb-option>
+          <nb-option *ngFor="let option of cfdiOptions" [value]="option.value">{{ option.label }}</nb-option>
+        </nb-select>
+      </div>
+      <div class="form-field">
+        <label>Régimen fiscal</label>
+        <nb-select fullWidth formControlName="regimen" placeholder="Selecciona">
+          <nb-option value="">Selecciona una opción</nb-option>
+          <nb-option *ngFor="let option of regimenOptions" [value]="option.value">{{ option.label }}</nb-option>
+        </nb-select>
+      </div>
+    </form>
+  </nb-card-body>
+</nb-card>
+
 <nb-card>
   <nb-card-header class="card-header">
     <div>

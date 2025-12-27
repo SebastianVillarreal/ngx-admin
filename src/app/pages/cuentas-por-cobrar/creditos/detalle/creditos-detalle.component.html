@@ -1,0 +1,176 @@
+<nb-card>
+  <nb-card-header class="card-header">
+    <div>
+      <h2 class="title">Créditos | Detalle Cliente</h2>
+      <p class="subtitle">Consulta y administra la información del crédito seleccionado.</p>
+    </div>
+    <div class="header-actions">
+      <button nbButton status="success" size="small" (click)="crearFolio()">
+        <nb-icon icon="plus-outline"></nb-icon>
+        Crear Folio
+      </button>
+      <button nbButton status="warning" size="small" (click)="finalizarCredito()">
+        Finalizar
+      </button>
+      <button nbButton status="danger" size="small" (click)="cancelarOperacion()">
+        Cancelar
+      </button>
+      <button nbButton status="info" size="small" appearance="outline" (click)="verHistorico()">
+        Histórico
+      </button>
+    </div>
+  </nb-card-header>
+
+  <nb-card-body>
+    <div class="state" *ngIf="loadingDetalle">
+      <nb-spinner status="primary"></nb-spinner>
+      <span>Cargando detalle del cliente…</span>
+    </div>
+
+    <nb-alert status="danger" *ngIf="!loadingDetalle && detalleError">
+      {{ detalleError }}
+    </nb-alert>
+
+    <form *ngIf="!loadingDetalle && !detalleError" [formGroup]="detalleForm" class="form-grid">
+      <div class="form-field">
+        <label>*Nombre:</label>
+        <input nbInput fullWidth formControlName="nombre" readonly />
+      </div>
+      <div class="form-field">
+        <label>*Límite Crédito:</label>
+        <input nbInput fullWidth formControlName="limiteCredito" readonly />
+      </div>
+      <div class="form-field">
+        <label>*Deuda Actual:</label>
+        <input nbInput fullWidth formControlName="deudaActual" readonly />
+      </div>
+      <div class="form-field">
+        <label>*Crédito Disponible:</label>
+        <input nbInput fullWidth formControlName="creditoDisponible" readonly />
+      </div>
+      <div class="form-field">
+        <label>*Forma Pago:</label>
+        <nb-select fullWidth placeholder="Seleccione" formControlName="formaPago">
+          <nb-option *ngFor="let option of formaPagoOptions" [value]="option.value">
+            {{ option.label }}
+          </nb-option>
+        </nb-select>
+      </div>
+      <div class="form-field">
+        <label>*Referencia:</label>
+        <input nbInput fullWidth formControlName="referencia" placeholder="Referencia" />
+      </div>
+      <div class="form-field">
+        <label>*Folio Op:</label>
+        <input nbInput fullWidth formControlName="folioOp" placeholder="0" />
+      </div>
+    </form>
+  </nb-card-body>
+</nb-card>
+
+<nb-card>
+  <nb-card-header class="card-header secondary">
+    <div>
+      <h2 class="title">Créditos | Detalle Cliente</h2>
+      <p class="subtitle">Detalle de folios activos.</p>
+    </div>
+    <button nbButton status="success" size="small" (click)="exportFolios()" [disabled]="!folios.length">
+      <nb-icon icon="download-outline"></nb-icon>
+      Exportar Excel
+    </button>
+  </nb-card-header>
+  <nb-card-body>
+    <ng-container *ngIf="folios.length; else noFolios">
+      <table class="detalle-table">
+        <thead>
+          <tr>
+            <th>Folio Interno</th>
+            <th>Total</th>
+            <th>Abonado</th>
+            <th>Restante</th>
+            <th>Fecha</th>
+            <th>Fecha Vencimiento</th>
+            <th>Acciones</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let folio of folios">
+            <td>{{ folio.folioInterno }}</td>
+            <td>{{ folio.total | currency: 'MXN':'symbol-narrow' }}</td>
+            <td>{{ folio.abonado | currency: 'MXN':'symbol-narrow' }}</td>
+            <td>{{ folio.restante | currency: 'MXN':'symbol-narrow' }}</td>
+            <td>{{ folio.fecha | date: 'dd/MM/yyyy' }}</td>
+            <td>{{ folio.fechaVencimiento | date: 'dd/MM/yyyy' }}</td>
+            <td class="acciones">
+              <button nbButton size="tiny" status="danger">Detalle</button>
+              <button nbButton size="tiny" status="success">Lista Abonos</button>
+              <button nbButton size="tiny" status="info">Abonar</button>
+            </td>
+            <td class="checkbox">
+              <nb-checkbox></nb-checkbox>
+            </td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="3" class="resumen">Total Restante:</td>
+            <td>{{ totalRestante | currency: 'MXN':'symbol-narrow' }}</td>
+            <td colspan="2" class="resumen">Total Restante x Página:</td>
+            <td colspan="2">{{ totalRestantePagina | currency: 'MXN':'symbol-narrow' }}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </ng-container>
+    <ng-template #noFolios>
+      <div class="empty-state">
+        <nb-icon icon="inbox-outline"></nb-icon>
+        <p>No hay folios registrados para este cliente.</p>
+      </div>
+    </ng-template>
+  </nb-card-body>
+</nb-card>
+
+<nb-card>
+  <nb-card-header class="card-header secondary">
+    <div>
+      <h2 class="title">Créditos | Detalle Abono</h2>
+      <p class="subtitle">Historial de abonos registrados.</p>
+    </div>
+    <div class="header-actions">
+      <label>Mostrar</label>
+      <nb-select size="small" [selected]="abonosPorPagina" (selectedChange)="abonosPorPagina = $event">
+        <nb-option *ngFor="let size of abonosPageOptions" [value]="size">{{ size }}</nb-option>
+      </nb-select>
+      <span>registros</span>
+    </div>
+  </nb-card-header>
+  <nb-card-body>
+    <ng-container *ngIf="abonos.length; else sinAbonos">
+      <table class="detalle-table">
+        <thead>
+          <tr>
+            <th>Folio Interno</th>
+            <th>Total</th>
+            <th>Abonado</th>
+            <th>Restante</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let abono of abonos | slice: 0 : abonosPorPagina">
+            <td>{{ abono.folioInterno }}</td>
+            <td>{{ abono.total | currency: 'MXN':'symbol-narrow' }}</td>
+            <td>{{ abono.abonado | currency: 'MXN':'symbol-narrow' }}</td>
+            <td>{{ abono.restante | currency: 'MXN':'symbol-narrow' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </ng-container>
+    <ng-template #sinAbonos>
+      <div class="empty-state">
+        <nb-icon icon="inbox-outline"></nb-icon>
+        <p>Ningún dato disponible en esta tabla =(</p>
+      </div>
+    </ng-template>
+  </nb-card-body>
+</nb-card>
