@@ -6,6 +6,7 @@ import {
   NbButtonModule,
   NbCardModule,
   NbCheckboxModule,
+  NbDialogModule,
   NbIconModule,
   NbInputModule,
   NbSpinnerModule,
@@ -18,6 +19,7 @@ import { CuentasPorCobrarComponent } from './cuentas-por-cobrar.component';
 import { ClientesComponent } from './clientes/clientes.component';
 import { CreditosComponent } from './creditos/creditos.component';
 import { CreditosDetalleComponent } from './creditos/detalle/creditos-detalle.component';
+import { FoliosPagosComponent } from './creditos/folios-pagos/folios-pagos.component';
 
 @NgModule({
   imports: [
@@ -34,7 +36,8 @@ import { CreditosDetalleComponent } from './creditos/detalle/creditos-detalle.co
     NbAlertModule,
     NbCheckboxModule,
     NbSelectModule,
+    NbDialogModule.forChild(),
   ],
-  declarations: [CuentasPorCobrarComponent, ClientesComponent, CreditosComponent, CreditosDetalleComponent],
+  declarations: [CuentasPorCobrarComponent, ClientesComponent, CreditosComponent, CreditosDetalleComponent, FoliosPagosComponent],
 })
 export class CuentasPorCobrarModule {}

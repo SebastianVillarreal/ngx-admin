@@ -5,6 +5,7 @@ import { CuentasPorCobrarComponent } from './cuentas-por-cobrar.component';
 import { ClientesComponent } from './clientes/clientes.component';
 import { CreditosComponent } from './creditos/creditos.component';
 import { CreditosDetalleComponent } from './creditos/detalle/creditos-detalle.component';
+import { FoliosPagosComponent } from './creditos/folios-pagos/folios-pagos.component';
 
 const routes: Routes = [
   {
@@ -18,6 +19,10 @@ const routes: Routes = [
       {
         path: 'creditos',
         component: CreditosComponent,
+      },
+      {
+        path: 'creditos/folios-pagos',
+        component: FoliosPagosComponent,
       },
       {
         path: 'creditos/detalle/:id',

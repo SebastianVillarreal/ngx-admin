@@ -90,6 +90,22 @@
   text-align: center;
 }
 
+.detalle-table .abono-input {
+  min-width: 200px;
+}
+
+.abono-feedback {
+  min-height: 1rem;
+}
+
+.error-text {
+  color: var(--text-danger-color);
+}
+
+.success-text {
+  color: var(--text-success-color);
+}
+
 .detalle-table tfoot td {
   font-weight: 600;
 }
@@ -105,4 +121,35 @@
   gap: 0.5rem;
   padding: 1.5rem 0;
   color: var(--text-hint-color);
+}
+
+.abonos-dialog {
+  width: min(600px, 90vw);
+}
+
+.finalizar-dialog {
+  width: min(420px, 90vw);
+}
+
+.finalizar-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.currency-input {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.currency-input span {
+  font-weight: 600;
+  color: var(--text-hint-color);
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
 }

@@ -77,6 +77,16 @@ export const MENU_ITEMS: NbMenuItem[] = [
       {
         title: 'Creditos',
         link: '/pages/cuentas-por-cobrar/creditos',
+        children: [
+          {
+            title: 'Listado',
+            link: '/pages/cuentas-por-cobrar/creditos',
+          },
+          {
+            title: 'Folios Pagos',
+            link: '/pages/cuentas-por-cobrar/creditos/folios-pagos',
+          },
+        ],
       },
     ],
   },

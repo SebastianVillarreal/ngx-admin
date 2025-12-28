@@ -5,9 +5,10 @@
       <p class="subtitle">Consulta y administra la información del crédito seleccionado.</p>
     </div>
     <div class="header-actions">
-      <button nbButton status="success" size="small" (click)="crearFolio()">
-        <nb-icon icon="plus-outline"></nb-icon>
-        Crear Folio
+      <button nbButton status="success" size="small" (click)="crearFolio()" [disabled]="folioLoading">
+        <nb-icon icon="plus-outline" *ngIf="!folioLoading"></nb-icon>
+        <nb-spinner *ngIf="folioLoading" size="tiny"></nb-spinner>
+        {{ folioLoading ? 'Creando…' : 'Crear Folio' }}
       </button>
       <button nbButton status="warning" size="small" (click)="finalizarCredito()">
         Finalizar
@@ -65,6 +66,12 @@
         <input nbInput fullWidth formControlName="folioOp" placeholder="0" />
       </div>
     </form>
+    <nb-alert status="success" *ngIf="folioSuccess">
+      {{ folioSuccess }}
+    </nb-alert>
+    <nb-alert status="danger" *ngIf="folioError">
+      {{ folioError }}
+    </nb-alert>
   </nb-card-body>
 </nb-card>
 
@@ -90,6 +97,7 @@
             <th>Restante</th>
             <th>Fecha</th>
             <th>Fecha Vencimiento</th>
+            <th>Registrar abono</th>
             <th>Acciones</th>
             <th></th>
           </tr>
@@ -102,13 +110,41 @@
             <td>{{ folio.restante | currency: 'MXN':'symbol-narrow' }}</td>
             <td>{{ folio.fecha | date: 'dd/MM/yyyy' }}</td>
             <td>{{ folio.fechaVencimiento | date: 'dd/MM/yyyy' }}</td>
+            <td class="abono-input">
+              <input
+                nbInput
+                type="number"
+                size="small"
+                placeholder="Monto"
+                min="0"
+                [max]="folio.restante"
+                [disabled]="abonoLoadingMap[folio.folioInterno]"
+                [(ngModel)]="abonoInputs[folio.folioInterno]"
+                [ngModelOptions]="{ standalone: true }"
+                (keyup.enter)="submitAbono(folio)"
+              />
+              <div class="abono-feedback">
+                <small class="error-text" *ngIf="abonoErrorMap[folio.folioInterno]">
+                  {{ abonoErrorMap[folio.folioInterno] }}
+                </small>
+                <small class="success-text" *ngIf="abonoSuccessMap[folio.folioInterno]">
+                  {{ abonoSuccessMap[folio.folioInterno] }}
+                </small>
+              </div>
+            </td>
             <td class="acciones">
               <button nbButton size="tiny" status="danger">Detalle</button>
-              <button nbButton size="tiny" status="success">Lista Abonos</button>
+              <button nbButton size="tiny" status="success" (click)="openAbonosDialog(folio)">
+                Lista Abonos
+              </button>
               <button nbButton size="tiny" status="info">Abonar</button>
             </td>
             <td class="checkbox">
-              <nb-checkbox></nb-checkbox>
+              <nb-checkbox
+                [checked]="abonoAutoCheck[folio.folioInterno] || false"
+                (checkedChange)="handleAutoAbonoToggle(folio, $event)"
+                [disabled]="abonoLoadingMap[folio.folioInterno] || (folio.restante ?? 0) <= 0"
+              ></nb-checkbox>
             </td>
           </tr>
         </tbody>
@@ -131,6 +167,122 @@
   </nb-card-body>
 </nb-card>
 
+<ng-template #abonosDialog let-ref="dialogRef">
+  <nb-card class="abonos-dialog">
+    <nb-card-header class="card-header">
+      <div>
+        <h2 class="title">Lista de abonos</h2>
+        <p class="subtitle">Folio: {{ abonosFolio }}</p>
+      </div>
+      <button nbButton ghost status="basic" size="small" (click)="closeAbonosDialog()">
+        <nb-icon icon="close-outline"></nb-icon>
+      </button>
+    </nb-card-header>
+    <nb-card-body>
+      <div class="state" *ngIf="abonosLoading">
+        <nb-spinner status="primary"></nb-spinner>
+        <span>Cargando abonos…</span>
+      </div>
+      <nb-alert status="danger" *ngIf="!abonosLoading && abonosError">
+        {{ abonosError }}
+      </nb-alert>
+      <div *ngIf="!abonosLoading && !abonosError">
+        <ng-container *ngIf="abonosTicket.length; else sinAbonosDialog">
+          <table class="detalle-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Monto</th>
+                <th>Fecha</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let abono of abonosTicket">
+                <td>{{ abono.Id }}</td>
+                <td>{{ abono.Monto | currency: 'MXN':'symbol-narrow' }}</td>
+                <td>{{ abono.Fecha }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </ng-container>
+        <ng-template #sinAbonosDialog>
+          <div class="empty-state">
+            <nb-icon icon="inbox-outline"></nb-icon>
+            <p>No hay abonos registrados para este folio.</p>
+          </div>
+        </ng-template>
+      </div>
+    </nb-card-body>
+  </nb-card>
+</ng-template>
+
+<ng-template #finalizarDialog let-ref="dialogRef">
+  <nb-card class="finalizar-dialog">
+    <nb-card-header class="card-header">
+      <div>
+        <h2 class="title">Resumen Ticket</h2>
+        <p class="subtitle">Confirma los datos para cerrar el abono.</p>
+      </div>
+      <button nbButton ghost status="basic" size="small" (click)="closeFinalizarDialog()">
+        <nb-icon icon="close-outline"></nb-icon>
+      </button>
+    </nb-card-header>
+    <nb-card-body>
+      <nb-alert status="danger" *ngIf="finalizarDialogError">
+        {{ finalizarDialogError }}
+      </nb-alert>
+      <div class="finalizar-grid">
+        <div class="form-field">
+          <label>*Total abonado:</label>
+          <input nbInput fullWidth [value]="totalFinalizarAbono | currency: 'MXN':'symbol-narrow'" readonly />
+        </div>
+        <div class="form-field">
+          <label>*Monto:</label>
+          <div class="currency-input">
+            <span>$</span>
+            <input
+              nbInput
+              fullWidth
+              type="number"
+              min="0"
+              [disabled]="finalizarLoading"
+              [value]="montoFinalizar"
+              (input)="onMontoFinalizarChange($event.target.value)"
+              placeholder="Monto recibido"
+            />
+          </div>
+        </div>
+        <div class="form-field">
+          <label>*Cambio:</label>
+          <div class="currency-input">
+            <span>$</span>
+            <input
+              nbInput
+              fullWidth
+              readonly
+              [value]="cambioFinalizar | number: '1.2-2'"
+            />
+          </div>
+        </div>
+      </div>
+    </nb-card-body>
+    <nb-card-footer class="dialog-footer">
+      <button nbButton status="danger" (click)="closeFinalizarDialog()" [disabled]="finalizarLoading">
+        Cancelar
+      </button>
+      <button
+        nbButton
+        status="success"
+        (click)="confirmarFinalizarAbono()"
+        [disabled]="!finalizarPuedeCerrar || finalizarLoading"
+      >
+        <nb-spinner size="tiny" *ngIf="finalizarLoading"></nb-spinner>
+        <span *ngIf="!finalizarLoading">Finalizar</span>
+      </button>
+    </nb-card-footer>
+  </nb-card>
+</ng-template>
+
 <nb-card>
   <nb-card-header class="card-header secondary">
     <div>
@@ -146,31 +298,49 @@
     </div>
   </nb-card-header>
   <nb-card-body>
-    <ng-container *ngIf="abonos.length; else sinAbonos">
-      <table class="detalle-table">
-        <thead>
-          <tr>
-            <th>Folio Interno</th>
-            <th>Total</th>
-            <th>Abonado</th>
-            <th>Restante</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let abono of abonos | slice: 0 : abonosPorPagina">
-            <td>{{ abono.folioInterno }}</td>
-            <td>{{ abono.total | currency: 'MXN':'symbol-narrow' }}</td>
-            <td>{{ abono.abonado | currency: 'MXN':'symbol-narrow' }}</td>
-            <td>{{ abono.restante | currency: 'MXN':'symbol-narrow' }}</td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="state" *ngIf="detalleAbonosLoading">
+      <nb-spinner status="primary"></nb-spinner>
+      <span>Cargando detalle de abonos…</span>
+    </div>
+    <nb-alert status="danger" *ngIf="!detalleAbonosLoading && detalleAbonosError">
+      {{ detalleAbonosError }}
+    </nb-alert>
+    <ng-container *ngIf="!detalleAbonosLoading && !detalleAbonosError">
+      <ng-container *ngIf="detalleAbonos.length; else sinDetalleAbonos">
+        <table class="detalle-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Folio Interno</th>
+              <th>Monto</th>
+              <th>Restante</th>
+              <th>Fecha</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let abono of detalleAbonos | slice: 0 : abonosPorPagina">
+              <td>{{ abono.Id }}</td>
+              <td>{{ abono.FolioInterno }}</td>
+              <td>{{ abono.Abono | currency: 'MXN':'symbol-narrow' }}</td>
+              <td>{{ abono.Restante | currency: 'MXN':'symbol-narrow' }}</td>
+              <td>{{ abono.Fecha || '---' }}</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="2" class="resumen">Total monto:</td>
+              <td>{{ totalDetalleAbonos | currency: 'MXN':'symbol-narrow' }}</td>
+              <td colspan="2"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </ng-container>
+      <ng-template #sinDetalleAbonos>
+        <div class="empty-state">
+          <nb-icon icon="inbox-outline"></nb-icon>
+          <p>Ningún dato disponible en esta tabla =(</p>
+        </div>
+      </ng-template>
     </ng-container>
-    <ng-template #sinAbonos>
-      <div class="empty-state">
-        <nb-icon icon="inbox-outline"></nb-icon>
-        <p>Ningún dato disponible en esta tabla =(</p>
-      </div>
-    </ng-template>
   </nb-card-body>
 </nb-card>

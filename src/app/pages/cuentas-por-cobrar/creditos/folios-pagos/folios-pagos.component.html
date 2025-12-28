@@ -1,0 +1,130 @@
+<nb-card>
+  <nb-card-header class="card-header">
+    <div>
+      <h2 class="title">Folios Pagos</h2>
+      <p class="subtitle">Filtra los folios de pago por rango de fechas.</p>
+    </div>
+    <div class="actions">
+      <button nbButton status="basic" size="small" (click)="limpiarFiltros()">
+        Limpiar
+      </button>
+      <button nbButton status="success" size="small" (click)="aplicarFiltros()">
+        Aplicar filtros
+      </button>
+    </div>
+  </nb-card-header>
+  <nb-card-body>
+    <form [formGroup]="filtrosForm" class="filtros-grid">
+      <div class="form-field">
+        <label>Fecha inicio</label>
+        <input nbInput fullWidth type="date" formControlName="fechaInicio" />
+      </div>
+      <div class="form-field">
+        <label>Fecha fin</label>
+        <input nbInput fullWidth type="date" formControlName="fechaFin" />
+      </div>
+    </form>
+    <nb-alert status="danger" *ngIf="tablaError">
+      {{ tablaError }}
+    </nb-alert>
+  </nb-card-body>
+</nb-card>
+
+<nb-card>
+  <nb-card-header class="card-header secondary">
+    <div>
+      <h2 class="title">Resultados</h2>
+      <p class="subtitle">
+        <ng-container *ngIf="filtrosAplicados; else placeholder">
+          Mostrando folios del {{ filtrosAplicados.fechaInicio || 'inicio' }} al {{ filtrosAplicados.fechaFin || 'fin' }}.
+        </ng-container>
+        <ng-template #placeholder>Aplica un filtro para consultar la información.</ng-template>
+      </p>
+    </div>
+    <div class="actions">
+      <div class="search-control">
+        <nb-icon icon="search-outline"></nb-icon>
+        <input
+          nbInput
+          fullWidth
+          type="text"
+          placeholder="Buscar folio, cliente o RFC"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearch($event)"
+        />
+      </div>
+      <div class="page-size-control">
+        <label>Registros</label>
+        <nb-select size="small" [selected]="pageSize" (selectedChange)="changePageSize($event)">
+          <nb-option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</nb-option>
+        </nb-select>
+      </div>
+      <button
+        nbButton
+        status="success"
+        size="small"
+        (click)="exportToExcel()"
+        [disabled]="loadingTabla || !filteredFolios.length"
+      >
+        <nb-icon icon="download-outline"></nb-icon>
+        Exportar
+      </button>
+    </div>
+  </nb-card-header>
+  <nb-card-body>
+    <div class="state" *ngIf="loadingTabla">
+      <nb-spinner status="primary"></nb-spinner>
+      <span>Cargando folios…</span>
+    </div>
+    <ng-container *ngIf="!loadingTabla">
+      <div class="empty-state" *ngIf="!filteredFolios.length">
+        <nb-icon icon="inbox-outline"></nb-icon>
+        <p>No se encontraron folios para el criterio seleccionado.</p>
+      </div>
+      <table class="result-table" *ngIf="paginatedFolios.length">
+        <thead>
+          <tr>
+            <th>Folio</th>
+            <th>Cliente</th>
+            <th>Monto</th>
+            <th>Referencia</th>
+            <th>Fecha</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let folio of paginatedFolios">
+            <td>{{ folio.Id }}</td>
+            <td>
+              <div class="cliente">
+                <span class="cliente-nombre">{{ folio.NombreCliente }}</span>
+                <small class="cliente-rfc" *ngIf="folio.Rfc">{{ folio.Rfc }}</small>
+              </div>
+            </td>
+            <td>{{ folio.Monto | currency: 'MXN':'symbol-narrow' }}</td>
+            <td>{{ folio.Referencia || '---' }}</td>
+            <td>{{ folio.Fecha }}</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="2" class="resumen">Total de la búsqueda</td>
+            <td>{{ totalMonto | currency: 'MXN':'symbol-narrow' }}</td>
+            <td colspan="2"></td>
+          </tr>
+        </tfoot>
+      </table>
+      <div class="pagination-bar" *ngIf="totalItems">
+        <span>Mostrando {{ rangeStart }} - {{ rangeEnd }} de {{ totalItems }} registros</span>
+        <div class="pagination-controls">
+          <button nbButton size="tiny" status="basic" (click)="goToPreviousPage()" [disabled]="page === 1">
+            <nb-icon icon="arrow-back-outline"></nb-icon>
+          </button>
+          <span>Página {{ page }} de {{ totalPages }}</span>
+          <button nbButton size="tiny" status="basic" (click)="goToNextPage()" [disabled]="page === totalPages">
+            <nb-icon icon="arrow-forward-outline"></nb-icon>
+          </button>
+        </div>
+      </div>
+    </ng-container>
+  </nb-card-body>
+</nb-card>
