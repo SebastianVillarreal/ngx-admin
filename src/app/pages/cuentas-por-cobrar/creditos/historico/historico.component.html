@@ -1,0 +1,122 @@
+<nb-card>
+  <nb-card-header class="card-header">
+    <div>
+      <h2 class="title">Histórico de Créditos</h2>
+      <p class="subtitle">Consulta los folios históricos asociados a un cliente.</p>
+    </div>
+    <button
+      nbButton
+      status="success"
+      size="small"
+      (click)="buscarHistorico()"
+      [disabled]="!selectedCliente || historicoLoading"
+    >
+      <nb-icon icon="search-outline"></nb-icon>
+      Buscar
+    </button>
+  </nb-card-header>
+  <nb-card-body>
+    <div class="form-grid">
+      <div class="form-field">
+        <label>*Cliente</label>
+        <nb-select
+          fullWidth
+          placeholder="Selecciona un cliente"
+          [(selected)]="selectedCliente"
+          [disabled]="clientesLoading"
+        >
+          <nb-option *ngFor="let cliente of clientes" [value]="cliente.value">
+            {{ cliente.label }}
+          </nb-option>
+        </nb-select>
+      </div>
+    </div>
+    <nb-alert status="info" *ngIf="clientesLoading">
+      Cargando clientes…
+    </nb-alert>
+    <nb-alert status="danger" *ngIf="!clientesLoading && clientesError">
+      {{ clientesError }}
+    </nb-alert>
+    <nb-alert status="warning" *ngIf="historicoError">
+      {{ historicoError }}
+    </nb-alert>
+  </nb-card-body>
+</nb-card>
+
+<nb-card>
+  <nb-card-header class="card-header secondary">
+    <div>
+      <h2 class="title">Resultados</h2>
+      <p class="subtitle">
+        <ng-container *ngIf="clienteSeleccionadoNombre; else emptySelection">
+          Histórico del cliente {{ clienteSeleccionadoNombre }}.
+        </ng-container>
+        <ng-template #emptySelection>Selecciona un cliente y haz clic en "Buscar".</ng-template>
+      </p>
+    </div>
+    <div class="header-actions">
+      <div class="total" *ngIf="filteredHistorico.length">
+        Total acumulado:
+        <strong>{{ totalHistorico | currency: 'MXN':'symbol-narrow' }}</strong>
+      </div>
+      <div class="search-control">
+        <nb-icon icon="search-outline"></nb-icon>
+        <input
+          nbInput
+          fullWidth
+          type="text"
+          placeholder="Buscar folio, cliente o estatus"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearch($event)"
+          [disabled]="!historico.length"
+        />
+      </div>
+      <button
+        nbButton
+        status="success"
+        size="small"
+        (click)="exportToExcel()"
+        [disabled]="historicoLoading || !filteredHistorico.length"
+      >
+        <nb-icon icon="download-outline"></nb-icon>
+        Exportar
+      </button>
+    </div>
+  </nb-card-header>
+  <nb-card-body>
+    <div class="state" *ngIf="historicoLoading">
+      <nb-spinner status="primary"></nb-spinner>
+      <span>Consultando histórico…</span>
+    </div>
+    <ng-container *ngIf="!historicoLoading">
+      <div class="empty-state" *ngIf="!historico.length">
+        <nb-icon icon="inbox-outline"></nb-icon>
+        <p>Aplica una búsqueda para mostrar los registros históricos.</p>
+      </div>
+      <div class="empty-state" *ngIf="historico.length && !filteredHistorico.length">
+        <nb-icon icon="search-outline"></nb-icon>
+        <p>Sin coincidencias para "{{ searchTerm }}".</p>
+      </div>
+      <table class="historico-table" *ngIf="filteredHistorico.length">
+        <thead>
+          <tr>
+            <th>Folio Interno</th>
+            <th>Fecha</th>
+            <th>Total</th>
+            <th>Estatus</th>
+            <th>Fecha pago</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of filteredHistorico">
+            <td>{{ item.FolioInterno }}</td>
+            <td>{{ item.FechaDate ? (item.FechaDate | date: 'dd/MM/yyyy') : item.Fecha }}</td>
+            <td>{{ item.Total | currency: 'MXN':'symbol-narrow' }}</td>
+            <td>{{ item.Estatus || '---' }}</td>
+            <td>{{ item.FechaPagoDate ? (item.FechaPagoDate | date: 'dd/MM/yyyy') : 'Pendiente' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </ng-container>
+  </nb-card-body>
+</nb-card>

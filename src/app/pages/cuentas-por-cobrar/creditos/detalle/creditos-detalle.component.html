@@ -87,9 +87,17 @@
     </button>
   </nb-card-header>
   <nb-card-body>
-    <ng-container *ngIf="folios.length; else noFolios">
-      <table class="detalle-table">
-        <thead>
+    <div class="state" *ngIf="loadingDetalle">
+      <nb-spinner status="primary"></nb-spinner>
+      <span>Cargando folios…</span>
+    </div>
+    <nb-alert status="danger" *ngIf="!loadingDetalle && detalleError">
+      {{ detalleError }}
+    </nb-alert>
+    <ng-container *ngIf="!loadingDetalle && !detalleError">
+      <ng-container *ngIf="folios.length; else noFolios">
+        <table class="detalle-table result-table">
+          <thead>
           <tr>
             <th>Folio Interno</th>
             <th>Total</th>
@@ -103,7 +111,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let folio of folios">
+          <tr *ngFor="let folio of folios; trackBy: trackFolioBy">
             <td>{{ folio.folioInterno }}</td>
             <td>{{ folio.total | currency: 'MXN':'symbol-narrow' }}</td>
             <td>{{ folio.abonado | currency: 'MXN':'symbol-narrow' }}</td>
@@ -156,7 +164,8 @@
             <td colspan="2">{{ totalRestantePagina | currency: 'MXN':'symbol-narrow' }}</td>
           </tr>
         </tfoot>
-      </table>
+        </table>
+      </ng-container>
     </ng-container>
     <ng-template #noFolios>
       <div class="empty-state">

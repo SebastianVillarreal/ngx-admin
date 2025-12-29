@@ -6,6 +6,8 @@ import { ClientesComponent } from './clientes/clientes.component';
 import { CreditosComponent } from './creditos/creditos.component';
 import { CreditosDetalleComponent } from './creditos/detalle/creditos-detalle.component';
 import { FoliosPagosComponent } from './creditos/folios-pagos/folios-pagos.component';
+import { CorteAbonosComponent } from './creditos/corte-abonos/corte-abonos.component';
+import { HistoricoComponent } from './creditos/historico/historico.component';
 
 const routes: Routes = [
   {
@@ -23,6 +25,14 @@ const routes: Routes = [
       {
         path: 'creditos/folios-pagos',
         component: FoliosPagosComponent,
+      },
+      {
+        path: 'creditos/corte-abonos',
+        component: CorteAbonosComponent,
+      },
+      {
+        path: 'creditos/historico',
+        component: HistoricoComponent,
       },
       {
         path: 'creditos/detalle/:id',

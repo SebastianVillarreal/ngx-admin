@@ -86,6 +86,14 @@ export const MENU_ITEMS: NbMenuItem[] = [
             title: 'Folios Pagos',
             link: '/pages/cuentas-por-cobrar/creditos/folios-pagos',
           },
+          {
+            title: 'Corte Abonos',
+            link: '/pages/cuentas-por-cobrar/creditos/corte-abonos',
+          },
+          {
+            title: 'Historico',
+            link: '/pages/cuentas-por-cobrar/creditos/historico',
+          },
         ],
       },
     ],

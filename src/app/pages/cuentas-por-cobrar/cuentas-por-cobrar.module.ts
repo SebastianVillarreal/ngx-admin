@@ -20,6 +20,8 @@ import { ClientesComponent } from './clientes/clientes.component';
 import { CreditosComponent } from './creditos/creditos.component';
 import { CreditosDetalleComponent } from './creditos/detalle/creditos-detalle.component';
 import { FoliosPagosComponent } from './creditos/folios-pagos/folios-pagos.component';
+import { CorteAbonosComponent } from './creditos/corte-abonos/corte-abonos.component';
+import { HistoricoComponent } from './creditos/historico/historico.component';
 
 @NgModule({
   imports: [
@@ -38,6 +40,14 @@ import { FoliosPagosComponent } from './creditos/folios-pagos/folios-pagos.compo
     NbSelectModule,
     NbDialogModule.forChild(),
   ],
-  declarations: [CuentasPorCobrarComponent, ClientesComponent, CreditosComponent, CreditosDetalleComponent, FoliosPagosComponent],
+  declarations: [
+    CuentasPorCobrarComponent,
+    ClientesComponent,
+    CreditosComponent,
+    CreditosDetalleComponent,
+    FoliosPagosComponent,
+    CorteAbonosComponent,
+    HistoricoComponent,
+  ],
 })
 export class CuentasPorCobrarModule {}

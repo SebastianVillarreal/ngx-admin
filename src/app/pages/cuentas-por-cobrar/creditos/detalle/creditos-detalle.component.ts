@@ -579,6 +579,10 @@ export class CreditosDetalleComponent implements OnInit {
     folio.restante = Number(Math.max((folio.restante ?? 0) - monto, 0).toFixed(2));
   }
 
+  trackFolioBy(index: number, folio: CreditoFolioDetalle): string {
+    return folio?.folioInterno || `folio-${index}`;
+  }
+
   private loadDetalleAbonos(idFolio: string): void {
     if (!idFolio || idFolio === '0') {
       this.detalleAbonos = [];

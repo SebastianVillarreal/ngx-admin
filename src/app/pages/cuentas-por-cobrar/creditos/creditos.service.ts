@@ -213,6 +213,25 @@ interface FoliosAbonoApiResponse {
   };
 }
 
+export interface HistoricoTicket {
+  FolioInterno: string;
+  IdCliente: number;
+  Fecha: string;
+  Cliente: string;
+  Total: number;
+  Estatus: string;
+  FechaPago: string | null;
+}
+
+interface HistoricoTcApiResponse {
+  StatusCode: number;
+  success: boolean;
+  message: string;
+  response?: {
+    data?: HistoricoTicket[];
+  };
+}
+
 @Injectable({ providedIn: 'root' })
 export class CreditosService {
   private readonly endpoint = `${environment.apiBase}/GetClientesCreditos`;
@@ -223,6 +242,7 @@ export class CreditosService {
   private readonly detalleFolioAbonosEndpoint = `${environment.apiBase}/GetDetalleFolioAbonos`;
   private readonly finalizarFolioAbonoEndpoint = `${environment.apiBase}/FinalizarFolioAbono`;
   private readonly foliosAbonoEndpoint = `${environment.apiBase}/GetFoliosAbono`;
+  private readonly historicoTcEndpoint = `${environment.apiBase}/GetHistoricoTC`;
 
   constructor(private readonly http: HttpClient) {}
 
@@ -342,6 +362,17 @@ export class CreditosService {
       catchError((error) => {
         console.error('GetFoliosAbono error', error);
         return throwError(() => new Error('No se pudo obtener la lista de folios de pago.'));
+      }),
+    );
+  }
+
+  fetchHistoricoTC(idCliente: string): Observable<HistoricoTicket[]> {
+    const params = new HttpParams().set('cliente', idCliente);
+    return this.http.get<HistoricoTcApiResponse>(this.historicoTcEndpoint, { params }).pipe(
+      map((res) => res.response?.data ?? []),
+      catchError((error) => {
+        console.error('GetHistoricoTC error', error);
+        return throwError(() => new Error('No se pudo obtener el histórico de créditos.'));
       }),
     );
   }
