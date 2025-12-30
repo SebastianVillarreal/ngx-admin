@@ -4,11 +4,24 @@
       <h2 class="title">Movimientos de Inventario</h2>
       <p class="subtitle">Registra un movimiento especificando la sucursal, el tipo y una referencia.</p>
     </div>
-    <button nbButton status="success" size="small" (click)="submitMovimiento()" [disabled]="submitting">
-      <nb-icon *ngIf="!submitting" icon="save-outline"></nb-icon>
-      <nb-spinner *ngIf="submitting" size="tiny"></nb-spinner>
-      {{ submitting ? 'Guardando…' : 'Guardar' }}
-    </button>
+    <div class="header-actions">
+      <button nbButton status="success" size="small" (click)="submitMovimiento()" [disabled]="submitting">
+        <nb-icon *ngIf="!submitting" icon="save-outline"></nb-icon>
+        <nb-spinner *ngIf="submitting" size="tiny"></nb-spinner>
+        {{ submitting ? 'Guardando…' : 'Guardar' }}
+      </button>
+      <button
+        nbButton
+        status="primary"
+        size="small"
+        (click)="finalizarMovimiento()"
+        [disabled]="finalizando || !movimientoId"
+      >
+        <nb-icon *ngIf="!finalizando" icon="flag-checkered"></nb-icon>
+        <nb-spinner *ngIf="finalizando" size="tiny"></nb-spinner>
+        {{ finalizando ? 'Finalizando…' : 'Finalizar' }}
+      </button>
+    </div>
   </nb-card-header>
   <nb-card-body>
     <form [formGroup]="movimientoForm" class="form-grid">
@@ -87,6 +100,8 @@
     </form>
 
     <nb-alert status="success" *ngIf="submissionMessage">{{ submissionMessage }}</nb-alert>
+    <nb-alert status="danger" *ngIf="finalizacionError">{{ finalizacionError }}</nb-alert>
+    <nb-alert status="success" *ngIf="finalizacionMessage">{{ finalizacionMessage }}</nb-alert>
     <div class="resultado" *ngIf="movimientoId || movimientoFolio">
       <div class="resultado-field" *ngIf="movimientoId">
         <label>ID Movimiento</label>

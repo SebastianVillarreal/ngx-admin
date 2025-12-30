@@ -106,6 +106,16 @@ export const MENU_ITEMS: NbMenuItem[] = [
       {
         title: 'Movimientos',
         link: '/pages/inventarios/movimientos',
+        children: [
+          {
+            title: 'Registrar',
+            link: '/pages/inventarios/movimientos',
+          },
+          {
+            title: 'Editar y autorizar',
+            link: '/pages/inventarios/movimientos/editar-autorizar',
+          },
+        ],
       },
       {
         title: 'Verificador',

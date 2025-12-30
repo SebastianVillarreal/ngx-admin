@@ -15,6 +15,7 @@ import {
 import { ThemeModule } from '../../@theme/theme.module';
 import { InventariosRoutingModule } from './inventarios-routing.module';
 import { MovimientosComponent } from './movimientos/movimientos.component';
+import { EditarAutorizarComponent } from './movimientos/editar-autorizar/editar-autorizar.component';
 import { VerificadorComponent } from './verificador/verificador.component';
 
 @NgModule({
@@ -32,6 +33,6 @@ import { VerificadorComponent } from './verificador/verificador.component';
     NbSelectModule,
     NbSpinnerModule,
   ],
-  declarations: [MovimientosComponent, VerificadorComponent],
+  declarations: [MovimientosComponent, VerificadorComponent, EditarAutorizarComponent],
 })
 export class InventariosModule {}

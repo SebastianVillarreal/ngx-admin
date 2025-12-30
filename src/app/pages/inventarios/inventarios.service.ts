@@ -106,6 +106,7 @@ export interface GetRenglonesMovimientoPayload {
   Tipo: string;
   IdSucursal: string;
   Historico: string;
+  IdMovimiento?: string;
 }
 
 export interface RenglonMovimiento {
@@ -170,6 +171,30 @@ interface VerificadorInventarioApiResponse {
   };
 }
 
+export interface MovimientosSinAfectarPayload {
+  IdSucursal: string;
+  Tipo: string;
+}
+
+export interface MovimientoSinAfectar {
+  Id: number;
+  Folio: number;
+  TipoMovimiento: string;
+  Movimiento?: string;
+  NombreSucursal: string;
+  IdSucursal: number;
+  Fecha: string;
+}
+
+interface MovimientosSinAfectarApiResponse {
+  StatusCode: number;
+  success: boolean;
+  message: string;
+  response?: {
+    data?: MovimientoSinAfectar[];
+  };
+}
+
 @Injectable({ providedIn: 'root' })
 export class InventariosService {
   private readonly tipoMovimientosEndpoint = `${environment.apiBase}/GetTipoMovimientos`;
@@ -179,6 +204,7 @@ export class InventariosService {
   private readonly existenciaArticuloEndpoint = `${environment.apiBase}/GetExistencia`;
   private readonly renglonesMovimientoEndpoint = `${environment.apiBase}/GetRenglonesMovimiento`;
   private readonly verificadorInventarioEndpoint = `${environment.apiBase}/GetVerificadorInventario`;
+  private readonly movimientosSinAfectarEndpoint = `${environment.apiBase}/GetMovimientosSinAfectar`;
 
   constructor(private readonly http: HttpClient) {}
 
@@ -260,6 +286,16 @@ export class InventariosService {
       catchError((error) => {
         console.error('GetVerificadorInventario error', error);
         return throwError(() => new Error('No se pudo obtener la información del verificador.'));
+      }),
+    );
+  }
+
+  fetchMovimientosSinAfectar(payload: MovimientosSinAfectarPayload): Observable<MovimientoSinAfectar[]> {
+    return this.http.post<MovimientosSinAfectarApiResponse>(this.movimientosSinAfectarEndpoint, payload).pipe(
+      map((res) => res.response?.data ?? []),
+      catchError((error) => {
+        console.error('GetMovimientosSinAfectar error', error);
+        return throwError(() => new Error('No se pudieron obtener los movimientos.'));
       }),
     );
   }

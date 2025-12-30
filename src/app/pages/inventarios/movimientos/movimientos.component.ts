@@ -58,6 +58,9 @@ export class MovimientosComponent implements OnInit, OnDestroy {
   renglones: RenglonMovimiento[] = [];
   renglonesLoading = false;
   renglonesError = '';
+  finalizando = false;
+  finalizacionMessage = '';
+  finalizacionError = '';
 
   constructor(private readonly fb: FormBuilder, private readonly inventariosService: InventariosService) {
     this.movimientoForm = this.fb.group({
@@ -311,6 +314,28 @@ export class MovimientosComponent implements OnInit, OnDestroy {
     });
   }
 
+  finalizarMovimiento(): void {
+    this.finalizacionError = '';
+    this.finalizacionMessage = '';
+    if (!this.movimientoId || !this.movimientoFolio) {
+      this.finalizacionError = 'Genera y guarda un movimiento antes de finalizarlo.';
+      return;
+    }
+
+    if (!this.renglones.length) {
+      this.finalizacionError = 'Agrega al menos un artículo al movimiento antes de finalizarlo.';
+      return;
+    }
+
+    this.finalizando = true;
+    const folio = this.movimientoFolio;
+    setTimeout(() => {
+      this.resetMovimientoState();
+      this.finalizando = false;
+      this.finalizacionMessage = `Movimiento ${folio} finalizado.`;
+    }, 400);
+  }
+
   loadRenglones(): void {
     if (!this.movimientoFolio || !this.movimientoContext) {
       this.renglones = [];
@@ -369,6 +394,8 @@ export class MovimientosComponent implements OnInit, OnDestroy {
 
   submitMovimiento(): void {
     this.submissionMessage = '';
+    this.finalizacionMessage = '';
+    this.finalizacionError = '';
     if (this.movimientoForm.invalid) {
       this.movimientoForm.markAllAsTouched();
       return;
@@ -411,5 +438,29 @@ export class MovimientosComponent implements OnInit, OnDestroy {
 
   private getTipoMovimientoLabel(value: string): string {
     return this.tiposMovimiento.find((item) => item.value === value)?.label || value;
+  }
+
+  private resetMovimientoState(): void {
+    this.movimientoForm.reset();
+    this.movimientoForm.markAsPristine();
+    this.movimientoForm.markAsUntouched();
+    this.detalleForm.reset();
+    this.detalleForm.markAsPristine();
+    this.detalleForm.markAsUntouched();
+    this.detalleForm.get('unidadMedida')?.disable({ emitEvent: false });
+    this.detalleForm.get('existencia')?.disable({ emitEvent: false });
+    this.movimientoId = 0;
+    this.movimientoFolio = 0;
+    this.movimientoContext = null;
+    this.detalleArticuloInfo = null;
+    this.detalleMensaje = '';
+    this.detalleError = '';
+    this.submissionMessage = '';
+    this.tiposMovimiento = [];
+    this.tiposMovimientoError = '';
+    this.codigoOptions = [];
+    this.descripcionOptions = [];
+    this.renglones = [];
+    this.renglonesError = '';
   }
 }

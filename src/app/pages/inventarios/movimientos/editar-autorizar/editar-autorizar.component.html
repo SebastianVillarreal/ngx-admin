@@ -1,0 +1,148 @@
+<nb-card>
+  <nb-card-header class="card-header">
+    <div>
+      <h2 class="title">Editar y autorizar</h2>
+      <p class="subtitle">Filtra los movimientos pendientes por sucursal y tipo.</p>
+    </div>
+    <button nbButton status="primary" size="small" (click)="mostrar()" [disabled]="mostrando">
+      <nb-spinner *ngIf="mostrando" size="tiny"></nb-spinner>
+      <span *ngIf="!mostrando">Mostrar</span>
+    </button>
+  </nb-card-header>
+  <nb-card-body>
+    <form [formGroup]="filtrosForm" class="filtros-grid">
+      <div class="form-field">
+        <label for="sucursal">Sucursal</label>
+        <nb-select
+          fullWidth
+          id="sucursal"
+          placeholder="Selecciona una sucursal"
+          formControlName="sucursal"
+          [status]="filtrosForm.get('sucursal')?.invalid && filtrosForm.get('sucursal')?.touched ? 'danger' : 'basic'"
+        >
+          <nb-option *ngFor="let sucursal of sucursales" [value]="sucursal.value">
+            {{ sucursal.label }}
+          </nb-option>
+        </nb-select>
+        <small class="error-text" *ngIf="filtrosForm.get('sucursal')?.invalid && filtrosForm.get('sucursal')?.touched">
+          Selecciona una sucursal.
+        </small>
+      </div>
+
+      <div class="form-field">
+        <label for="sentido">Entrada / salida</label>
+        <nb-select
+          fullWidth
+          id="sentido"
+          placeholder="Selecciona una opción"
+          formControlName="sentido"
+          [status]="filtrosForm.get('sentido')?.invalid && filtrosForm.get('sentido')?.touched ? 'danger' : 'basic'"
+        >
+          <nb-option *ngFor="let sentido of sentidos" [value]="sentido.value">
+            {{ sentido.label }}
+          </nb-option>
+        </nb-select>
+        <small class="error-text" *ngIf="filtrosForm.get('sentido')?.invalid && filtrosForm.get('sentido')?.touched">
+          Selecciona si es entrada o salida.
+        </small>
+      </div>
+    </form>
+
+    <div class="result-container">
+      <div class="state" *ngIf="mostrando">
+        <nb-spinner status="primary"></nb-spinner>
+        <span>Consultando movimientos…</span>
+      </div>
+
+      <nb-alert *ngIf="!mostrando && errorMensaje" status="danger">
+        {{ errorMensaje }}
+      </nb-alert>
+
+      <nb-alert *ngIf="mensaje && !errorMensaje" status="info" class="mt-3">
+        {{ mensaje }}
+      </nb-alert>
+
+      <div class="empty-state" *ngIf="sinResultados">
+        <nb-icon icon="inbox-outline"></nb-icon>
+        <p>No hay movimientos pendientes.</p>
+      </div>
+
+      <table class="movimientos-table" *ngIf="movimientos.length">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Folio</th>
+            <th>Tipo de movimiento</th>
+            <th>Sucursal</th>
+            <th>Fecha</th>
+            <th>Ver renglones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let movimiento of movimientos; trackBy: trackByMovimiento">
+            <td>{{ movimiento.Id }}</td>
+            <td>{{ movimiento.Folio }}</td>
+            <td>{{ movimiento.TipoMovimiento }}</td>
+            <td>{{ movimiento.NombreSucursal }}</td>
+            <td>{{ movimiento.Fecha | date: 'dd/MM/yyyy' }}</td>
+            <td class="acciones">
+              <button nbButton status="info" size="tiny" (click)="verRenglones(movimiento)">
+                <nb-icon icon="eye-outline"></nb-icon>
+                Ver renglones
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="detalle-container" *ngIf="movimientoSeleccionado">
+        <div class="detalle-header">
+          <div>
+            <h4>Detalle del folio {{ movimientoSeleccionado.Folio }}</h4>
+            <p>{{ movimientoSeleccionado.TipoMovimiento }} — {{ movimientoSeleccionado.NombreSucursal }}</p>
+          </div>
+        </div>
+
+        <div class="state" *ngIf="renglonesLoading">
+          <nb-spinner status="primary"></nb-spinner>
+          <span>Cargando renglones…</span>
+        </div>
+
+        <nb-alert *ngIf="!renglonesLoading && renglonesError" status="danger">
+          {{ renglonesError }}
+        </nb-alert>
+
+        <div class="empty-state" *ngIf="!renglonesLoading && !renglonesError && !renglones.length">
+          <nb-icon icon="inbox-outline"></nb-icon>
+          <p>No se encontraron renglones para este movimiento.</p>
+        </div>
+
+        <table class="renglones-table" *ngIf="renglones.length">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Descripción</th>
+              <th>Cantidad</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let renglon of renglones; trackBy: trackByRenglon">
+              <td>{{ renglon.Articulo }}</td>
+              <td>{{ renglon.Descripcion }}</td>
+              <td>{{ renglon.Cantidad }}</td>
+              <td class="acciones">
+                <button nbButton status="success" size="tiny" disabled>
+                  Autorizar
+                </button>
+                <button nbButton status="warning" appearance="outline" size="tiny" disabled>
+                  Editar
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </nb-card-body>
+</nb-card>
