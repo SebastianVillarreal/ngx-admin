@@ -96,6 +96,18 @@ export const MENU_ITEMS: NbMenuItem[] = [
           },
         ],
       },
+      
+    ],
+  },
+  {
+    title: 'Inventarios',
+    icon: 'settings-2-outline',
+    children: [
+      {
+        title: 'Movimientos',
+        link: '/pages/inventarios/movimientos',
+      },
+      
     ],
   },
 

@@ -45,6 +45,11 @@ const routes: Routes = [{
         .then(m => m.CatalogosModule),
     },
     {
+      path: 'inventarios',
+      loadChildren: () => import('./inventarios/inventarios.module')
+        .then(m => m.InventariosModule),
+    },
+    {
       path: 'iot-dashboard',
       component: DashboardComponent,
     },

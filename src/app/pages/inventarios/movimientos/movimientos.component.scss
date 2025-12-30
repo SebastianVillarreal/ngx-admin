@@ -1,0 +1,123 @@
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.card-header.secondary {
+  border-top: 3px solid #1d4ed8;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--text-hint-color);
+  font-size: 0.9rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.form-field.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-field label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-hint-color);
+  margin: 0;
+}
+
+.error-text {
+  color: var(--text-danger-color);
+  font-size: 0.75rem;
+}
+
+.detalle-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.detalle-grid .form-field:nth-child(3) {
+  grid-column: span 1;
+}
+
+.detalle-grid .form-field:nth-child(4),
+.detalle-grid .form-field:nth-child(5) {
+  max-width: 240px;
+}
+
+.field-status {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  color: var(--text-hint-color);
+}
+
+.detalle-actions {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.renglones-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.renglones-table th,
+.renglones-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--divider-color);
+  text-align: left;
+}
+
+.renglones-table th {
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  color: var(--text-hint-color);
+}
+
+.renglones-table .acciones {
+  width: 120px;
+}
+
+.resultado {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.resultado-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.resultado-field label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-hint-color);
+}

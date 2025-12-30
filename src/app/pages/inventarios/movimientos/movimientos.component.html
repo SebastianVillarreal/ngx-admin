@@ -1,0 +1,269 @@
+<nb-card>
+  <nb-card-header class="card-header">
+    <div>
+      <h2 class="title">Movimientos de Inventario</h2>
+      <p class="subtitle">Registra un movimiento especificando la sucursal, el tipo y una referencia.</p>
+    </div>
+    <button nbButton status="success" size="small" (click)="submitMovimiento()" [disabled]="submitting">
+      <nb-icon *ngIf="!submitting" icon="save-outline"></nb-icon>
+      <nb-spinner *ngIf="submitting" size="tiny"></nb-spinner>
+      {{ submitting ? 'Guardando…' : 'Guardar' }}
+    </button>
+  </nb-card-header>
+  <nb-card-body>
+    <form [formGroup]="movimientoForm" class="form-grid">
+      <div class="form-field">
+        <label>*Sucursal</label>
+        <nb-select
+          fullWidth
+          placeholder="Selecciona una sucursal"
+          formControlName="sucursal"
+          [status]="movimientoForm.get('sucursal')?.invalid && movimientoForm.get('sucursal')?.touched ? 'danger' : 'basic'"
+        >
+          <nb-option *ngFor="let option of sucursales" [value]="option.value">
+            {{ option.label }}
+          </nb-option>
+        </nb-select>
+        <small class="error-text" *ngIf="movimientoForm.get('sucursal')?.invalid && movimientoForm.get('sucursal')?.touched">
+          Selecciona una sucursal válida.
+        </small>
+      </div>
+
+      <div class="form-field">
+        <label>*Entrada / salida</label>
+        <nb-select
+          fullWidth
+          placeholder="Selecciona la naturaleza"
+          formControlName="sentido"
+          [status]="movimientoForm.get('sentido')?.invalid && movimientoForm.get('sentido')?.touched ? 'danger' : 'basic'"
+        >
+          <nb-option *ngFor="let option of sentidosMovimiento" [value]="option.value">
+            {{ option.label }}
+          </nb-option>
+        </nb-select>
+        <small class="error-text" *ngIf="movimientoForm.get('sentido')?.invalid && movimientoForm.get('sentido')?.touched">
+          Selecciona si el movimiento es de entrada o salida.
+        </small>
+      </div>
+
+      <div class="form-field">
+        <label>*Tipo de movimiento</label>
+        <div class="field-status" *ngIf="tiposMovimientoLoading">
+          <nb-spinner status="primary" size="tiny"></nb-spinner>
+          <span>Cargando tipos…</span>
+        </div>
+        <nb-select
+          fullWidth
+          placeholder="Selecciona el tipo"
+          formControlName="tipoMovimiento"
+          [status]="movimientoForm.get('tipoMovimiento')?.invalid && movimientoForm.get('tipoMovimiento')?.touched ? 'danger' : 'basic'"
+          [disabled]="tiposMovimientoLoading || !tiposMovimiento.length"
+        >
+          <nb-option *ngFor="let option of tiposMovimiento" [value]="option.value">
+            {{ option.label }}
+          </nb-option>
+        </nb-select>
+        <small class="error-text" *ngIf="tiposMovimientoError">
+          {{ tiposMovimientoError }}
+        </small>
+        <small class="error-text" *ngIf="movimientoForm.get('tipoMovimiento')?.invalid && movimientoForm.get('tipoMovimiento')?.touched">
+          Selecciona un tipo de movimiento.
+        </small>
+      </div>
+
+      <div class="form-field full-width">
+        <label>*Referencia</label>
+        <textarea
+          nbInput
+          fullWidth
+          rows="3"
+          placeholder="Describe brevemente el movimiento"
+          formControlName="referencia"
+        ></textarea>
+        <small class="error-text" *ngIf="movimientoForm.get('referencia')?.invalid && movimientoForm.get('referencia')?.touched">
+          Captura una referencia (máx. 120 caracteres).
+        </small>
+      </div>
+    </form>
+
+    <nb-alert status="success" *ngIf="submissionMessage">{{ submissionMessage }}</nb-alert>
+    <div class="resultado" *ngIf="movimientoId || movimientoFolio">
+      <div class="resultado-field" *ngIf="movimientoId">
+        <label>ID Movimiento</label>
+        <input nbInput readonly [value]="movimientoId" />
+      </div>
+      <div class="resultado-field" *ngIf="movimientoFolio">
+        <label>Folio Movimiento</label>
+        <input nbInput readonly [value]="movimientoFolio" />
+      </div>
+    </div>
+  </nb-card-body>
+</nb-card>
+
+<nb-card>
+  <nb-card-header class="card-header secondary">
+    <div>
+      <h2 class="title">Detalle del movimiento</h2>
+      <p class="subtitle">Captura los artículos que formarán parte del movimiento.</p>
+    </div>
+  </nb-card-header>
+  <nb-card-body>
+    <nb-alert status="info" *ngIf="detalleLoading">
+      Consultando información del artículo…
+    </nb-alert>
+    <nb-alert status="danger" *ngIf="!detalleLoading && detalleError">
+      {{ detalleError }}
+    </nb-alert>
+    <nb-alert status="success" *ngIf="detalleMensaje">
+      {{ detalleMensaje }}
+    </nb-alert>
+    <form [formGroup]="detalleForm" class="detalle-grid">
+      <div class="form-field">
+        <label>*Código</label>
+        <div class="field-status" *ngIf="codigoAutocompleteLoading">
+          <nb-spinner status="primary" size="tiny"></nb-spinner>
+          <span>Buscando…</span>
+        </div>
+        <input
+          nbInput
+          placeholder="Buscar por código"
+          formControlName="codigo"
+          [nbAutocomplete]="codigoAuto"
+        />
+        <nb-autocomplete #codigoAuto>
+          <nb-option *ngFor="let option of codigoOptions" [value]="option.codigo" (click)="onCodigoSelected(option)">
+            {{ option.codigo }} — {{ option.descripcion }}
+          </nb-option>
+        </nb-autocomplete>
+        <small class="error-text" *ngIf="codigoAutocompleteError">
+          {{ codigoAutocompleteError }}
+        </small>
+        <small class="error-text" *ngIf="detalleForm.get('codigo')?.invalid && detalleForm.get('codigo')?.touched">
+          Selecciona un código válido.
+        </small>
+      </div>
+
+      <div class="form-field">
+        <label>*Descripción</label>
+        <div class="field-status" *ngIf="descripcionAutocompleteLoading">
+          <nb-spinner status="primary" size="tiny"></nb-spinner>
+          <span>Buscando…</span>
+        </div>
+        <input
+          nbInput
+          placeholder="Buscar por descripción"
+          formControlName="descripcion"
+          [nbAutocomplete]="descripcionAuto"
+        />
+        <nb-autocomplete #descripcionAuto>
+          <nb-option
+            *ngFor="let option of descripcionOptions"
+            [value]="option.descripcion"
+            (click)="onDescripcionSelected(option)"
+          >
+            {{ option.descripcion }} — {{ option.codigo }}
+          </nb-option>
+        </nb-autocomplete>
+        <small class="error-text" *ngIf="descripcionAutocompleteError">
+          {{ descripcionAutocompleteError }}
+        </small>
+        <small class="error-text" *ngIf="detalleForm.get('descripcion')?.invalid && detalleForm.get('descripcion')?.touched">
+          Selecciona una descripción válida.
+        </small>
+      </div>
+
+      <div class="form-field">
+        <label>*Cantidad</label>
+        <input
+          nbInput
+          type="number"
+          step="0.01"
+          min="0"
+          placeholder="0.00"
+          formControlName="cantidad"
+        />
+        <small class="error-text" *ngIf="detalleForm.get('cantidad')?.invalid && detalleForm.get('cantidad')?.touched">
+          Captura una cantidad mayor a cero.
+        </small>
+      </div>
+
+      <div class="form-field">
+        <label>Unidad</label>
+        <input nbInput readonly formControlName="unidadMedida" />
+      </div>
+
+      <div class="form-field">
+        <label>Existencia</label>
+        <input nbInput readonly formControlName="existencia" />
+      </div>
+    </form>
+    <div class="detalle-actions">
+      <button
+        nbButton
+        status="primary"
+        (click)="agregarDetalle()"
+        [disabled]="detalleSubmitLoading || detalleLoading || !movimientoId"
+      >
+        <nb-spinner size="tiny" *ngIf="detalleSubmitLoading"></nb-spinner>
+        <span *ngIf="!detalleSubmitLoading">Agregar detalle</span>
+      </button>
+    </div>
+  </nb-card-body>
+</nb-card>
+
+<nb-card>
+  <nb-card-header class="card-header secondary">
+    <div>
+      <h2 class="title">Artículos agregados</h2>
+      <p class="subtitle">Visualiza los renglones capturados para el movimiento.</p>
+    </div>
+    <button
+      nbButton
+      size="small"
+      status="basic"
+      (click)="loadRenglones()"
+      [disabled]="renglonesLoading || !movimientoFolio"
+    >
+      <nb-icon icon="refresh-outline"></nb-icon>
+      Actualizar
+    </button>
+  </nb-card-header>
+  <nb-card-body>
+    <nb-alert status="info" *ngIf="!movimientoFolio">
+      Primero registra el movimiento para listar sus artículos.
+    </nb-alert>
+    <div class="state" *ngIf="renglonesLoading">
+      <nb-spinner status="primary"></nb-spinner>
+      <span>Cargando artículos…</span>
+    </div>
+    <nb-alert status="danger" *ngIf="!renglonesLoading && renglonesError">
+      {{ renglonesError }}
+    </nb-alert>
+    <div class="empty-state" *ngIf="movimientoFolio && !renglonesLoading && !renglonesError && !renglones.length">
+      <nb-icon icon="inbox-outline"></nb-icon>
+      <p>Aún no hay artículos registrados.</p>
+    </div>
+    <table class="renglones-table" *ngIf="renglones.length">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Descripción</th>
+          <th>Cantidad</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let renglon of renglones">
+          <td>{{ renglon.Articulo }}</td>
+          <td>{{ renglon.Descripcion }}</td>
+          <td>{{ renglon.Cantidad }}</td>
+          <td class="acciones">
+            <button nbButton size="tiny" status="danger" disabled>
+              <nb-icon icon="trash-2-outline"></nb-icon>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </nb-card-body>
+</nb-card>
