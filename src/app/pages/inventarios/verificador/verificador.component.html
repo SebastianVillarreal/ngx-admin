@@ -1,0 +1,149 @@
+<nb-card>
+  <nb-card-header>
+    Inventario | Verificador
+  </nb-card-header>
+
+  <nb-card-body>
+    <form [formGroup]="verificadorForm" (ngSubmit)="onSubmit()" class="verificador-form">
+      <div class="form-grid">
+        <div class="form-field">
+          <label for="sucursal">Sucursal</label>
+          <nb-select
+            fullWidth
+            id="sucursal"
+            placeholder="Selecciona una sucursal"
+            formControlName="sucursalId"
+          >
+            <nb-option *ngFor="let sucursal of sucursales" [value]="sucursal.id">
+              {{ sucursal.nombre }}
+            </nb-option>
+          </nb-select>
+        </div>
+
+        <div class="form-field">
+          <label for="codigo">Código</label>
+          <input
+            nbInput
+            fullWidth
+            id="codigo"
+            formControlName="codigo"
+            placeholder="Ingresa el código"
+          />
+        </div>
+
+        <div class="form-field">
+          <label for="fechaInicio">Fecha inicial</label>
+          <input
+            nbInput
+            fullWidth
+            id="fechaInicio"
+            type="date"
+            formControlName="fechaInicio"
+          />
+        </div>
+
+        <div class="form-field">
+          <label for="fechaFin">Fecha final</label>
+          <input
+            nbInput
+            fullWidth
+            id="fechaFin"
+            type="date"
+            formControlName="fechaFin"
+          />
+        </div>
+      </div>
+
+      <div class="actions">
+        <button nbButton status="primary" type="submit" [disabled]="verificadorForm.invalid || isLoading">
+          <nb-spinner *ngIf="isLoading" size="tiny"></nb-spinner>
+          <span *ngIf="!isLoading">Consultar información</span>
+        </button>
+      </div>
+    </form>
+
+    <nb-alert *ngIf="errorMessage" status="danger" outline="danger" class="mt-3">
+      {{ errorMessage }}
+    </nb-alert>
+  </nb-card-body>
+</nb-card>
+
+<nb-card *ngIf="consultaCompletada && resultado">
+  <nb-card-header>
+    Resumen del artículo
+  </nb-card-header>
+  <nb-card-body>
+    <div class="summary-grid">
+      <div class="form-field">
+        <label>Descripción</label>
+        <input nbInput fullWidth [value]="descripcionArticulo" readonly />
+      </div>
+      <div class="form-field">
+        <label>Teórico calculado</label>
+        <input nbInput fullWidth [value]="(teoricoCalculado ?? 0) | number: '1.2-2'" readonly />
+      </div>
+      <div class="form-field">
+        <label>Inventario inicial</label>
+        <input nbInput fullWidth [value]="(inventarioInicial ?? 0) | number: '1.2-2'" readonly />
+      </div>
+    </div>
+
+    <div class="tables-grid">
+      <div>
+        <h5>Entradas</h5>
+        <table>
+          <thead>
+            <tr>
+              <th>Movimiento</th>
+              <th>Cantidad</th>
+              <th>Ver</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let movimiento of entradasConfig; trackBy: trackByMovimiento">
+              <td>{{ movimiento.label }}</td>
+              <td>{{ valorMovimiento(movimiento.key) | number: '1.2-2' }}</td>
+              <td>
+                <button nbButton status="danger" appearance="outline" size="small" disabled>
+                  <nb-icon icon="search-outline"></nb-icon>
+                  Ver detalle
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div>
+        <h5>Salidas</h5>
+        <table>
+          <thead>
+            <tr>
+              <th>Movimiento</th>
+              <th>Cantidad</th>
+              <th>Ver</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let movimiento of salidasConfig; trackBy: trackByMovimiento">
+              <td>{{ movimiento.label }}</td>
+              <td>{{ valorMovimiento(movimiento.key) | number: '1.2-2' }}</td>
+              <td>
+                <button nbButton status="danger" appearance="outline" size="small" disabled>
+                  <nb-icon icon="search-outline"></nb-icon>
+                  Ver detalle
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </nb-card-body>
+</nb-card>
+
+<nb-card *ngIf="consultaCompletada && !resultado">
+  <nb-card-body class="empty-state">
+    No se encontró información para los filtros indicados.
+  </nb-card-body>
+</nb-card>

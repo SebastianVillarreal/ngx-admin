@@ -107,6 +107,10 @@ export const MENU_ITEMS: NbMenuItem[] = [
         title: 'Movimientos',
         link: '/pages/inventarios/movimientos',
       },
+      {
+        title: 'Verificador',
+        link: '/pages/inventarios/verificador',
+      },
       
     ],
   },

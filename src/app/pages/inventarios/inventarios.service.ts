@@ -124,6 +124,52 @@ interface RenglonesMovimientoApiResponse {
   };
 }
 
+export interface VerificadorInventarioPayload {
+  Codigo: string;
+  IdSucursal: string;
+  FechaInicial: string;
+  FechaFinal: string;
+}
+
+export interface VerificadorInventarioRecord {
+  Descripcion: string;
+  InventarioInicial: number;
+  Ventas: number;
+  SalidaSeparado: number;
+  Entradas: number;
+  EntradasTraspaso: number;
+  DevolucionesVenta: number;
+  SalidasDevolucion: number;
+  Existencia: number;
+  TotalEntradas: number;
+  SalidasTraspaso: number;
+  SalidasMermas: number;
+  SalidasConsumo: number;
+  SalidasConversion: number;
+  SalidaEspecial: number;
+  EntradasConversion: number;
+  EntradaEspecial: number;
+  TotalSalidas: number;
+  AjustePositivo: number;
+  AjusteNegativo: number;
+  SalidaCancelacionEntrada: number;
+  Compras: number;
+  Pruebas: number;
+  AjusteSalidaTraspaso: number;
+  AjusteEntradaTraspaso: number;
+  EntradaCancelacionSeparado: number;
+  EntradaMermaSucursal: number;
+}
+
+interface VerificadorInventarioApiResponse {
+  StatusCode: number;
+  success: boolean;
+  message: string;
+  response?: {
+    data?: VerificadorInventarioRecord[];
+  };
+}
+
 @Injectable({ providedIn: 'root' })
 export class InventariosService {
   private readonly tipoMovimientosEndpoint = `${environment.apiBase}/GetTipoMovimientos`;
@@ -132,6 +178,7 @@ export class InventariosService {
   private readonly autocompleteArticulosEndpoint = `${environment.apiBase}/AutocompleteArticulos`;
   private readonly existenciaArticuloEndpoint = `${environment.apiBase}/GetExistencia`;
   private readonly renglonesMovimientoEndpoint = `${environment.apiBase}/GetRenglonesMovimiento`;
+  private readonly verificadorInventarioEndpoint = `${environment.apiBase}/GetVerificadorInventario`;
 
   constructor(private readonly http: HttpClient) {}
 
@@ -203,6 +250,16 @@ export class InventariosService {
       catchError((error) => {
         console.error('GetRenglonesMovimiento error', error);
         return throwError(() => new Error('No se pudieron obtener los renglones del movimiento.'));
+      }),
+    );
+  }
+
+  obtenerVerificadorInventario(payload: VerificadorInventarioPayload): Observable<VerificadorInventarioRecord | null> {
+    return this.http.post<VerificadorInventarioApiResponse>(this.verificadorInventarioEndpoint, payload).pipe(
+      map((res) => res.response?.data?.[0] ?? null),
+      catchError((error) => {
+        console.error('GetVerificadorInventario error', error);
+        return throwError(() => new Error('No se pudo obtener la información del verificador.'));
       }),
     );
   }
