@@ -1,0 +1,264 @@
+<nb-card>
+  <nb-card-header class="card-header">
+    <div>
+      <h2 class="title">Histórico de movimientos</h2>
+      <p class="subtitle">Filtra los movimientos ya autorizados por sucursal y periodo.</p>
+    </div>
+    <button nbButton status="primary" size="small" (click)="ejecutarBusqueda()" [disabled]="buscando">
+      <nb-spinner *ngIf="buscando" size="tiny"></nb-spinner>
+      <span *ngIf="!buscando">Buscar</span>
+    </button>
+  </nb-card-header>
+  <nb-card-body>
+    <form [formGroup]="historicoForm" class="filtros-grid">
+      <div class="form-field">
+        <label for="sucursal">Sucursal</label>
+        <nb-select
+          fullWidth
+          id="sucursal"
+          placeholder="Selecciona una sucursal"
+          formControlName="sucursal"
+          [status]="historicoForm.get('sucursal')?.invalid && historicoForm.get('sucursal')?.touched ? 'danger' : 'basic'"
+        >
+          <nb-option *ngFor="let sucursal of sucursales" [value]="sucursal.value">
+            {{ sucursal.label }}
+          </nb-option>
+        </nb-select>
+        <small class="error-text" *ngIf="historicoForm.get('sucursal')?.invalid && historicoForm.get('sucursal')?.touched">
+          Selecciona una sucursal.
+        </small>
+      </div>
+
+      <div class="form-field">
+        <label for="fechaInicio">Fecha inicial</label>
+        <input
+          nbInput
+          id="fechaInicio"
+          type="date"
+          formControlName="fechaInicio"
+          [status]="historicoForm.get('fechaInicio')?.invalid && historicoForm.get('fechaInicio')?.touched ? 'danger' : 'basic'"
+        />
+        <small class="error-text" *ngIf="historicoForm.get('fechaInicio')?.invalid && historicoForm.get('fechaInicio')?.touched">
+          Selecciona la fecha inicial.
+        </small>
+      </div>
+
+      <div class="form-field">
+        <label for="fechaFin">Fecha final</label>
+        <input
+          nbInput
+          id="fechaFin"
+          type="date"
+          formControlName="fechaFin"
+          [status]="historicoForm.get('fechaFin')?.invalid && historicoForm.get('fechaFin')?.touched ? 'danger' : 'basic'"
+        />
+        <small class="error-text" *ngIf="historicoForm.get('fechaFin')?.invalid && historicoForm.get('fechaFin')?.touched">
+          Selecciona la fecha final.
+        </small>
+      </div>
+
+      <div class="form-field">
+        <label for="sentido">Entrada / salida</label>
+        <nb-select
+          fullWidth
+          id="sentido"
+          placeholder="Selecciona el sentido"
+          formControlName="sentido"
+          [status]="historicoForm.get('sentido')?.invalid && historicoForm.get('sentido')?.touched ? 'danger' : 'basic'"
+        >
+          <nb-option *ngFor="let sentido of sentidos" [value]="sentido.value">
+            {{ sentido.label }}
+          </nb-option>
+        </nb-select>
+        <small class="error-text" *ngIf="historicoForm.get('sentido')?.invalid && historicoForm.get('sentido')?.touched">
+          Selecciona si consultarás entradas o salidas.
+        </small>
+      </div>
+
+      <div class="form-field">
+        <label for="tipoMovimiento">Tipo de movimiento</label>
+        <div class="field-status" *ngIf="tiposMovimientoLoading">
+          <nb-spinner status="primary" size="tiny"></nb-spinner>
+          <span>Cargando…</span>
+        </div>
+        <nb-select
+          fullWidth
+          id="tipoMovimiento"
+          placeholder="Selecciona el tipo"
+          formControlName="tipoMovimiento"
+          [disabled]="tiposMovimientoLoading || !tiposMovimiento.length"
+          [status]="
+            historicoForm.get('tipoMovimiento')?.invalid && historicoForm.get('tipoMovimiento')?.touched ? 'danger' : 'basic'
+          "
+        >
+          <nb-option *ngFor="let tipo of tiposMovimiento; trackBy: trackByTipo" [value]="tipo.value">
+            {{ tipo.label }}
+          </nb-option>
+        </nb-select>
+        <small class="error-text" *ngIf="tiposMovimientoError">
+          {{ tiposMovimientoError }}
+        </small>
+        <small class="error-text" *ngIf="historicoForm.get('tipoMovimiento')?.invalid && historicoForm.get('tipoMovimiento')?.touched">
+          Selecciona un tipo de movimiento.
+        </small>
+      </div>
+    </form>
+
+    <div class="resultados">
+      <div class="state" *ngIf="buscando">
+        <nb-spinner status="primary"></nb-spinner>
+        <span>Consultando histórico…</span>
+      </div>
+
+      <nb-alert *ngIf="busquedaMensaje && !historicoError" status="info">
+        {{ busquedaMensaje }}
+      </nb-alert>
+
+      <nb-alert *ngIf="busquedaError" status="danger">
+        {{ busquedaError }}
+      </nb-alert>
+
+      <nb-alert *ngIf="historicoError" status="danger">
+        {{ historicoError }}
+      </nb-alert>
+
+      <div class="empty-state" *ngIf="sinResultados">
+        <nb-icon icon="inbox-outline"></nb-icon>
+        <p>No se encontraron movimientos para los filtros seleccionados.</p>
+      </div>
+
+      <div class="tabla-wrapper" *ngIf="historicoMovimientos.length">
+        <table class="historico-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Sucursal</th>
+              <th>Folio</th>
+              <th>Tipo de movimiento</th>
+              <th>Fecha</th>
+              <th>Referencia</th>
+              <th>Estatus</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let movimiento of historicoPaginado; trackBy: trackByHistorico">
+              <td>{{ movimiento.Id }}</td>
+              <td>{{ movimiento.NombreSucursal || ('Sucursal ' + (movimiento.IdSucursal || '')) }}</td>
+              <td>{{ movimiento.Folio }}</td>
+              <td>{{ movimiento.TipoMovimiento }}</td>
+              <td>{{ movimiento.Fecha | date: 'dd/MM/yyyy' }}</td>
+              <td>{{ movimiento.Referencia || '—' }}</td>
+              <td>{{ movimiento.NombreEstatus || '—' }}</td>
+              <td class="acciones">
+                <button nbButton status="info" size="tiny" (click)="verDetalle(movimiento)">
+                  Ver detalle
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="paginacion">
+          <div class="paginacion-info">
+            Mostrando {{ paginaDesde }}-{{ paginaHasta }} de {{ historicoMovimientos.length }} movimiento(s)
+          </div>
+          <div class="paginacion-controles">
+            <div class="paginacion-select">
+              <span>Filas</span>
+              <nb-select size="tiny" [selected]="pageSize" (selectedChange)="onPageSizeChange($event)">
+                <nb-option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</nb-option>
+              </nb-select>
+            </div>
+            <div class="paginacion-nav">
+              <button nbButton status="basic" size="tiny" (click)="paginaAnterior()" [disabled]="paginaActual === 1">
+                Anterior
+              </button>
+              <span>Pag. {{ paginaActual }} de {{ totalPaginas }}</span>
+              <button
+                nbButton
+                status="basic"
+                size="tiny"
+                (click)="paginaSiguiente()"
+                [disabled]="paginaActual === totalPaginas"
+              >
+                Siguiente
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <nb-card *ngIf="detalleSeleccionado" class="detalle-panel">
+        <nb-card-header>
+          Movimiento #{{ detalleSeleccionado?.Folio }}
+          <button nbButton size="tiny" status="basic" appearance="ghost" (click)="cerrarDetalle()">
+            Cerrar
+          </button>
+        </nb-card-header>
+        <nb-card-body>
+          <div class="detalle-grid">
+            <div>
+              <label>ID</label>
+              <p>{{ detalleSeleccionado?.Id }}</p>
+            </div>
+            <div>
+              <label>Sucursal</label>
+              <p>{{ detalleSeleccionado?.NombreSucursal || ('Sucursal ' + (detalleSeleccionado?.IdSucursal || '')) }}</p>
+            </div>
+            <div>
+              <label>Tipo</label>
+              <p>{{ detalleSeleccionado?.TipoMovimiento }}</p>
+            </div>
+            <div>
+              <label>Fecha</label>
+              <p>{{ detalleSeleccionado?.Fecha | date: 'dd/MM/yyyy' }}</p>
+            </div>
+            <div>
+              <label>Referencia</label>
+              <p>{{ detalleSeleccionado?.Referencia || '—' }}</p>
+            </div>
+            <div>
+              <label>Estatus</label>
+              <p>{{ detalleSeleccionado?.NombreEstatus || '—' }}</p>
+            </div>
+          </div>
+          <div class="detalle-renglones">
+            <div class="state" *ngIf="renglonesLoading">
+              <nb-spinner status="primary"></nb-spinner>
+              <span>Cargando renglones…</span>
+            </div>
+
+            <nb-alert *ngIf="!renglonesLoading && renglonesError" status="danger">
+              {{ renglonesError }}
+            </nb-alert>
+
+            <div
+              class="empty-state"
+              *ngIf="!renglonesLoading && !renglonesError && !renglonesMovimiento.length"
+            >
+              <nb-icon icon="inbox-outline"></nb-icon>
+              <p>Este movimiento no tiene renglones registrados.</p>
+            </div>
+
+            <table class="renglones-table" *ngIf="renglonesMovimiento.length">
+              <thead>
+                <tr>
+                  <th>Código</th>
+                  <th>Descripción</th>
+                  <th class="cantidad">Cantidad</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let renglon of renglonesMovimiento; trackBy: trackByRenglon">
+                  <td>{{ renglon.Articulo }}</td>
+                  <td>{{ renglon.Descripcion }}</td>
+                  <td class="cantidad">{{ renglon.Cantidad | number: '1.2-2' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </nb-card-body>
+      </nb-card>
+    </div>
+  </nb-card-body>
+</nb-card>

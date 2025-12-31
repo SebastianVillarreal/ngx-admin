@@ -1,0 +1,195 @@
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--text-hint-color);
+  font-size: 0.9rem;
+}
+
+.filtros-grid {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.form-field label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-hint-color);
+  margin: 0;
+}
+
+.error-text {
+  color: var(--text-danger-color);
+  font-size: 0.75rem;
+}
+
+.field-status {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  color: var(--text-hint-color);
+}
+
+.resultados {
+  margin-top: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.state {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-hint-color);
+  font-size: 0.9rem;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--text-hint-color);
+  font-weight: 500;
+}
+
+.historico-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabla-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.historico-table th,
+.historico-table td {
+  padding: 0.65rem;
+  border-bottom: 1px solid var(--divider-color);
+  text-align: left;
+}
+
+.historico-table th {
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  color: var(--text-hint-color);
+  letter-spacing: 0.02em;
+}
+
+.acciones {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.paginacion {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+}
+
+.paginacion-info {
+  color: var(--text-hint-color);
+}
+
+.paginacion-controles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.paginacion-select {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--text-hint-color);
+}
+
+.paginacion-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.detalle-panel nb-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.detalle-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.75rem;
+}
+
+.detalle-grid label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-hint-color);
+}
+
+.detalle-grid p {
+  margin: 0;
+  font-weight: 600;
+}
+
+.detalle-renglones {
+  margin-top: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.renglones-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.renglones-table th,
+.renglones-table td {
+  padding: 0.6rem;
+  border-bottom: 1px solid var(--divider-color);
+  text-align: left;
+}
+
+.renglones-table th {
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  color: var(--text-hint-color);
+  letter-spacing: 0.02em;
+}
+
+.renglones-table .cantidad {
+  text-align: right;
+  width: 120px;
+}

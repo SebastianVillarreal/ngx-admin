@@ -224,6 +224,33 @@ interface AutorizarMovimientoApiResponse {
   message: string;
 }
 
+export interface HistoricoMovimientosPayload {
+  Fecha: string;
+  FechaFin: string;
+  IdSucursal: string;
+  TipoMovimiento: string;
+}
+
+export interface HistoricoMovimiento {
+  Id: number;
+  IdSucursal: number;
+  NombreSucursal: string | null;
+  Folio: number;
+  Fecha: string;
+  TipoMovimiento: string;
+  Referencia: string | null;
+  NombreEstatus: string | null;
+}
+
+interface HistoricoMovimientosApiResponse {
+  StatusCode: number;
+  success: boolean;
+  message: string;
+  response?: {
+    data?: HistoricoMovimiento[];
+  };
+}
+
 @Injectable({ providedIn: 'root' })
 export class InventariosService {
   private readonly tipoMovimientosEndpoint = `${environment.apiBase}/GetTipoMovimientos`;
@@ -236,6 +263,7 @@ export class InventariosService {
   private readonly movimientosSinAfectarEndpoint = `${environment.apiBase}/GetMovimientosSinAfectar`;
   private readonly updateCantidadRenglonEndpoint = `${environment.apiBase}/UpdateCantidadRenglonMov`;
   private readonly autorizarMovimientoEndpoint = `${environment.apiBase}/AutorizarMovimiento`;
+  private readonly historicoMovimientosEndpoint = `${environment.apiBase}/GetHistoricoMovimientos`;
 
   constructor(private readonly http: HttpClient) {}
 
@@ -347,6 +375,16 @@ export class InventariosService {
       catchError((error) => {
         console.error('AutorizarMovimiento error', error);
         return throwError(() => new Error('No se pudo autorizar el movimiento.'));
+      }),
+    );
+  }
+
+  fetchHistoricoMovimientos(payload: HistoricoMovimientosPayload): Observable<HistoricoMovimiento[]> {
+    return this.http.post<HistoricoMovimientosApiResponse>(this.historicoMovimientosEndpoint, payload).pipe(
+      map((res) => res.response?.data ?? []),
+      catchError((error) => {
+        console.error('GetHistoricoMovimientos error', error);
+        return throwError(() => new Error('No se pudo consultar el histórico de movimientos.'));
       }),
     );
   }

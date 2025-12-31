@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 
 import { MovimientosComponent } from './movimientos/movimientos.component';
 import { EditarAutorizarComponent } from './movimientos/editar-autorizar/editar-autorizar.component';
+import { HistoricoComponent } from './movimientos/historico/historico.component';
 import { VerificadorComponent } from './verificador/verificador.component';
 
 const routes: Routes = [
@@ -18,6 +19,10 @@ const routes: Routes = [
   {
     path: 'movimientos/editar-autorizar',
     component: EditarAutorizarComponent,
+  },
+  {
+    path: 'movimientos/historico',
+    component: HistoricoComponent,
   },
   {
     path: 'verificador',

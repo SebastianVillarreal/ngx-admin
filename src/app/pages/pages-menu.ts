@@ -115,6 +115,10 @@ export const MENU_ITEMS: NbMenuItem[] = [
             title: 'Editar y autorizar',
             link: '/pages/inventarios/movimientos/editar-autorizar',
           },
+          {
+            title: 'Histórico',
+            link: '/pages/inventarios/movimientos/historico',
+          },
         ],
       },
       {
