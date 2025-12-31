@@ -251,6 +251,47 @@ interface HistoricoMovimientosApiResponse {
   };
 }
 
+export interface CodigoAjusteItem {
+  Codigo: string;
+  Cantidad: string;
+}
+
+export interface ImportarCodigosAjustePayload {
+  Codigos: CodigoAjusteItem[];
+  FechaInventario: string;
+}
+
+export interface ImportarCodigosAjusteResponse {
+  Codigo: string;
+  Descripcion: string;
+  Teorico: number;
+  Fisico: number;
+  Diferencia: number;
+}
+
+export interface AplicarAjustesPorListaPayload {
+  Codigos: Array<{
+    Codigo: string;
+    Cantidad: string;
+    Teorico: string | number;
+  }>;
+}
+
+interface AplicarAjustesPorListaApiResponse {
+  StatusCode: number;
+  success: boolean;
+  message: string;
+}
+
+interface ImportarCodigosAjusteApiResponse {
+  StatusCode: number;
+  success: boolean;
+  message: string;
+  response?: {
+    data?: ImportarCodigosAjusteResponse[];
+  };
+}
+
 @Injectable({ providedIn: 'root' })
 export class InventariosService {
   private readonly tipoMovimientosEndpoint = `${environment.apiBase}/GetTipoMovimientos`;
@@ -264,6 +305,8 @@ export class InventariosService {
   private readonly updateCantidadRenglonEndpoint = `${environment.apiBase}/UpdateCantidadRenglonMov`;
   private readonly autorizarMovimientoEndpoint = `${environment.apiBase}/AutorizarMovimiento`;
   private readonly historicoMovimientosEndpoint = `${environment.apiBase}/GetHistoricoMovimientos`;
+  private readonly cargarCodigosAjusteEndpoint = `${environment.apiBase}/INV_CargarCodigosAjuste`;
+  private readonly aplicarAjustesPorListaEndpoint = `${environment.apiBase}/INV_AplicarAjustesPorLista`;
 
   constructor(private readonly http: HttpClient) {}
 
@@ -385,6 +428,26 @@ export class InventariosService {
       catchError((error) => {
         console.error('GetHistoricoMovimientos error', error);
         return throwError(() => new Error('No se pudo consultar el histórico de movimientos.'));
+      }),
+    );
+  }
+
+  cargarCodigosAjuste(payload: ImportarCodigosAjustePayload): Observable<ImportarCodigosAjusteResponse[]> {
+    return this.http.post<ImportarCodigosAjusteApiResponse>(this.cargarCodigosAjusteEndpoint, payload).pipe(
+      map((res) => res.response?.data ?? []),
+      catchError((error) => {
+        console.error('INV_CargarCodigosAjuste error', error);
+        return throwError(() => new Error('No se pudo procesar el archivo de inventario físico.'));
+      }),
+    );
+  }
+
+  aplicarAjustesPorLista(payload: AplicarAjustesPorListaPayload): Observable<void> {
+    return this.http.post<AplicarAjustesPorListaApiResponse>(this.aplicarAjustesPorListaEndpoint, payload).pipe(
+      map(() => undefined),
+      catchError((error) => {
+        console.error('INV_AplicarAjustesPorLista error', error);
+        return throwError(() => new Error('No se pudo aplicar el ajuste físico.'));
       }),
     );
   }

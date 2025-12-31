@@ -18,6 +18,7 @@ import { MovimientosComponent } from './movimientos/movimientos.component';
 import { EditarAutorizarComponent } from './movimientos/editar-autorizar/editar-autorizar.component';
 import { HistoricoComponent } from './movimientos/historico/historico.component';
 import { VerificadorComponent } from './verificador/verificador.component';
+import { ImportarFisicosComponent } from './importar-fisicos/importar-fisicos.component';
 
 @NgModule({
   imports: [
@@ -34,6 +35,12 @@ import { VerificadorComponent } from './verificador/verificador.component';
     NbSelectModule,
     NbSpinnerModule,
   ],
-  declarations: [MovimientosComponent, VerificadorComponent, EditarAutorizarComponent, HistoricoComponent],
+  declarations: [
+    MovimientosComponent,
+    VerificadorComponent,
+    EditarAutorizarComponent,
+    HistoricoComponent,
+    ImportarFisicosComponent,
+  ],
 })
 export class InventariosModule {}

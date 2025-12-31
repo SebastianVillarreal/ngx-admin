@@ -125,6 +125,10 @@ export const MENU_ITEMS: NbMenuItem[] = [
         title: 'Verificador',
         link: '/pages/inventarios/verificador',
       },
+      {
+        title: 'Importar físicos',
+        link: '/pages/inventarios/importar-fisicos',
+      },
       
     ],
   },

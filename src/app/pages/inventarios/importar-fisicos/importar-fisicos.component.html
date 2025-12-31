@@ -1,0 +1,97 @@
+<nb-card>
+  <nb-card-header class="card-header">
+    <div>
+      <h2>Inventarios | Importar físicos</h2>
+      <p>Sube el archivo con los conteos físicos y aplica el ajuste sobre la fecha indicada.</p>
+    </div>
+  </nb-card-header>
+  <nb-card-body>
+    <form [formGroup]="importarFisicosForm" class="importar-form">
+      <div class="form-field">
+        <label for="fechaInventario">Fecha del inventario</label>
+        <input
+          nbInput
+          id="fechaInventario"
+          type="date"
+          formControlName="fechaInventario"
+          [status]="fechaControl?.invalid && fechaControl?.touched ? 'danger' : 'basic'"
+        />
+        <small class="error-text" *ngIf="fechaControl?.invalid && fechaControl?.touched">
+          Selecciona la fecha del inventario físico.
+        </small>
+      </div>
+
+      <div class="form-field">
+        <label for="archivoFisico">Archivo de físicos</label>
+        <div class="file-field">
+          <input
+            id="archivoFisico"
+            type="file"
+            (change)="onArchivoSeleccionado($event)"
+            [class.has-error]="archivoControl?.invalid && archivoControl?.touched"
+            accept=".xlsx,.xls"
+          />
+          <div class="file-preview" *ngIf="archivoNombre">
+            <nb-icon icon="file-text-outline"></nb-icon>
+            <span>{{ archivoNombre }}</span>
+          </div>
+          <small class="hint">Formatos sugeridos: CSV, XLSX, XLS o TXT.</small>
+          <small class="error-text" *ngIf="archivoControl?.invalid && archivoControl?.touched">
+            Selecciona el archivo con el inventario físico.
+          </small>
+        </div>
+      </div>
+    </form>
+
+    <div class="acciones">
+      <button nbButton status="primary" (click)="onCargarArchivo()" [disabled]="subiendo">
+        <nb-spinner *ngIf="subiendo" size="tiny"></nb-spinner>
+        <span *ngIf="!subiendo">Cargar archivo</span>
+      </button>
+      <button nbButton status="success" (click)="onAplicarAjuste()" [disabled]="aplicando || !resultadosPreview.length">
+        <nb-spinner *ngIf="aplicando" size="tiny"></nb-spinner>
+        <span *ngIf="!aplicando">Aplicar ajuste</span>
+      </button>
+    </div>
+
+    <nb-alert *ngIf="mensajeExito" status="success">
+      {{ mensajeExito }}
+    </nb-alert>
+
+    <nb-alert *ngIf="mensajeError" status="danger">
+      {{ mensajeError }}
+    </nb-alert>
+
+    <div class="preview-panel" *ngIf="resultadosPreview.length">
+      <div class="preview-header">
+        <h4>Resumen antes de aplicar</h4>
+        <span>{{ resultadosPreview.length }} código(s) procesados</span>
+      </div>
+      <table class="preview-table">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Descripción</th>
+            <th>Teórico</th>
+            <th>Físico</th>
+            <th>Diferencia</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of resultadosPreview">
+            <td>{{ item.Codigo }}</td>
+            <td>{{ item.Descripcion || '—' }}</td>
+            <td>{{ item.Teorico | number: '1.2-2' }}</td>
+            <td>{{ item.Fisico | number: '1.2-2' }}</td>
+            <td [class.positivo]="item.Diferencia >= 0" [class.negativo]="item.Diferencia < 0">
+              {{ item.Diferencia | number: '1.2-2' }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <nb-alert status="info" outline="info">
+        Confirma que los datos coinciden con tu conteo físico antes de aplicar el ajuste definitivo.
+      </nb-alert>
+    </div>
+  </nb-card-body>
+</nb-card>
