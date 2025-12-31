@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import jsPDF from 'jspdf';
 import { finalize } from 'rxjs/operators';
 
 import {
@@ -40,6 +41,10 @@ export class EditarAutorizarComponent {
     sentido: ['', Validators.required],
   });
 
+  readonly pageSizeOptions: number[] = [10, 25, 50];
+  pageSize = this.pageSizeOptions[0];
+  paginaActual = 1;
+
   mostrando = false;
   mensaje = '';
   movimientos: MovimientoSinAfectar[] = [];
@@ -79,6 +84,7 @@ export class EditarAutorizarComponent {
     this.mostrando = true;
     this.consultaRealizada = false;
     this.movimientos = [];
+    this.resetPagination();
     this.movimientoSeleccionado = undefined;
     this.renglones = [];
     this.renglonesError = '';
@@ -105,6 +111,7 @@ export class EditarAutorizarComponent {
       .subscribe({
         next: (movimientos) => {
           this.movimientos = movimientos;
+          this.resetPagination();
           this.consultaRealizada = true;
           const resumen = movimientos.length ? `${movimientos.length} movimiento(s)` : 'sin movimientos';
           this.mensaje = `Se encontraron ${resumen} de ${sentidoNombre?.toLowerCase() ?? ''} para ${sucursalNombre}.`;
@@ -129,8 +136,57 @@ export class EditarAutorizarComponent {
     return movimiento.Id;
   }
 
+  get movimientosPaginados(): MovimientoSinAfectar[] {
+    if (!this.movimientos.length) {
+      return [];
+    }
+    const inicio = (this.paginaActual - 1) * this.pageSize;
+    return this.movimientos.slice(inicio, inicio + this.pageSize);
+  }
+
+  get totalPaginas(): number {
+    if (!this.movimientos.length) {
+      return 0;
+    }
+    return Math.ceil(this.movimientos.length / this.pageSize);
+  }
+
+  get paginaDesde(): number {
+    if (!this.movimientos.length) {
+      return 0;
+    }
+    return (this.paginaActual - 1) * this.pageSize + 1;
+  }
+
+  get paginaHasta(): number {
+    if (!this.movimientos.length) {
+      return 0;
+    }
+    return Math.min(this.paginaDesde + this.pageSize - 1, this.movimientos.length);
+  }
+
   trackByRenglon(_: number, renglon: RenglonMovimiento): number {
     return renglon.Id;
+  }
+
+  cambiarPagina(paso: number): void {
+    if (!this.movimientos.length) {
+      return;
+    }
+    const destino = this.paginaActual + paso;
+    if (destino < 1) {
+      return;
+    }
+    if (this.totalPaginas && destino > this.totalPaginas) {
+      return;
+    }
+    this.paginaActual = destino;
+  }
+
+  onPageSizeChange(size: number): void {
+    const nuevoTamano = Number(size);
+    this.pageSize = this.pageSizeOptions.includes(nuevoTamano) ? nuevoTamano : this.pageSizeOptions[0];
+    this.resetPagination();
   }
 
   verRenglones(movimiento: MovimientoSinAfectar): void {
@@ -194,6 +250,7 @@ export class EditarAutorizarComponent {
       IdSucursal: String(movimiento.IdSucursal ?? ''),
       Fecha: this.obtenerFechaActual(),
     };
+    const renglonesSnapshot = this.renglones.map((item) => ({ ...item }));
 
     this.autorizarLoading = true;
     this.inventariosService
@@ -207,7 +264,14 @@ export class EditarAutorizarComponent {
       .subscribe({
         next: () => {
           this.autorizarMensaje = `Movimiento ${movimiento.Folio} autorizado correctamente.`;
+          try {
+            this.generarComprobanteAutorizacionPdf(movimiento, renglonesSnapshot);
+          } catch (error) {
+            console.error('Error al generar el comprobante PDF', error);
+            this.autorizarError = 'Movimiento autorizado, pero no se pudo generar el comprobante en PDF.';
+          }
           this.movimientos = this.movimientos.filter((item) => item.Id !== movimiento.Id);
+          this.ajustarPaginaDespuesCambio();
           this.movimientoSeleccionado = undefined;
           this.renglones = [];
           this.renglonesError = '';
@@ -289,7 +353,104 @@ export class EditarAutorizarComponent {
     this.cantidadActualizando = false;
   }
 
+  private resetPagination(): void {
+    this.paginaActual = 1;
+  }
+
+  private ajustarPaginaDespuesCambio(): void {
+    if (!this.movimientos.length) {
+      this.paginaActual = 1;
+      return;
+    }
+    const totalPaginas = this.totalPaginas || 1;
+    if (this.paginaActual > totalPaginas) {
+      this.paginaActual = totalPaginas;
+    }
+  }
+
   private obtenerFechaActual(): string {
     return new Date().toISOString().split('T')[0];
+  }
+
+  private generarComprobanteAutorizacionPdf(
+    movimiento: MovimientoSinAfectar,
+    renglones: RenglonMovimiento[],
+  ): void {
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text('Comprobante de movimiento autorizado', 105, 16, { align: 'center' });
+
+    const fechaAutorizacion = this.formatFechaParaPdf(new Date());
+    const fechaMovimiento = this.formatFechaParaPdf(movimiento.Fecha);
+    const sucursal = movimiento.NombreSucursal || `Sucursal ${movimiento.IdSucursal ?? 'N/D'}`;
+    const tipo = movimiento.TipoMovimiento || movimiento.Movimiento || 'N/D';
+
+    doc.setFontSize(11);
+    doc.text(`Folio: ${movimiento.Folio ?? 'N/D'}`, 15, 30);
+    doc.text(`Autorizado: ${fechaAutorizacion}`, 105, 30);
+    doc.text(`Tipo: ${tipo}`, 15, 38);
+    doc.text(`Sucursal: ${sucursal}`, 105, 38);
+    doc.text(`Fecha original: ${fechaMovimiento}`, 15, 46);
+
+    doc.setFontSize(12);
+    doc.text('Detalle de artículos', 15, 60);
+    doc.setFontSize(10);
+    let cursorY = 66;
+    const drawHeader = () => {
+      doc.text('Código', 15, cursorY);
+      doc.text('Descripción', 60, cursorY);
+      doc.text('Cantidad', 195, cursorY, { align: 'right' });
+      cursorY += 6;
+    };
+
+    drawHeader();
+
+    if (!renglones.length) {
+      doc.text('Sin renglones capturados.', 15, cursorY);
+    } else {
+      renglones.forEach((item) => {
+        if (cursorY > 270) {
+          doc.addPage();
+          cursorY = 20;
+          drawHeader();
+        }
+        doc.text(item.Articulo, 15, cursorY);
+        doc.text(this.truncateText(item.Descripcion, 70), 60, cursorY);
+        doc.text(this.formatCantidad(item.Cantidad), 195, cursorY, { align: 'right' });
+        cursorY += 6;
+      });
+    }
+
+    const folio = movimiento.Folio ?? movimiento.Id;
+    doc.save(`Comprobante-Autorizacion-${folio}.pdf`);
+  }
+
+  private formatFechaParaPdf(input?: string | Date): string {
+    if (!input) {
+      return 'N/D';
+    }
+    const date = input instanceof Date ? input : new Date(input);
+    if (Number.isNaN(date.getTime())) {
+      return 'N/D';
+    }
+    return date.toLocaleString('es-MX', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    });
+  }
+
+  private truncateText(text: string | undefined, maxLength = 70): string {
+    if (!text) {
+      return '';
+    }
+    return text.length > maxLength ? `${text.slice(0, maxLength - 3)}...` : text;
+  }
+
+  private formatCantidad(value: number): string {
+    const numeric = Number(value) || 0;
+    return numeric.toLocaleString('es-MX', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
   }
 }

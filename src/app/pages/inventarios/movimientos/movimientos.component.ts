@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import jsPDF from 'jspdf';
 import { Subscription, of } from 'rxjs';
 import { debounceTime, distinctUntilChanged, finalize, map, switchMap } from 'rxjs/operators';
 
@@ -21,6 +22,26 @@ interface ArticuloCatalogo {
   unidad: string;
   existencia: string;
   costo?: number;
+}
+
+interface MovimientoContext {
+  sucursal: string;
+  tipoMovimiento: string;
+  sucursalLabel?: string;
+  tipoMovimientoLabel?: string;
+  sentido?: string;
+  sentidoLabel?: string;
+  referencia?: string;
+  fechaRegistro?: string;
+}
+
+interface MovimientoComprobanteInfo {
+  folio: number;
+  sucursal: string;
+  tipo: string;
+  sentido: string;
+  referencia: string;
+  fecha: string;
 }
 
 @Component({
@@ -54,7 +75,7 @@ export class MovimientosComponent implements OnInit, OnDestroy {
   detalleMensaje = '';
   detalleSubmitLoading = false;
   detalleArticuloInfo: ExistenciaArticulo | null = null;
-  movimientoContext: { sucursal: string; tipoMovimiento: string } | null = null;
+  movimientoContext: MovimientoContext | null = null;
   renglones: RenglonMovimiento[] = [];
   renglonesLoading = false;
   renglonesError = '';
@@ -327,13 +348,109 @@ export class MovimientosComponent implements OnInit, OnDestroy {
       return;
     }
 
+    if (!this.movimientoContext) {
+      this.finalizacionError = 'No se encontró la información del movimiento en curso.';
+      return;
+    }
+
     this.finalizando = true;
     const folio = this.movimientoFolio;
+    const detalleSnapshot = this.renglones.map((item) => ({ ...item }));
+    const comprobanteInfo = this.buildComprobanteInfo(this.movimientoContext, folio);
     setTimeout(() => {
+      try {
+        this.generarComprobanteMovimientoPdf(comprobanteInfo, detalleSnapshot);
+      } catch (error) {
+        console.error('Error al generar el comprobante PDF', error);
+        this.finalizacionError = 'Movimiento finalizado, pero no se pudo generar el comprobante en PDF.';
+      }
       this.resetMovimientoState();
       this.finalizando = false;
       this.finalizacionMessage = `Movimiento ${folio} finalizado.`;
     }, 400);
+  }
+
+  private buildComprobanteInfo(context: MovimientoContext, folio: number): MovimientoComprobanteInfo {
+    return {
+      folio,
+      sucursal: context.sucursalLabel || context.sucursal,
+      tipo: context.tipoMovimientoLabel || context.tipoMovimiento,
+      sentido: context.sentidoLabel || context.sentido || '',
+      referencia: context.referencia || '',
+      fecha: context.fechaRegistro
+        ? this.formatFechaParaComprobante(new Date(context.fechaRegistro))
+        : this.formatFechaParaComprobante(new Date()),
+    };
+  }
+
+  private formatFechaParaComprobante(date: Date): string {
+    return date.toLocaleString('es-MX', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    });
+  }
+
+  private generarComprobanteMovimientoPdf(
+    info: MovimientoComprobanteInfo,
+    renglones: RenglonMovimiento[],
+  ): void {
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text('Comprobante de Movimiento', 105, 16, { align: 'center' });
+
+    doc.setFontSize(11);
+    doc.text(`Folio: ${info.folio}`, 15, 30);
+    doc.text(`Fecha: ${info.fecha}`, 105, 30);
+    doc.text(`Sucursal: ${info.sucursal}`, 15, 38);
+    doc.text(`Tipo: ${info.tipo}`, 105, 38);
+    doc.text(`Sentido: ${info.sentido || 'N/A'}`, 15, 46);
+    doc.text(`Referencia: ${info.referencia || 'N/A'}`, 15, 54);
+
+    doc.setFontSize(12);
+    doc.text('Detalle de artículos', 15, 68);
+
+    doc.setFontSize(10);
+    let cursorY = 74;
+    doc.text('Código', 15, cursorY);
+    doc.text('Descripción', 60, cursorY);
+    doc.text('Cantidad', 195, cursorY, { align: 'right' });
+    cursorY += 6;
+
+    if (!renglones.length) {
+      doc.text('Sin artículos registrados.', 15, cursorY);
+    } else {
+      renglones.forEach((item) => {
+        if (cursorY > 270) {
+          doc.addPage();
+          cursorY = 20;
+          doc.text('Código', 15, cursorY);
+          doc.text('Descripción', 60, cursorY);
+          doc.text('Cantidad', 195, cursorY, { align: 'right' });
+          cursorY += 6;
+        }
+        doc.text(item.Articulo, 15, cursorY);
+        doc.text(this.truncateText(item.Descripcion, 70), 60, cursorY);
+        doc.text(this.formatCantidad(item.Cantidad), 195, cursorY, { align: 'right' });
+        cursorY += 6;
+      });
+    }
+
+    doc.save(`Comprobante-Mov-${info.folio}.pdf`);
+  }
+
+  private truncateText(text: string, maxLength = 70): string {
+    if (!text) {
+      return '';
+    }
+    return text.length > maxLength ? `${text.slice(0, maxLength - 3)}...` : text;
+  }
+
+  private formatCantidad(value: number): string {
+    const numeric = Number(value) || 0;
+    return numeric.toLocaleString('es-MX', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
   }
 
   loadRenglones(): void {
@@ -419,11 +536,20 @@ export class MovimientosComponent implements OnInit, OnDestroy {
       next: ({ id, folio }) => {
         this.submitting = false;
         const tipoLabel = this.getTipoMovimientoLabel(tipoMovimiento);
+        const sucursalLabel = this.getOptionLabel(this.sucursales, String(sucursal));
+        const sentidoLabel = this.getOptionLabel(this.sentidosMovimiento, sentido);
+        const fechaRegistro = new Date().toISOString();
         this.movimientoId = id;
         this.movimientoFolio = folio;
         this.movimientoContext = {
           sucursal: String(sucursal),
           tipoMovimiento: tipoMovimiento,
+          sucursalLabel,
+          tipoMovimientoLabel: tipoLabel,
+          sentido: sentido ?? '',
+          sentidoLabel,
+          referencia: referencia ?? '',
+          fechaRegistro,
         };
         this.submissionMessage = `Movimiento ${sentido} registrado en la sucursal ${sucursal} con tipo ${tipoLabel}.`;
         this.movimientoForm.reset();
@@ -434,6 +560,13 @@ export class MovimientosComponent implements OnInit, OnDestroy {
         this.submissionMessage = err?.message || 'No se pudo registrar el movimiento.';
       },
     });
+  }
+
+  private getOptionLabel(options: SelectOption[], value?: string | null): string {
+    if (!value) {
+      return '';
+    }
+    return options.find((item) => item.value === value)?.label || value;
   }
 
   private getTipoMovimientoLabel(value: string): string {

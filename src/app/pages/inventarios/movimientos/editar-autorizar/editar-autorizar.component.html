@@ -86,7 +86,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let movimiento of movimientos; trackBy: trackByMovimiento">
+          <tr *ngFor="let movimiento of movimientosPaginados; trackBy: trackByMovimiento">
             <td>{{ movimiento.Id }}</td>
             <td>{{ movimiento.Folio }}</td>
             <td>{{ movimiento.TipoMovimiento }}</td>
@@ -101,6 +101,37 @@
           </tr>
         </tbody>
       </table>
+
+      <div class="pagination-bar" *ngIf="movimientos.length">
+        <span class="pagination-info">
+          Mostrando {{ paginaDesde }}-{{ paginaHasta }} de {{ movimientos.length }} movimiento(s)
+        </span>
+        <div class="pagination-controls">
+          <nb-select
+            size="small"
+            [(selected)]="pageSize"
+            (selectedChange)="onPageSizeChange($event)"
+          >
+            <nb-option *ngFor="let size of pageSizeOptions" [value]="size">
+              {{ size }} por página
+            </nb-option>
+          </nb-select>
+          <button nbButton size="tiny" appearance="outline" status="basic" (click)="cambiarPagina(-1)" [disabled]="paginaActual === 1">
+            Anterior
+          </button>
+          <span class="pagination-page">Página {{ paginaActual }} de {{ totalPaginas || 1 }}</span>
+          <button
+            nbButton
+            size="tiny"
+            appearance="outline"
+            status="basic"
+            (click)="cambiarPagina(1)"
+            [disabled]="totalPaginas && paginaActual >= totalPaginas"
+          >
+            Siguiente
+          </button>
+        </div>
+      </div>
 
       <div class="detalle-container" *ngIf="movimientoSeleccionado">
         <div class="detalle-header">

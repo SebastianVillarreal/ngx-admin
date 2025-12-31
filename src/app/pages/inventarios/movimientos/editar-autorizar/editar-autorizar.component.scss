@@ -90,6 +90,31 @@
   letter-spacing: 0.02em;
 }
 
+.pagination-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.pagination-info {
+  color: var(--text-hint-color);
+  font-size: 0.85rem;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.pagination-page {
+  font-weight: 600;
+}
+
 .acciones {
   width: 160px;
   display: flex;
