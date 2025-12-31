@@ -195,6 +195,35 @@ interface MovimientosSinAfectarApiResponse {
   };
 }
 
+export interface UpdateCantidadRenglonPayload {
+  Articulo: string;
+  Cantidad: string;
+  Folio: string;
+  Tipo: string;
+  IdSucursal: string;
+  Id: string;
+}
+
+interface UpdateCantidadRenglonApiResponse {
+  StatusCode: number;
+  success: boolean;
+  message: string;
+}
+
+export interface AutorizarMovimientoPayload {
+  Folio: string;
+  TipoMovimiento: string;
+  UsuarioEntrega: string;
+  IdSucursal: string;
+  Fecha: string;
+}
+
+interface AutorizarMovimientoApiResponse {
+  StatusCode: number;
+  success: boolean;
+  message: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class InventariosService {
   private readonly tipoMovimientosEndpoint = `${environment.apiBase}/GetTipoMovimientos`;
@@ -205,6 +234,8 @@ export class InventariosService {
   private readonly renglonesMovimientoEndpoint = `${environment.apiBase}/GetRenglonesMovimiento`;
   private readonly verificadorInventarioEndpoint = `${environment.apiBase}/GetVerificadorInventario`;
   private readonly movimientosSinAfectarEndpoint = `${environment.apiBase}/GetMovimientosSinAfectar`;
+  private readonly updateCantidadRenglonEndpoint = `${environment.apiBase}/UpdateCantidadRenglonMov`;
+  private readonly autorizarMovimientoEndpoint = `${environment.apiBase}/AutorizarMovimiento`;
 
   constructor(private readonly http: HttpClient) {}
 
@@ -296,6 +327,26 @@ export class InventariosService {
       catchError((error) => {
         console.error('GetMovimientosSinAfectar error', error);
         return throwError(() => new Error('No se pudieron obtener los movimientos.'));
+      }),
+    );
+  }
+
+  actualizarCantidadRenglon(payload: UpdateCantidadRenglonPayload): Observable<void> {
+    return this.http.post<UpdateCantidadRenglonApiResponse>(this.updateCantidadRenglonEndpoint, payload).pipe(
+      map(() => undefined),
+      catchError((error) => {
+        console.error('UpdateCantidadRenglonMov error', error);
+        return throwError(() => new Error('No se pudo actualizar la cantidad.'));
+      }),
+    );
+  }
+
+  autorizarMovimiento(payload: AutorizarMovimientoPayload): Observable<void> {
+    return this.http.post<AutorizarMovimientoApiResponse>(this.autorizarMovimientoEndpoint, payload).pipe(
+      map(() => undefined),
+      catchError((error) => {
+        console.error('AutorizarMovimiento error', error);
+        return throwError(() => new Error('No se pudo autorizar el movimiento.'));
       }),
     );
   }

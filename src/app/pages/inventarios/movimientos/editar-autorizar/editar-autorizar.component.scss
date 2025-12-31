@@ -106,6 +106,14 @@
   gap: 1rem;
 }
 
+.detalle-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
 .detalle-header h4 {
   margin: 0;
   font-size: 1rem;
@@ -134,4 +142,8 @@
   font-size: 0.75rem;
   color: var(--text-hint-color);
   letter-spacing: 0.02em;
+}
+
+.renglones-table input[nbinput] {
+  max-width: 150px;
 }

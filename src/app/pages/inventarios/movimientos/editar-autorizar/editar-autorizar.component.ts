@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { finalize } from 'rxjs/operators';
 
 import {
@@ -22,6 +22,8 @@ interface SelectOption {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EditarAutorizarComponent {
+  private readonly usuarioEntregaId = '1';
+
   readonly sucursales: SelectOption[] = [
     { value: '1', label: 'Matriz' },
     { value: '2', label: 'Sucursal Norte' },
@@ -47,12 +49,24 @@ export class EditarAutorizarComponent {
   renglones: RenglonMovimiento[] = [];
   renglonesLoading = false;
   renglonesError = '';
+  editandoCantidadId: number | null = null;
+  cantidadForm: FormGroup;
+  cantidadMensaje = '';
+  cantidadError = '';
+  cantidadActualizando = false;
+  autorizarMensaje = '';
+  autorizarError = '';
+  autorizarLoading = false;
 
   constructor(
     private readonly fb: FormBuilder,
     private readonly inventariosService: InventariosService,
     private readonly cdr: ChangeDetectorRef,
-  ) {}
+  ) {
+    this.cantidadForm = this.fb.group({
+      cantidad: [null, [Validators.required, Validators.min(0)]],
+    });
+  }
 
   mostrar(): void {
     this.mensaje = '';
@@ -68,6 +82,10 @@ export class EditarAutorizarComponent {
     this.movimientoSeleccionado = undefined;
     this.renglones = [];
     this.renglonesError = '';
+    this.resetCantidadState();
+    this.autorizarMensaje = '';
+    this.autorizarError = '';
+    this.autorizarLoading = false;
     const { sucursal, sentido } = this.filtrosForm.getRawValue();
     const sucursalNombre = this.obtenerEtiqueta(this.sucursales, sucursal);
     const sentidoNombre = this.obtenerEtiqueta(this.sentidos, sentido);
@@ -119,6 +137,9 @@ export class EditarAutorizarComponent {
     this.movimientoSeleccionado = movimiento;
     this.renglones = [];
     this.renglonesError = '';
+    this.resetCantidadState();
+    this.autorizarMensaje = '';
+    this.autorizarError = '';
     const payload: GetRenglonesMovimientoPayload = {
       Folio: String(movimiento.Folio),
       Tipo: movimiento.Movimiento ?? '',
@@ -149,5 +170,126 @@ export class EditarAutorizarComponent {
           this.renglonesError = error.message;
         },
       });
+  }
+
+  autorizarMovimiento(): void {
+    this.autorizarMensaje = '';
+    this.autorizarError = '';
+    const movimiento = this.movimientoSeleccionado;
+    if (!movimiento) {
+      this.autorizarError = 'Selecciona un movimiento para autorizar.';
+      return;
+    }
+
+    const tipoMovimiento = movimiento.Movimiento ?? movimiento.TipoMovimiento ?? '';
+    if (!tipoMovimiento) {
+      this.autorizarError = 'El movimiento seleccionado no tiene una clave de tipo válida.';
+      return;
+    }
+
+    const payload = {
+      Folio: String(movimiento.Folio ?? ''),
+      TipoMovimiento: tipoMovimiento,
+      UsuarioEntrega: this.usuarioEntregaId,
+      IdSucursal: String(movimiento.IdSucursal ?? ''),
+      Fecha: this.obtenerFechaActual(),
+    };
+
+    this.autorizarLoading = true;
+    this.inventariosService
+      .autorizarMovimiento(payload)
+      .pipe(
+        finalize(() => {
+          this.autorizarLoading = false;
+          this.cdr.markForCheck();
+        }),
+      )
+      .subscribe({
+        next: () => {
+          this.autorizarMensaje = `Movimiento ${movimiento.Folio} autorizado correctamente.`;
+          this.movimientos = this.movimientos.filter((item) => item.Id !== movimiento.Id);
+          this.movimientoSeleccionado = undefined;
+          this.renglones = [];
+          this.renglonesError = '';
+          this.resetCantidadState();
+        },
+        error: (error: Error) => {
+          this.autorizarError = error.message;
+        },
+      });
+  }
+
+  iniciarEdicionCantidad(renglon: RenglonMovimiento): void {
+    this.editandoCantidadId = renglon.Id;
+    this.cantidadForm.reset({ cantidad: renglon.Cantidad });
+    this.cantidadMensaje = '';
+    this.cantidadError = '';
+  }
+
+  cancelarEdicionCantidad(): void {
+    this.resetCantidadState();
+  }
+
+  guardarCantidad(renglon: RenglonMovimiento): void {
+    this.cantidadMensaje = '';
+    this.cantidadError = '';
+    if (this.editandoCantidadId !== renglon.Id) {
+      return;
+    }
+
+    if (this.cantidadForm.invalid) {
+      this.cantidadForm.markAllAsTouched();
+      return;
+    }
+
+    const nuevaCantidad = Number(this.cantidadForm.get('cantidad')?.value);
+    if (isNaN(nuevaCantidad)) {
+      this.cantidadError = 'Ingresa una cantidad válida.';
+      return;
+    }
+
+    if (!this.movimientoSeleccionado) {
+      this.cantidadError = 'Selecciona un movimiento antes de actualizar la cantidad.';
+      return;
+    }
+
+    const payload = {
+      Articulo: renglon.Articulo,
+      Cantidad: nuevaCantidad.toString(),
+      Folio: String(this.movimientoSeleccionado.Folio ?? ''),
+      Tipo: this.movimientoSeleccionado.Movimiento ?? '',
+      IdSucursal: String(this.movimientoSeleccionado.IdSucursal ?? ''),
+      Id: renglon.Id.toString(),
+    };
+
+    this.cantidadActualizando = true;
+    this.inventariosService
+      .actualizarCantidadRenglon(payload)
+      .pipe(
+        finalize(() => {
+          this.cantidadActualizando = false;
+          this.cdr.markForCheck();
+        }),
+      )
+      .subscribe({
+        next: () => {
+          renglon.Cantidad = nuevaCantidad;
+          this.cantidadMensaje = 'Cantidad actualizada correctamente.';
+          this.resetCantidadState();
+        },
+        error: (error: Error) => {
+          this.cantidadError = error.message;
+        },
+      });
+  }
+
+  private resetCantidadState(): void {
+    this.editandoCantidadId = null;
+    this.cantidadForm.reset();
+    this.cantidadActualizando = false;
+  }
+
+  private obtenerFechaActual(): string {
+    return new Date().toISOString().split('T')[0];
   }
 }
