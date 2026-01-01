@@ -6,6 +6,7 @@ import { EditarAutorizarComponent } from './movimientos/editar-autorizar/editar-
 import { HistoricoComponent } from './movimientos/historico/historico.component';
 import { VerificadorComponent } from './verificador/verificador.component';
 import { ImportarFisicosComponent } from './importar-fisicos/importar-fisicos.component';
+import { RepartoMermasComponent } from './reparto-mermas/reparto-mermas.component';
 
 const routes: Routes = [
   {
@@ -32,6 +33,10 @@ const routes: Routes = [
   {
     path: 'importar-fisicos',
     component: ImportarFisicosComponent,
+  },
+  {
+    path: 'reparto-mermas',
+    component: RepartoMermasComponent,
   },
 ];
 

@@ -1,0 +1,71 @@
+<nb-card>
+  <nb-card-header class="card-header">
+    <div>
+      <h2>Inventarios | Reparto de mermas</h2>
+      <p>Consulta y genera notas de reparto con base en las fechas de ventas y mermas.</p>
+    </div>
+  </nb-card-header>
+  <nb-card-body>
+    <form [formGroup]="filtrosForm" class="filtros-grid">
+      <div class="form-field">
+        <label for="ventasInicio">Ventas - fecha inicial</label>
+        <input
+          nbInput
+          id="ventasInicio"
+          type="date"
+          formControlName="fechaVentasInicio"
+          [status]="filtrosForm.get('fechaVentasInicio')?.invalid && filtrosForm.get('fechaVentasInicio')?.touched ? 'danger' : 'basic'"
+        />
+      </div>
+      <div class="form-field">
+        <label for="ventasFin">Ventas - fecha final</label>
+        <input
+          nbInput
+          id="ventasFin"
+          type="date"
+          formControlName="fechaVentasFin"
+          [status]="filtrosForm.get('fechaVentasFin')?.invalid && filtrosForm.get('fechaVentasFin')?.touched ? 'danger' : 'basic'"
+        />
+      </div>
+      <div class="form-field">
+        <label for="mermasInicio">Mermas - fecha inicial</label>
+        <input
+          nbInput
+          id="mermasInicio"
+          type="date"
+          formControlName="fechaMermasInicio"
+          [status]="filtrosForm.get('fechaMermasInicio')?.invalid && filtrosForm.get('fechaMermasInicio')?.touched ? 'danger' : 'basic'"
+        />
+      </div>
+      <div class="form-field">
+        <label for="mermasFin">Mermas - fecha final</label>
+        <input
+          nbInput
+          id="mermasFin"
+          type="date"
+          formControlName="fechaMermasFin"
+          [status]="filtrosForm.get('fechaMermasFin')?.invalid && filtrosForm.get('fechaMermasFin')?.touched ? 'danger' : 'basic'"
+        />
+      </div>
+    </form>
+
+    <div class="acciones">
+      <button nbButton status="primary" (click)="onBuscar()" [disabled]="buscando">
+        <nb-spinner *ngIf="buscando" size="tiny"></nb-spinner>
+        <span *ngIf="!buscando">Buscar</span>
+      </button>
+      <button nbButton status="success" (click)="onGenerarNotas()" [disabled]="generandoNotas">
+        <nb-spinner *ngIf="generandoNotas" size="tiny"></nb-spinner>
+        <span *ngIf="!generandoNotas">Generar notas</span>
+      </button>
+    </div>
+
+    <nb-alert *ngIf="mensajeInfo" status="info">
+      {{ mensajeInfo }}
+    </nb-alert>
+
+    <nb-alert *ngIf="mensajeError" status="danger">
+      {{ mensajeError }}
+    </nb-alert>
+  </nb-card-body>
+</nb-card>

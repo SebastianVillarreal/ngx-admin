@@ -19,6 +19,7 @@ import { EditarAutorizarComponent } from './movimientos/editar-autorizar/editar-
 import { HistoricoComponent } from './movimientos/historico/historico.component';
 import { VerificadorComponent } from './verificador/verificador.component';
 import { ImportarFisicosComponent } from './importar-fisicos/importar-fisicos.component';
+import { RepartoMermasComponent } from './reparto-mermas/reparto-mermas.component';
 
 @NgModule({
   imports: [
@@ -41,6 +42,7 @@ import { ImportarFisicosComponent } from './importar-fisicos/importar-fisicos.co
     EditarAutorizarComponent,
     HistoricoComponent,
     ImportarFisicosComponent,
+    RepartoMermasComponent,
   ],
 })
 export class InventariosModule {}

@@ -129,6 +129,10 @@ export const MENU_ITEMS: NbMenuItem[] = [
         title: 'Importar físicos',
         link: '/pages/inventarios/importar-fisicos',
       },
+      {
+        title: 'Reparto de mermas',
+        link: '/pages/inventarios/reparto-mermas',
+      },
       
     ],
   },
