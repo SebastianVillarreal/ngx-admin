@@ -1,0 +1,88 @@
+<nb-card>
+  <nb-card-header class="card-header">
+    <div>
+      <h2>Compras | Cotizaciones</h2>
+      <p>Registra la cotización con el proveedor y define la fecha estimada de llegada.</p>
+    </div>
+  </nb-card-header>
+  <nb-card-body>
+    <form [formGroup]="cotizacionForm" class="cotizacion-form">
+      <div class="form-field">
+        <label for="proveedor">Proveedor</label>
+        <div class="field-status" *ngIf="proveedoresLoading">
+          <nb-spinner status="primary" size="tiny"></nb-spinner>
+          <span>Cargando proveedores…</span>
+        </div>
+        <nb-select
+          id="proveedor"
+          fullWidth
+          placeholder="Selecciona un proveedor"
+          formControlName="proveedor"
+          [disabled]="proveedoresLoading || !proveedores.length"
+          [status]="cotizacionForm.get('proveedor')?.invalid && cotizacionForm.get('proveedor')?.touched ? 'danger' : 'basic'"
+        >
+          <nb-option *ngFor="let proveedor of proveedores" [value]="proveedor.value">
+            {{ proveedor.label }}
+          </nb-option>
+        </nb-select>
+        <small class="error-text" *ngIf="proveedoresError">
+          {{ proveedoresError }}
+        </small>
+        <small class="error-text" *ngIf="cotizacionForm.get('proveedor')?.invalid && cotizacionForm.get('proveedor')?.touched">
+          Selecciona un proveedor válido.
+        </small>
+      </div>
+
+      <div class="form-field">
+        <label for="sucursal">Sucursal</label>
+        <nb-select
+          id="sucursal"
+          fullWidth
+          formControlName="sucursal"
+          placeholder="Selecciona una sucursal"
+          [status]="cotizacionForm.get('sucursal')?.invalid && cotizacionForm.get('sucursal')?.touched ? 'danger' : 'basic'"
+        >
+          <nb-option *ngFor="let sucursal of sucursales" [value]="sucursal.value">
+            {{ sucursal.label }}
+          </nb-option>
+        </nb-select>
+        <small class="error-text" *ngIf="cotizacionForm.get('sucursal')?.invalid && cotizacionForm.get('sucursal')?.touched">
+          Selecciona la sucursal.
+        </small>
+      </div>
+
+      <div class="form-field">
+        <label for="fechaLlegada">Fecha de llegada</label>
+        <input
+          nbInput
+          id="fechaLlegada"
+          type="date"
+          formControlName="fechaLlegada"
+          [status]="cotizacionForm.get('fechaLlegada')?.invalid && cotizacionForm.get('fechaLlegada')?.touched ? 'danger' : 'basic'"
+        />
+        <small class="error-text" *ngIf="cotizacionForm.get('fechaLlegada')?.invalid && cotizacionForm.get('fechaLlegada')?.touched">
+          Ingresa la fecha estimada de llegada.
+        </small>
+      </div>
+    </form>
+
+    <div class="acciones">
+      <button nbButton status="primary" (click)="onGuardar()" [disabled]="guardando">
+        <nb-spinner *ngIf="guardando" size="tiny"></nb-spinner>
+        <span *ngIf="!guardando">Guardar</span>
+      </button>
+      <button nbButton status="success" (click)="onFinalizar()" [disabled]="finalizando">
+        <nb-spinner *ngIf="finalizando" size="tiny"></nb-spinner>
+        <span *ngIf="!finalizando">Finalizar</span>
+      </button>
+    </div>
+
+    <nb-alert *ngIf="mensajeExito" status="success">
+      {{ mensajeExito }}
+    </nb-alert>
+
+    <nb-alert *ngIf="mensajeError" status="danger">
+      {{ mensajeError }}
+    </nb-alert>
+  </nb-card-body>
+</nb-card>

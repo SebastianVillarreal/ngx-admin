@@ -35,6 +35,20 @@ export const MENU_ITEMS: NbMenuItem[] = [
     ],
   },
   {
+    title: 'Compras',
+    icon: 'shopping-bag-outline',
+    children: [
+      {
+        title: 'Artículos',
+        link: '/pages/compras/articulos',
+      },
+      {
+        title: 'Cotizaciones',
+        link: '/pages/compras/cotizaciones',
+      },
+    ],
+  },
+  {
     title: 'Recibo',
     icon: 'file-text-outline',
     children: [
@@ -130,7 +144,7 @@ export const MENU_ITEMS: NbMenuItem[] = [
         link: '/pages/inventarios/importar-fisicos',
       },
       {
-        title: 'Reparto de mermas',
+        title: 'Reparto de mermas(Maqueta)',
         link: '/pages/inventarios/reparto-mermas',
       },
       

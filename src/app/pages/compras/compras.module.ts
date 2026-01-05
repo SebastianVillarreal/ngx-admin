@@ -17,6 +17,7 @@ import { ComprasRoutingModule } from './compras-routing.module';
 import { ComprasComponent } from './compras.component';
 import { ArticulosComponent } from './articulos/articulos.component';
 import { NuevoArticuloComponent } from './articulos/nuevo-articulo.component';
+import { CotizacionesComponent } from './cotizaciones/cotizaciones.component';
 
 @NgModule({
   imports: [
@@ -38,6 +39,7 @@ import { NuevoArticuloComponent } from './articulos/nuevo-articulo.component';
     ComprasComponent,
     ArticulosComponent,
     NuevoArticuloComponent,
+    CotizacionesComponent,
   ],
 })
 export class ComprasModule { }
