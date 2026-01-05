@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
   NbActionsModule,
+  NbAutocompleteModule,
   NbButtonModule,
   NbCardModule,
   NbCheckboxModule,
@@ -31,6 +32,7 @@ import { CotizacionesComponent } from './cotizaciones/cotizaciones.component';
     NbSelectModule,
     NbIconModule,
     NbActionsModule,
+    NbAutocompleteModule,
     FormsModule,
     ReactiveFormsModule,
     Ng2SmartTableModule,

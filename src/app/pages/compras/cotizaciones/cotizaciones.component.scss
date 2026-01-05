@@ -28,6 +28,75 @@
   gap: 0.4rem;
 }
 
+.detalle-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+.detalle-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.detalle-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+  padding: 1rem;
+  border: 1px solid var(--border-basic-color-4, rgba(143, 155, 179, 0.24));
+  border-radius: 0.75rem;
+  background-color: var(--card-background-color);
+}
+
+.detalle-field {
+  flex: 1 1 190px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.detalle-field--codigo {
+  min-width: 220px;
+}
+
+.detalle-field--descripcion {
+  flex: 2 1 260px;
+}
+
+.detalle-field--cantidad,
+.detalle-field--costo {
+  flex: 0 1 140px;
+  max-width: 180px;
+}
+
+.detalle-actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-end;
+}
+
+.detalle-tabla {
+  margin-top: 1rem;
+}
+
+.detalle-loading {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-hint-color);
+}
+
+.hint-text {
+  color: var(--text-hint-color);
+  font-size: 0.85rem;
+  margin: 0.5rem 0 0;
+}
+
 .field-status {
   display: inline-flex;
   align-items: center;

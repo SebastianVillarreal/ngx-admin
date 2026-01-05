@@ -71,11 +71,159 @@
         <nb-spinner *ngIf="guardando" size="tiny"></nb-spinner>
         <span *ngIf="!guardando">Guardar</span>
       </button>
-      <button nbButton status="success" (click)="onFinalizar()" [disabled]="finalizando">
+      <button nbButton status="success" (click)="onFinalizar()" [disabled]="finalizando || !folioCotizacion">
         <nb-spinner *ngIf="finalizando" size="tiny"></nb-spinner>
         <span *ngIf="!finalizando">Finalizar</span>
       </button>
     </div>
+
+    <section class="detalle-section">
+      <div class="detalle-header">
+        <div>
+          <h3>Detalle de la cotización</h3>
+          <p *ngIf="folioCotizacion; else folioPendiente">Folio actual: {{ folioCotizacion }}</p>
+        </div>
+        <button nbButton size="small" status="info" ghost (click)="onRefrescarDetalle()" [disabled]="!folioCotizacion || detalleLoading">
+          <nb-spinner *ngIf="detalleLoading" size="tiny"></nb-spinner>
+          <span *ngIf="!detalleLoading">Actualizar</span>
+        </button>
+      </div>
+
+      <ng-template #folioPendiente>
+        <p class="hint-text">Guarda la cotización para comenzar a agregar productos.</p>
+      </ng-template>
+
+      <form *ngIf="folioCotizacion" [formGroup]="detalleForm" class="detalle-form">
+        <div class="detalle-field detalle-field--codigo">
+          <label for="codigo">Código</label>
+          <div class="field-status" *ngIf="codigoAutocompleteLoading">
+            <nb-spinner status="primary" size="tiny"></nb-spinner>
+            <span>Buscando…</span>
+          </div>
+          <input
+            nbInput
+            id="codigo"
+            placeholder="Ej. 200"
+            formControlName="codigo"
+            [nbAutocomplete]="codigoAuto"
+          />
+          <nb-autocomplete #codigoAuto>
+            <nb-option
+              *ngFor="let option of codigoOptions"
+              [value]="option.codigo"
+              (click)="onCodigoOptionSelected(option)"
+            >
+              {{ option.codigo }} — {{ option.descripcion }}
+            </nb-option>
+          </nb-autocomplete>
+          <small class="error-text" *ngIf="codigoAutocompleteError">
+            {{ codigoAutocompleteError }}
+          </small>
+          <small class="error-text" *ngIf="detalleForm.get('codigo')?.invalid && detalleForm.get('codigo')?.touched">
+            Selecciona un código válido.
+          </small>
+        </div>
+        <div class="detalle-field detalle-field--descripcion">
+          <label for="descripcion">Descripción</label>
+          <div class="field-status" *ngIf="descripcionAutocompleteLoading">
+            <nb-spinner status="primary" size="tiny"></nb-spinner>
+            <span>Buscando…</span>
+          </div>
+          <input
+            nbInput
+            id="descripcion"
+            placeholder="Nombre del producto"
+            formControlName="descripcion"
+            [nbAutocomplete]="descripcionAuto"
+          />
+          <nb-autocomplete #descripcionAuto>
+            <nb-option
+              *ngFor="let option of descripcionOptions"
+              [value]="option.descripcion"
+              (click)="onDescripcionOptionSelected(option)"
+            >
+              {{ option.descripcion }} — {{ option.codigo }}
+            </nb-option>
+          </nb-autocomplete>
+          <small class="error-text" *ngIf="descripcionAutocompleteError">
+            {{ descripcionAutocompleteError }}
+          </small>
+          <small class="error-text" *ngIf="detalleForm.get('descripcion')?.invalid && detalleForm.get('descripcion')?.touched">
+            Selecciona una descripción válida.
+          </small>
+        </div>
+        <div class="detalle-field detalle-field--cantidad">
+          <label for="cantidad">Cantidad</label>
+          <input
+            nbInput
+            id="cantidad"
+            type="number"
+            min="0"
+            step="0.01"
+            formControlName="cantidad"
+          />
+          <small class="error-text" *ngIf="detalleForm.get('cantidad')?.invalid && detalleForm.get('cantidad')?.touched">
+            Ingresa una cantidad válida.
+          </small>
+        </div>
+        <div class="detalle-field detalle-field--costo">
+          <label for="costo">Costo</label>
+          <input
+            nbInput
+            id="costo"
+            type="number"
+            min="0"
+            step="0.01"
+            formControlName="costo"
+          />
+          <small class="error-text" *ngIf="detalleForm.get('costo')?.invalid && detalleForm.get('costo')?.touched">
+            Ingresa el costo del producto.
+          </small>
+        </div>
+        <div class="detalle-actions">
+          <button nbButton status="primary" (click)="onAgregarDetalle()" [disabled]="agregandoDetalle || detalleForm.invalid">
+            <nb-spinner *ngIf="agregandoDetalle" size="tiny"></nb-spinner>
+            <span *ngIf="!agregandoDetalle">Agregar producto</span>
+          </button>
+        </div>
+      </form>
+
+      <div class="detalle-tabla" *ngIf="folioCotizacion">
+        <nb-alert *ngIf="detalleError" status="danger">
+          {{ detalleError }}
+        </nb-alert>
+
+        <div class="detalle-loading" *ngIf="detalleLoading">
+          <nb-spinner status="info"></nb-spinner>
+          <span>Cargando detalle…</span>
+        </div>
+
+        <table *ngIf="!detalleLoading && detalles.length" class="table">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Descripción</th>
+              <th>Cantidad</th>
+              <th>Costo</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of detalles">
+              <td>{{ item.Codigo }}</td>
+              <td>{{ item.Descripcion }}</td>
+              <td>{{ item.Cantidad | number: '1.0-2' }}</td>
+              <td>{{ item.Costo | currency: 'MXN' }}</td>
+              <td>{{ item.Total | currency: 'MXN' }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p class="hint-text" *ngIf="!detalleLoading && !detalles.length && !detalleError">
+          No hay productos en esta cotización todavía.
+        </p>
+      </div>
+    </section>
 
     <nb-alert *ngIf="mensajeExito" status="success">
       {{ mensajeExito }}
@@ -83,6 +231,14 @@
 
     <nb-alert *ngIf="mensajeError" status="danger">
       {{ mensajeError }}
+    </nb-alert>
+
+    <nb-alert *ngIf="mensajeFinalizacion" status="success">
+      {{ mensajeFinalizacion }}
+    </nb-alert>
+
+    <nb-alert *ngIf="errorFinalizacion" status="danger">
+      {{ errorFinalizacion }}
     </nb-alert>
   </nb-card-body>
 </nb-card>
