@@ -1,0 +1,229 @@
+<nb-card>
+  <nb-card-header class="card-header">
+    <div>
+      <h2>Compras | Proveedores</h2>
+      <p>Consulta los proveedores registrados y revisa su información principal.</p>
+    </div>
+    <button nbButton size="small" status="info" (click)="onActualizar()" [disabled]="loading">
+      <nb-spinner *ngIf="loading" size="tiny"></nb-spinner>
+      <ng-container *ngIf="!loading">
+        <nb-icon icon="refresh-outline"></nb-icon>
+        Actualizar
+      </ng-container>
+    </button>
+  </nb-card-header>
+  <nb-card-body>
+    <section class="formulario-proveedor">
+      <h3>Registrar nuevo proveedor</h3>
+      <form [formGroup]="proveedorForm" class="form-grid">
+        <div class="form-field">
+          <label>Clave *</label>
+          <input nbInput placeholder="PRV-001" formControlName="clave" />
+        </div>
+        <div class="form-field">
+          <label>Nombre *</label>
+          <input nbInput placeholder="Nombre comercial" formControlName="nombre" />
+        </div>
+        <div class="form-field">
+          <label>RFC *</label>
+          <input nbInput placeholder="RFC" formControlName="rfc" />
+        </div>
+        <div class="form-field wide">
+          <label>Dirección *</label>
+          <input nbInput placeholder="Calle y número" formControlName="direccion" />
+        </div>
+        <div class="form-field">
+          <label>Ciudad *</label>
+          <input nbInput placeholder="Ciudad" formControlName="ciudad" />
+        </div>
+        <div class="form-field">
+          <label>Estado *</label>
+          <input nbInput placeholder="Estado" formControlName="estado" />
+        </div>
+        <div class="form-field">
+          <label>País *</label>
+          <input nbInput placeholder="País" formControlName="pais" />
+        </div>
+        <div class="form-field">
+          <label>Código Postal *</label>
+          <input nbInput type="number" min="0" placeholder="00000" formControlName="codigoPostal" />
+        </div>
+        <div class="form-field">
+          <label>Teléfono *</label>
+          <input nbInput placeholder="000-000-0000" formControlName="telefono" />
+        </div>
+        <div class="form-field">
+          <label>Email *</label>
+          <input nbInput type="email" placeholder="correo@empresa.com" formControlName="email" />
+        </div>
+        <div class="form-field">
+          <label>Contacto *</label>
+          <input nbInput placeholder="Nombre del contacto" formControlName="contacto" />
+        </div>
+        <div class="form-field">
+          <label>Giro *</label>
+          <input nbInput placeholder="Giro" formControlName="giro" />
+        </div>
+        <div class="form-field">
+          <label>Condición de pago *</label>
+          <input nbInput placeholder="30 días" formControlName="condicion" />
+        </div>
+        <div class="form-field">
+          <label>Tipo *</label>
+          <nb-select formControlName="tipo">
+            <nb-option *ngFor="let option of tipoOptions" [value]="option.value">{{ option.label }}</nb-option>
+          </nb-select>
+        </div>
+        <div class="form-field">
+          <label>Representante *</label>
+          <input nbInput placeholder="Representante" formControlName="representante" />
+        </div>
+        <div class="form-field">
+          <label>Cuenta contable *</label>
+          <input nbInput placeholder="000-000" formControlName="cuentaContable" />
+        </div>
+        <div class="form-field">
+          <label>Cta. bonificación *</label>
+          <input nbInput placeholder="Cuenta bonificación" formControlName="CuentaContableGlobalBonificacion" />
+        </div>
+        <div class="form-field">
+          <label>Banco *</label>
+          <input nbInput placeholder="Banco" formControlName="banco" />
+        </div>
+        <div class="form-field">
+          <label>Clabe *</label>
+          <input nbInput placeholder="CLABE" formControlName="Clabe" />
+        </div>
+        <div class="form-field">
+          <label>Convenio *</label>
+          <input nbInput placeholder="Convenio" formControlName="Convenio" />
+        </div>
+        <div class="form-field">
+          <label>Tipo de pago *</label>
+          <input nbInput type="number" min="0" formControlName="TipoPago" />
+        </div>
+        <div class="form-field">
+          <label>Agente *</label>
+          <input nbInput formControlName="Agente" />
+        </div>
+        <div class="form-field">
+          <label>Supervisor *</label>
+          <input nbInput formControlName="Supervisor" />
+        </div>
+        <div class="form-field">
+          <label>Retención (%)</label>
+          <input nbInput type="number" min="0" formControlName="retencion" />
+        </div>
+        <div class="form-field">
+          <label>Retención IVA (%)</label>
+          <input nbInput type="number" min="0" formControlName="retencionIva" />
+        </div>
+        <div class="form-field">
+          <label>Comentarios</label>
+          <textarea nbInput rows="2" formControlName="Comentarios"></textarea>
+        </div>
+        <div class="form-field">
+          <label>Referencia</label>
+          <textarea nbInput rows="2" formControlName="Referencia"></textarea>
+        </div>
+      </form>
+      <div class="form-actions">
+        <button nbButton status="primary" (click)="onGuardarProveedor()" [disabled]="guardandoProveedor">
+          <nb-spinner *ngIf="guardandoProveedor" size="tiny"></nb-spinner>
+          <span *ngIf="!guardandoProveedor">Guardar proveedor</span>
+        </button>
+      </div>
+      <nb-alert *ngIf="mensajeFormularioExito" status="success">
+        {{ mensajeFormularioExito }}
+      </nb-alert>
+      <nb-alert *ngIf="mensajeFormularioError" status="danger">
+        {{ mensajeFormularioError }}
+      </nb-alert>
+    </section>
+
+    <div class="toolbar">
+      <div class="search-field">
+        <label>Buscar</label>
+        <input
+          nbInput
+          placeholder="Nombre, RFC o tipo"
+          [(ngModel)]="filtro"
+          (ngModelChange)="onFiltroChange($event)"
+          name="filtroProveedores"
+        />
+      </div>
+      <div class="page-size-field">
+        <label>Registros por página</label>
+        <nb-select [selected]="pageSize" (selectedChange)="onPageSizeChange($event)" name="proveedoresPageSize">
+          <nb-option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</nb-option>
+        </nb-select>
+      </div>
+      <div class="export-field">
+        <label>&nbsp;</label>
+        <button nbButton status="success" outline size="small" (click)="onExport()" [disabled]="!proveedoresFiltrados.length">
+          <nb-icon icon="download-outline"></nb-icon>
+          Exportar CSV
+        </button>
+      </div>
+    </div>
+
+    <nb-alert *ngIf="error" status="danger">
+      {{ error }}
+    </nb-alert>
+
+    <div class="estado" *ngIf="loading">
+      <nb-spinner status="primary"></nb-spinner>
+      <span>Cargando proveedores…</span>
+    </div>
+
+    <div class="table-responsive" *ngIf="!loading">
+      <table class="table" *ngIf="proveedoresFiltrados.length; else emptyState">
+        <thead>
+          <tr>
+            <th>Id</th>
+            <th>Nombre</th>
+            <th>Dirección</th>
+            <th>RFC</th>
+            <th>Plazo</th>
+            <th>Email</th>
+            <th>Teléfono</th>
+            <th>Tipo</th>
+            <th>Cuenta bonificación</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let proveedor of proveedoresPaginados">
+            <td>{{ proveedor.Id }}</td>
+            <td>{{ proveedor.nombre }}</td>
+            <td>{{ proveedor.direccion || '—' }}</td>
+            <td>{{ proveedor.rfc }}</td>
+            <td>{{ proveedor.condicion || '—' }}</td>
+            <td>{{ proveedor.email || '—' }}</td>
+            <td>{{ proveedor.telefono || '—' }}</td>
+            <td>{{ proveedor.descripcionTipo || '—' }}</td>
+            <td>{{ proveedor.CuentaContableGlobalBonificacion || '—' }}</td>
+            <td class="acciones">
+              <button nbButton size="tiny" status="primary" appearance="outline" (click)="onEditar(proveedor)">
+                Editar
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <ng-template #emptyState>
+        <p class="hint-text">No hay proveedores para mostrar.</p>
+      </ng-template>
+    </div>
+
+    <div class="pagination" *ngIf="proveedoresFiltrados.length">
+      <button nbButton size="tiny" appearance="outline" (click)="onPaginar('prev')" [disabled]="currentPage === 1">
+        <nb-icon icon="arrow-back-outline"></nb-icon>
+      </button>
+      <span>Página {{ currentPage }} de {{ totalPages }}</span>
+      <button nbButton size="tiny" appearance="outline" (click)="onPaginar('next')" [disabled]="currentPage === totalPages">
+        <nb-icon icon="arrow-forward-outline"></nb-icon>
+      </button>
+    </div>
+  </nb-card-body>
+</nb-card>

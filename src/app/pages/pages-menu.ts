@@ -56,6 +56,10 @@ export const MENU_ITEMS: NbMenuItem[] = [
           },
         ],
       },
+      {
+        title: 'Proveedores',
+        link: '/pages/compras/proveedores',
+      },
       
     ],
   },
