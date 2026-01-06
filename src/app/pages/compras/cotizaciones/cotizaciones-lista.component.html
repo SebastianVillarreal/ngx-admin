@@ -1,0 +1,109 @@
+<nb-card>
+  <nb-card-header class="card-header">
+    <div>
+      <h2>Compras | Cotizaciones existentes</h2>
+      <p>Consulta las cotizaciones registradas por proveedor para revisar su seguimiento.</p>
+    </div>
+  </nb-card-header>
+  <nb-card-body>
+    <div class="filtros-cotizaciones">
+      <div class="form-field">
+        <label>Proveedor</label>
+        <div class="field-status" *ngIf="proveedoresLoading">
+          <nb-spinner status="primary" size="tiny"></nb-spinner>
+          <span>Cargando proveedores…</span>
+        </div>
+        <nb-select
+          fullWidth
+          placeholder="Selecciona un proveedor"
+          [(ngModel)]="proveedorSeleccionado"
+          name="proveedorListado"
+          (selectedChange)="onProveedorChange($event)"
+          [disabled]="proveedoresLoading || !proveedores.length"
+        >
+          <nb-option value="">Selecciona un proveedor</nb-option>
+          <nb-option *ngFor="let proveedor of proveedores" [value]="proveedor.value">
+            {{ proveedor.label }}
+          </nb-option>
+        </nb-select>
+        <small class="error-text" *ngIf="proveedoresError">
+          {{ proveedoresError }}
+        </small>
+      </div>
+    </div>
+
+    <div class="estado" *ngIf="cotizacionesLoading">
+      <nb-spinner status="primary"></nb-spinner>
+      <span>Cargando cotizaciones…</span>
+    </div>
+    <nb-alert *ngIf="cotizacionesError" status="danger">
+      {{ cotizacionesError }}
+    </nb-alert>
+
+    <div class="table-responsive" *ngIf="!cotizacionesLoading && !cotizacionesError">
+      <table class="table cotizaciones-table" *ngIf="cotizaciones.length; else emptyListado">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Proveedor</th>
+            <th>Fecha estimada</th>
+            <th>Estatus</th>
+            <th>Días de retraso</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let cotizacion of cotizaciones">
+            <td>{{ cotizacion.Id }}</td>
+            <td>{{ cotizacion.Proveedor }}</td>
+            <td>{{ cotizacion.FechaEstimada }}</td>
+            <td>{{ cotizacion.NombreEstatus }}</td>
+            <td>{{ cotizacion.DiasRetraso }}</td>
+            <td>
+              <button nbButton size="tiny" status="info" (click)="onVerDetalle(cotizacion)">
+                Ver detalle
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <ng-template #emptyListado>
+        <p class="hint-text">Selecciona un proveedor para listar sus cotizaciones.</p>
+      </ng-template>
+    </div>
+
+    <div class="detalle-consulta" *ngIf="cotizacionSeleccionada">
+      <h3>Detalle de la cotización {{ cotizacionSeleccionada?.Id }}</h3>
+      <div class="estado" *ngIf="detalleLoading">
+        <nb-spinner status="info"></nb-spinner>
+        <span>Cargando detalle…</span>
+      </div>
+      <nb-alert *ngIf="detalleError" status="danger">
+        {{ detalleError }}
+      </nb-alert>
+      <table class="table" *ngIf="!detalleLoading && detalleSeleccionado.length">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Descripción</th>
+            <th>Cantidad</th>
+            <th>Costo</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of detalleSeleccionado">
+            <td>{{ item.Codigo }}</td>
+            <td>{{ item.Descripcion }}</td>
+            <td>{{ item.Cantidad | number: '1.0-2' }}</td>
+            <td>{{ item.Costo | currency: 'MXN' }}</td>
+            <td>{{ item.Total | currency: 'MXN' }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="hint-text" *ngIf="!detalleLoading && !detalleSeleccionado.length && !detalleError">
+        Esta cotización no tiene productos registrados.
+      </p>
+    </div>
+  </nb-card-body>
+</nb-card>

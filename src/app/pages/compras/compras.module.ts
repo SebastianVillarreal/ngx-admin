@@ -19,6 +19,7 @@ import { ComprasComponent } from './compras.component';
 import { ArticulosComponent } from './articulos/articulos.component';
 import { NuevoArticuloComponent } from './articulos/nuevo-articulo.component';
 import { CotizacionesComponent } from './cotizaciones/cotizaciones.component';
+import { CotizacionesListaComponent } from './cotizaciones/cotizaciones-lista.component';
 
 @NgModule({
   imports: [
@@ -42,6 +43,7 @@ import { CotizacionesComponent } from './cotizaciones/cotizaciones.component';
     ArticulosComponent,
     NuevoArticuloComponent,
     CotizacionesComponent,
+    CotizacionesListaComponent,
   ],
 })
 export class ComprasModule { }

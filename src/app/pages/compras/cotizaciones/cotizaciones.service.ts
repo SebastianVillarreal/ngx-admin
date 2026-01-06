@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
@@ -77,12 +77,36 @@ interface FinalizarCotizacionApiResponse {
   };
 }
 
+export interface CotizacionResumen {
+  Id: number;
+  IdSucursal: number;
+  IdProveedor: number;
+  IdUsuario: number;
+  Proveedor: string;
+  Comprador: string;
+  Fecha: string;
+  FechaEstimada: string;
+  NombreEstatus: string;
+  DiasRetraso: number;
+  Estatus: number;
+}
+
+interface CotizacionesApiResponse {
+  StatusCode: number;
+  success: boolean;
+  message: string;
+  response?: {
+    data?: CotizacionResumen[];
+  };
+}
+
 @Injectable({ providedIn: 'root' })
 export class CotizacionesService {
   private readonly proveedoresEndpoint = '/api/GetProveedores';
   private readonly detalleEndpoint = '/api/GetDetalleCotizacion';
   private readonly insertarDetalleEndpoint = '/api/InsertarDetalleCotizacion';
   private readonly finalizarEndpoint = '/api/FinalizarCotizacion';
+  private readonly cotizacionesEndpoint = '/api/GetCotizaciones';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -122,6 +146,17 @@ export class CotizacionesService {
       catchError((error) => {
         console.error('GetDetalleCotizacion error', error);
         return throwError(() => new Error('No se pudo obtener el detalle de la cotización.'));
+      }),
+    );
+  }
+
+  obtenerCotizaciones(proveedorId: string): Observable<CotizacionResumen[]> {
+    const params = new HttpParams().set('proveedor', proveedorId);
+    return this.http.get<CotizacionesApiResponse>(this.cotizacionesEndpoint, { params }).pipe(
+      map((res) => res.response?.data ?? []),
+      catchError((error) => {
+        console.error('GetCotizaciones error', error);
+        return throwError(() => new Error('No se pudieron obtener las cotizaciones.'));
       }),
     );
   }

@@ -45,7 +45,18 @@ export const MENU_ITEMS: NbMenuItem[] = [
       {
         title: 'Cotizaciones',
         link: '/pages/compras/cotizaciones',
+        children: [
+          {
+            title: 'Nueva cotización',
+            link: '/pages/compras/cotizaciones',
+          },
+          {
+            title: 'Lista de cotizaciones',
+            link: '/pages/compras/cotizaciones/lista',
+          },
+        ],
       },
+      
     ],
   },
   {

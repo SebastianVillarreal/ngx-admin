@@ -1,0 +1,64 @@
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.card-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.card-header p {
+  margin: 0;
+  color: var(--text-hint-color);
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.field-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  color: var(--text-hint-color);
+}
+
+.error-text {
+  color: var(--text-danger-color);
+  font-size: 0.75rem;
+}
+
+.filtros-cotizaciones {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+
+.cotizaciones-table th,
+.cotizaciones-table td {
+  white-space: nowrap;
+}
+
+.detalle-consulta {
+  margin-top: 1.5rem;
+}
+
+.estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-hint-color);
+}
+
+.hint-text {
+  color: var(--text-hint-color);
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+}
