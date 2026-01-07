@@ -1,0 +1,127 @@
+nb-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+h2 {
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}
+
+.traspaso-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-field--reference,
+.traspaso-form .form-actions {
+  grid-column: span 2;
+}
+
+.form-actions {
+  display: flex;
+  align-items: flex-end;
+}
+
+.error-text {
+  color: var(--text-danger-color);
+  font-size: 0.75rem;
+}
+
+.hint-text {
+  color: var(--text-hint-color);
+  font-size: 0.85rem;
+}
+
+nb-alert {
+  margin-bottom: 1rem;
+}
+
+.folios-panel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.folios-panel__item {
+  border: 1px solid var(--divider-color);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  background-color: var(--background-basic-color-2);
+}
+
+.folios-panel__label {
+  display: block;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  color: var(--text-hint-color);
+  margin-bottom: 0.25rem;
+}
+
+.folios-panel__value {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.detalle-section {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--divider-color);
+}
+
+.detalle-section header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.detalle-section h3 {
+  margin: 0;
+}
+
+.detalle-section p {
+  margin: 0.2rem 0 0;
+}
+
+.detalle-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.detalle-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.detalle-table th,
+.detalle-table td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--divider-color);
+}
+
+.detalle-table th {
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  color: var(--text-hint-color);
+}
+
+.detalle-table .numeric {
+  text-align: right;
+}

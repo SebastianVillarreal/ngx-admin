@@ -1,0 +1,170 @@
+<nb-card>
+  <nb-card-header>
+    <div>
+      <h2>Inventarios | Traspasos</h2>
+      <p>Gestiona los traspasos entre sucursales y consulta sus estatus.</p>
+    </div>
+  </nb-card-header>
+  <nb-card-body>
+    <form [formGroup]="traspasoForm" class="traspaso-form">
+      <div class="form-field">
+        <label>Sucursal origen</label>
+        <nb-select
+          placeholder="Selecciona origen"
+          formControlName="origen"
+          [status]="traspasoForm.get('origen')?.invalid && traspasoForm.get('origen')?.touched ? 'danger' : 'basic'"
+        >
+          <nb-option *ngFor="let sucursal of sucursales" [value]="sucursal.value">
+            {{ sucursal.label }}
+          </nb-option>
+        </nb-select>
+        <small class="error-text" *ngIf="traspasoForm.get('origen')?.invalid && traspasoForm.get('origen')?.touched">
+          Selecciona una sucursal de origen.
+        </small>
+      </div>
+
+      <div class="form-field">
+        <label>Sucursal destino</label>
+        <nb-select
+          placeholder="Selecciona destino"
+          formControlName="destino"
+          [status]="traspasoForm.get('destino')?.invalid && traspasoForm.get('destino')?.touched ? 'danger' : 'basic'"
+        >
+          <nb-option *ngFor="let sucursal of sucursales" [value]="sucursal.value">
+            {{ sucursal.label }}
+          </nb-option>
+        </nb-select>
+        <small class="error-text" *ngIf="traspasoForm.get('destino')?.invalid && traspasoForm.get('destino')?.touched">
+          Selecciona una sucursal destino.
+        </small>
+      </div>
+
+      <div class="form-field form-field--reference">
+        <label>Referencia</label>
+        <input
+          nbInput
+          type="text"
+          placeholder="Ej. Pedido semanal"
+          formControlName="referencia"
+          [status]="traspasoForm.get('referencia')?.invalid && traspasoForm.get('referencia')?.touched ? 'danger' : 'basic'"
+        />
+        <small class="error-text" *ngIf="traspasoForm.get('referencia')?.invalid && traspasoForm.get('referencia')?.touched">
+          Ingresa una referencia para identificar el traspaso.
+        </small>
+      </div>
+
+      <div class="form-actions">
+        <button
+          nbButton
+          status="primary"
+          type="button"
+          (click)="onGenerarTraspaso()"
+          [disabled]="isGenerando"
+        >
+          {{ isGenerando ? 'Generando...' : 'Generar traspaso' }}
+        </button>
+      </div>
+    </form>
+
+    <nb-alert *ngIf="errorGeneracion" status="danger" accent="danger">{{ errorGeneracion }}</nb-alert>
+    <nb-alert *ngIf="mensajeGeneracion" status="success" accent="success">{{ mensajeGeneracion }}</nb-alert>
+
+    <div class="folios-panel" *ngIf="resultadoTraspaso as folios">
+      <div class="folios-panel__item">
+        <span class="folios-panel__label">Id entrada</span>
+        <span class="folios-panel__value">{{ folios.IdEntrada }}</span>
+      </div>
+      <div class="folios-panel__item">
+        <span class="folios-panel__label">Id salida</span>
+        <span class="folios-panel__value">{{ folios.IdSalida }}</span>
+      </div>
+      <div class="folios-panel__item">
+        <span class="folios-panel__label">Folio entrada</span>
+        <span class="folios-panel__value">{{ folios.FolioEntrada }}</span>
+      </div>
+      <div class="folios-panel__item">
+        <span class="folios-panel__label">Folio salida</span>
+        <span class="folios-panel__value">{{ folios.FolioSalida }}</span>
+      </div>
+    </div>
+
+    <p class="hint-text" *ngIf="!mensajeGeneracion">
+      Completa el origen, destino y referencia para preparar el traspaso.
+    </p>
+
+    <section class="detalle-section">
+      <header>
+        <div>
+          <h3>Detalle de productos</h3>
+          <p>Agrega los renglones que formarán parte del traspaso.</p>
+        </div>
+      </header>
+
+      <form [formGroup]="detalleForm" class="detalle-form">
+        <div class="form-field">
+          <label>Código</label>
+          <input nbInput placeholder="Escanea o escribe" formControlName="codigo" />
+        </div>
+
+        <div class="form-field">
+          <label>Descripción</label>
+          <input nbInput placeholder="Descripción del producto" formControlName="descripcion" />
+        </div>
+
+        <div class="form-field">
+          <label>Cantidad</label>
+          <input nbInput type="number" min="0" step="0.01" placeholder="0" formControlName="cantidad" />
+        </div>
+
+        <div class="form-field">
+          <label>Costo</label>
+          <input nbInput type="number" min="0" step="0.01" placeholder="0" formControlName="costo" />
+        </div>
+
+        <div class="form-actions">
+          <button
+            nbButton
+            status="info"
+            type="button"
+            (click)="onAgregarRenglon()"
+            [disabled]="insertandoDetalle"
+          >
+            {{ insertandoDetalle ? 'Agregando...' : 'Agregar renglón' }}
+          </button>
+        </div>
+      </form>
+
+      <p class="hint-text" *ngIf="!resultadoTraspaso">
+        Genera primero el traspaso para obtener los folios y poder guardar los renglones.
+      </p>
+
+      <nb-alert *ngIf="detalleError" status="danger" accent="danger">{{ detalleError }}</nb-alert>
+      <nb-alert *ngIf="detalleMensaje" status="success" accent="success">{{ detalleMensaje }}</nb-alert>
+
+      <div class="detalle-table" *ngIf="renglones.length; else noRenglones">
+        <table>
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Descripción</th>
+              <th class="numeric">Cantidad</th>
+              <th class="numeric">Costo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let renglon of renglones">
+              <td>{{ renglon.codigo }}</td>
+              <td>{{ renglon.descripcion }}</td>
+              <td class="numeric">{{ renglon.cantidad | number: '1.2-2' }}</td>
+              <td class="numeric">{{ renglon.costo | currency: 'MXN':'symbol-narrow':'1.2-2' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <ng-template #noRenglones>
+        <p class="hint-text">Aún no hay renglones. Agrega uno para comenzar.</p>
+      </ng-template>
+    </section>
+  </nb-card-body>
+</nb-card>
