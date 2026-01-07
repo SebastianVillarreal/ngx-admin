@@ -1,19 +1,13 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 
 import {
+  DetalleTraspasoItem,
   InsertRenglonTraspasoPayload,
   NuevoTraspasoMetadata,
   NuevoTraspasoPayload,
   TraspasosService,
 } from './traspasos.service';
-
-interface DetalleTraspaso {
-  codigo: string;
-  descripcion: string;
-  cantidad: number;
-  costo: number;
-}
 
 @Component({
   selector: 'ngx-traspasos-inventarios',
@@ -50,9 +44,14 @@ export class TraspasosComponent {
   isGenerando = false;
   insertandoDetalle = false;
   resultadoTraspaso: NuevoTraspasoMetadata | null = null;
-  renglones: DetalleTraspaso[] = [];
+  detalleTraspaso: DetalleTraspasoItem[] = [];
+  cargandoDetalle = false;
 
-  constructor(private readonly fb: FormBuilder, private readonly traspasosService: TraspasosService) {}
+  constructor(
+    private readonly fb: FormBuilder,
+    private readonly traspasosService: TraspasosService,
+    private readonly cdr: ChangeDetectorRef,
+  ) {}
 
   onGenerarTraspaso(): void {
     this.resetMensajes();
@@ -82,18 +81,16 @@ export class TraspasosComponent {
     this.isGenerando = true;
     this.traspasosService.generarTraspaso(payload).subscribe({
       next: (data) => {
-        const totalRenglones = this.renglones.length;
         this.resultadoTraspaso = data;
-        this.renglones = [];
-        const resumenRenglones = totalRenglones
-          ? `${totalRenglones} renglón(es).`
-          : 'sin renglones por ahora.';
-        this.mensajeGeneracion = `Traspaso generado ${resumenRenglones} Folio entrada ${data.FolioEntrada}, folio salida ${data.FolioSalida}.`;
+        this.mensajeGeneracion = `Traspaso generado. Folio entrada ${data.FolioEntrada}, folio salida ${data.FolioSalida}.`;
+        this.cargarDetalleTraspaso(data.IdSalida);
         this.isGenerando = false;
+        this.markForCheck();
       },
       error: (error) => {
         this.errorGeneracion = error?.message ?? 'No se pudo generar el traspaso.';
         this.isGenerando = false;
+        this.markForCheck();
       },
     });
   }
@@ -139,13 +136,6 @@ export class TraspasosComponent {
     this.insertandoDetalle = true;
     this.traspasosService.insertarRenglonTraspaso(payload).subscribe({
       next: () => {
-        const nuevo: DetalleTraspaso = {
-          codigo,
-          descripcion,
-          cantidad: Number(cantidad),
-          costo: Number(costo),
-        };
-        this.renglones = [...this.renglones, nuevo];
         this.detalleMensaje = 'Renglón agregado al traspaso.';
         this.insertandoDetalle = false;
         this.detalleForm.reset({
@@ -154,10 +144,37 @@ export class TraspasosComponent {
           cantidad: null,
           costo: null,
         });
+        this.cargarDetalleTraspaso(this.resultadoTraspaso.IdSalida);
+        this.markForCheck();
       },
       error: (error) => {
         this.detalleError = error?.message ?? 'No se pudo agregar el renglón.';
         this.insertandoDetalle = false;
+        this.markForCheck();
+      },
+    });
+  }
+
+  onEliminarRenglon(renglon: DetalleTraspasoItem): void {
+    // TODO: integrar endpoint de eliminación cuando esté disponible.
+    this.detalleTraspaso = this.detalleTraspaso.filter((item) => item !== renglon);
+    this.detalleMensaje = 'Renglón eliminado de la vista. Falta integrar la eliminación en backend.';
+    this.markForCheck();
+  }
+
+  private cargarDetalleTraspaso(idSalida: number): void {
+    this.cargandoDetalle = true;
+    this.detalleError = '';
+    this.traspasosService.obtenerDetalleTraspaso(idSalida).subscribe({
+      next: (detalle) => {
+        this.detalleTraspaso = detalle;
+        this.cargandoDetalle = false;
+        this.markForCheck();
+      },
+      error: (error) => {
+        this.detalleError = error?.message ?? 'No se pudo cargar el detalle.';
+        this.cargandoDetalle = false;
+        this.markForCheck();
       },
     });
   }
@@ -166,5 +183,13 @@ export class TraspasosComponent {
     this.mensajeGeneracion = '';
     this.errorGeneracion = '';
     this.resultadoTraspaso = null;
+    this.detalleTraspaso = [];
+    this.detalleMensaje = '';
+    this.detalleError = '';
+    this.markForCheck();
+  }
+
+  private markForCheck(): void {
+    this.cdr.markForCheck();
   }
 }

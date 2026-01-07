@@ -141,29 +141,43 @@
       <nb-alert *ngIf="detalleError" status="danger" accent="danger">{{ detalleError }}</nb-alert>
       <nb-alert *ngIf="detalleMensaje" status="success" accent="success">{{ detalleMensaje }}</nb-alert>
 
-      <div class="detalle-table" *ngIf="renglones.length; else noRenglones">
+      <div class="detalle-loading" *ngIf="cargandoDetalle">
+        <nb-spinner size="large"></nb-spinner>
+      </div>
+
+      <div class="detalle-table" *ngIf="detalleTraspaso.length; else noRenglones">
         <table>
           <thead>
             <tr>
               <th>Código</th>
               <th>Descripción</th>
+              <th>Familia</th>
+              <th>Departamento</th>
               <th class="numeric">Cantidad</th>
-              <th class="numeric">Costo</th>
+              <th>Unidad</th>
+              <th class="acciones">Acciones</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let renglon of renglones">
-              <td>{{ renglon.codigo }}</td>
-              <td>{{ renglon.descripcion }}</td>
-              <td class="numeric">{{ renglon.cantidad | number: '1.2-2' }}</td>
-              <td class="numeric">{{ renglon.costo | currency: 'MXN':'symbol-narrow':'1.2-2' }}</td>
+            <tr *ngFor="let renglon of detalleTraspaso">
+              <td>{{ renglon.Codigo }}</td>
+              <td>{{ renglon.Descripcion }}</td>
+              <td>{{ renglon.Familia }}</td>
+              <td>{{ renglon.Departamento }}</td>
+              <td class="numeric">{{ renglon.Cantidad | number: '1.2-2' }}</td>
+              <td>{{ renglon.UnidadMedida }}</td>
+              <td class="acciones">
+                <button nbButton size="tiny" status="danger" (click)="onEliminarRenglon(renglon)">
+                  Eliminar
+                </button>
+              </td>
             </tr>
           </tbody>
         </table>
       </div>
 
       <ng-template #noRenglones>
-        <p class="hint-text">Aún no hay renglones. Agrega uno para comenzar.</p>
+        <p class="hint-text">Aún no hay renglones almacenados para este traspaso.</p>
       </ng-template>
     </section>
   </nb-card-body>

@@ -105,6 +105,12 @@ nb-alert {
   margin-bottom: 1rem;
 }
 
+.detalle-loading {
+  display: flex;
+  justify-content: center;
+  padding: 1rem 0;
+}
+
 .detalle-table table {
   width: 100%;
   border-collapse: collapse;
@@ -124,4 +130,9 @@ nb-alert {
 
 .detalle-table .numeric {
   text-align: right;
+}
+
+.detalle-table .acciones {
+  text-align: right;
+  width: 110px;
 }

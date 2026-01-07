@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
@@ -46,10 +46,29 @@ interface InsertRenglonTraspasoApiResponse {
   };
 }
 
+export interface DetalleTraspasoItem {
+  Codigo: string;
+  Descripcion: string;
+  Familia: string;
+  Departamento: string;
+  Cantidad: number;
+  UnidadMedida: string;
+}
+
+interface DetalleTraspasoApiResponse {
+  StatusCode: number;
+  success: boolean;
+  message: string;
+  response?: {
+    data?: DetalleTraspasoItem[];
+  };
+}
+
 @Injectable({ providedIn: 'root' })
 export class TraspasosService {
   private readonly nuevoTraspasoEndpoint = '/api/INV_NuevoTraspaso';
   private readonly insertRenglonEndpoint = '/api/INV_InsertRenglonTraspaso';
+  private readonly detalleEndpoint = '/api/GetDetalleTraspasosEnTransito';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -82,6 +101,18 @@ export class TraspasosService {
       catchError((error) => {
         console.error('INV_InsertRenglonTraspaso error', error);
         const message = error?.message || 'No se pudo agregar el renglón.';
+        return throwError(() => new Error(message));
+      }),
+    );
+  }
+
+  obtenerDetalleTraspaso(idSalida: number): Observable<DetalleTraspasoItem[]> {
+    const params = new HttpParams().set('id_movimiento', String(idSalida));
+    return this.http.get<DetalleTraspasoApiResponse>(this.detalleEndpoint, { params }).pipe(
+      map((res) => res.response?.data ?? []),
+      catchError((error) => {
+        console.error('GetDetalleTraspasosEnTransito error', error);
+        const message = error?.message || 'No se pudo obtener el detalle del traspaso.';
         return throwError(() => new Error(message));
       }),
     );
