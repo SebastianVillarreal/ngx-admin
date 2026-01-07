@@ -153,6 +153,16 @@ export const MENU_ITEMS: NbMenuItem[] = [
       {
         title: 'Traspasos',
         link: '/pages/inventarios/traspasos',
+        children: [
+          {
+            title: 'Crear traspaso',
+            link: '/pages/inventarios/traspasos',
+          },
+          {
+            title: 'Recibir traspasos',
+            link: '/pages/inventarios/recibir-traspasos',
+          },
+        ]
       },
       {
         title: 'Verificador',

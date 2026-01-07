@@ -1,0 +1,161 @@
+<nb-card>
+  <nb-card-header>
+    <div>
+      <h2>Recibir traspasos</h2>
+      <p>Consulta y recibe los traspasos pendientes en tu sucursal.</p>
+    </div>
+  </nb-card-header>
+  <nb-card-body>
+    <form [formGroup]="filtroForm" class="filtro-form">
+      <div class="form-field">
+        <label>Sucursal</label>
+        <nb-select
+          placeholder="Selecciona una sucursal"
+          formControlName="sucursal"
+          [status]="filtroForm.get('sucursal')?.invalid && filtroForm.get('sucursal')?.touched ? 'danger' : 'basic'"
+        >
+          <nb-option *ngFor="let sucursal of sucursales" [value]="sucursal.value">
+            {{ sucursal.label }}
+          </nb-option>
+        </nb-select>
+        <small class="error-text" *ngIf="filtroForm.get('sucursal')?.invalid && filtroForm.get('sucursal')?.touched">
+          Selecciona la sucursal donde recibirás el traspaso.
+        </small>
+      </div>
+
+      <div class="form-actions">
+        <button nbButton status="primary" type="button" (click)="onBuscar()">
+          Buscar traspasos
+        </button>
+      </div>
+    </form>
+
+    <nb-alert *ngIf="error" status="danger" accent="danger">{{ error }}</nb-alert>
+    <nb-alert *ngIf="mensaje" status="info" accent="info">{{ mensaje }}</nb-alert>
+
+    <div class="tabla-loading" *ngIf="cargando">
+      <nb-spinner size="large"></nb-spinner>
+    </div>
+
+    <div class="tabla-controles" *ngIf="!cargando && pendientes.length">
+      <label>
+        Registros por página
+        <nb-select [selected]="pageSize" size="small" (selectedChange)="onPageSizeChange($event)">
+          <nb-option *ngFor="let option of pageSizeOptions" [value]="option">{{ option }}</nb-option>
+        </nb-select>
+      </label>
+      <span>Total: {{ pendientes.length }}</span>
+    </div>
+
+    <div class="tabla-pendientes" *ngIf="!cargando && pendientes.length; else sinPendientes">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Origen</th>
+            <th>Folio</th>
+            <th>Fecha elaboración</th>
+            <th class="acciones">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let pendiente of pendientesPagina">
+            <td>{{ pendiente.Id }}</td>
+            <td>{{ pendiente.Origen }}</td>
+            <td>{{ pendiente.Folio }}</td>
+            <td>{{ pendiente.FechaElaboracion }}</td>
+            <td class="acciones">
+              <button nbButton size="tiny" status="info" (click)="onVerTraspaso(pendiente)">
+                Ver traspaso
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="paginacion" *ngIf="totalPaginas > 1">
+      <button nbButton size="small" status="basic" (click)="onPrevPage()" [disabled]="!puedeAnterior">
+        Anterior
+      </button>
+      <span>Página {{ pageIndex }} de {{ totalPaginas }}</span>
+      <button nbButton size="small" status="basic" (click)="onNextPage()" [disabled]="!puedeSiguiente">
+        Siguiente
+      </button>
+    </div>
+
+    <ng-template #sinPendientes>
+      <p class="hint-text" *ngIf="!cargando && !mensaje && !error">
+        Utiliza el filtro para buscar traspasos pendientes.
+      </p>
+    </ng-template>
+  </nb-card-body>
+</nb-card>
+
+<ng-template #detalleDialog>
+  <nb-card class="dialog-card">
+    <nb-card-header>
+      <div>
+        <h3>Detalle del traspaso</h3>
+        <p *ngIf="detalleSeleccionado">Folio {{ detalleSeleccionado.Folio }} · Id {{ detalleSeleccionado.Id }}</p>
+      </div>
+      <button nbButton ghost size="small" status="basic" (click)="onCerrarDetalle()">Cerrar</button>
+    </nb-card-header>
+    <nb-card-body>
+      <nb-alert *ngIf="autorizarMensaje" status="info" accent="info">{{ autorizarMensaje }}</nb-alert>
+      <nb-alert *ngIf="autorizarError" status="danger" accent="danger">{{ autorizarError }}</nb-alert>
+      <nb-alert *ngIf="detalleError" status="danger" accent="danger">{{ detalleError }}</nb-alert>
+
+      <div class="tabla-loading" *ngIf="detalleCargando">
+        <nb-spinner size="large"></nb-spinner>
+      </div>
+
+      <div class="tabla-pendientes" *ngIf="!detalleCargando && detalleRenglones.length">
+        <table>
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Descripción</th>
+              <th>Familia</th>
+              <th>Departamento</th>
+              <th class="numeric">Cantidad</th>
+              <th>Unidad</th>
+              <th class="numeric">Cantidad recibida</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let renglon of detalleRenglones">
+              <td>{{ renglon.Codigo }}</td>
+              <td>{{ renglon.Descripcion }}</td>
+              <td>{{ renglon.Familia }}</td>
+              <td>{{ renglon.Departamento }}</td>
+              <td class="numeric">{{ renglon.Cantidad | number: '1.2-2' }}</td>
+              <td>{{ renglon.UnidadMedida }}</td>
+              <td class="numeric">
+                <input
+                  nbInput
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  [value]="renglon.cantidadRecibida"
+                  (input)="onCantidadRecibidaChange(renglon, $event.target.value)"
+                  (keydown.enter)="onCantidadRecibidaEnter(renglon)"
+                  placeholder="Captura lo recibido"
+                />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="hint-text" *ngIf="!detalleCargando && !detalleRenglones.length && !detalleError">
+        No hay renglones registrados para este traspaso.
+      </p>
+    </nb-card-body>
+    <nb-card-footer class="dialog-footer">
+      <button nbButton status="success" (click)="onAutorizarTraspaso()" [disabled]="detalleCargando">
+        Autorizar
+      </button>
+    </nb-card-footer>
+  </nb-card>
+</ng-template>

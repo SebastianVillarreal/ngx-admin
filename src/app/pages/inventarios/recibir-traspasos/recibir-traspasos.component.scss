@@ -1,0 +1,129 @@
+nb-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+h2 {
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}
+
+.filtro-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-actions {
+  display: flex;
+  align-items: flex-end;
+}
+
+.error-text {
+  color: var(--text-danger-color);
+  font-size: 0.75rem;
+}
+
+.tabla-loading {
+  display: flex;
+  justify-content: center;
+  padding: 1.5rem 0;
+}
+
+.tabla-controles {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.tabla-controles label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.tabla-pendientes table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabla-pendientes th,
+.tabla-pendientes td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--divider-color);
+}
+
+.tabla-pendientes th {
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  color: var(--text-hint-color);
+}
+
+.tabla-pendientes .acciones {
+  text-align: right;
+  width: 120px;
+}
+
+.tabla-pendientes .numeric {
+  text-align: right;
+}
+
+.tabla-pendientes input[nbInput] {
+  width: 100%;
+  text-align: right;
+}
+
+.hint-text {
+  color: var(--text-hint-color);
+  font-size: 0.85rem;
+}
+
+.paginacion {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.dialog-card nb-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dialog-card nb-card-body {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.dialog-card h3 {
+  margin: 0;
+}
+
+.dialog-card p {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  color: var(--text-hint-color);
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+}

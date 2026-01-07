@@ -78,12 +78,29 @@ interface FinalizarTraspasoApiResponse {
   };
 }
 
+export interface TraspasoPendiente {
+  Id: number;
+  Origen: string;
+  Folio: number;
+  FechaElaboracion: string;
+}
+
+interface TraspasosPendientesApiResponse {
+  StatusCode: number;
+  success: boolean;
+  message: string;
+  response?: {
+    data?: TraspasoPendiente[];
+  };
+}
+
 @Injectable({ providedIn: 'root' })
 export class TraspasosService {
   private readonly nuevoTraspasoEndpoint = '/api/INV_NuevoTraspaso';
   private readonly insertRenglonEndpoint = '/api/INV_InsertRenglonTraspaso';
   private readonly detalleEndpoint = '/api/GetDetalleTraspasosEnTransito';
   private readonly finalizarEndpoint = '/api/INV_EnviarTraspaso';
+  private readonly pendientesEndpoint = '/api/INV_GetTraspasosPendientesRecibir';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -144,6 +161,18 @@ export class TraspasosService {
       catchError((error) => {
         console.error('INV_EnviarTraspaso error', error);
         const message = error?.message || 'No se pudo finalizar el traspaso.';
+        return throwError(() => new Error(message));
+      }),
+    );
+  }
+
+  obtenerTraspasosPendientes(sucursal: string): Observable<TraspasoPendiente[]> {
+    const params = new HttpParams().set('sucursal', sucursal);
+    return this.http.get<TraspasosPendientesApiResponse>(this.pendientesEndpoint, { params }).pipe(
+      map((res) => res.response?.data ?? []),
+      catchError((error) => {
+        console.error('INV_GetTraspasosPendientesRecibir error', error);
+        const message = error?.message || 'No se pudieron obtener los traspasos pendientes.';
         return throwError(() => new Error(message));
       }),
     );
