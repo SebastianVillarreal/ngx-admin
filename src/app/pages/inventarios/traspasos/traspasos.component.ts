@@ -3,6 +3,7 @@ import { FormBuilder, Validators } from '@angular/forms';
 
 import {
   DetalleTraspasoItem,
+  FinalizarTraspasoPayload,
   InsertRenglonTraspasoPayload,
   NuevoTraspasoMetadata,
   NuevoTraspasoPayload,
@@ -43,6 +44,7 @@ export class TraspasosComponent {
   detalleError = '';
   isGenerando = false;
   insertandoDetalle = false;
+  finalizando = false;
   resultadoTraspaso: NuevoTraspasoMetadata | null = null;
   detalleTraspaso: DetalleTraspasoItem[] = [];
   cargandoDetalle = false;
@@ -162,6 +164,33 @@ export class TraspasosComponent {
     this.markForCheck();
   }
 
+  onFinalizarTraspaso(): void {
+    if (!this.resultadoTraspaso) {
+      this.errorGeneracion = 'Primero genera el traspaso.';
+      return;
+    }
+
+    const payload: FinalizarTraspasoPayload = {
+      Salida: String(this.resultadoTraspaso.IdSalida),
+      Entrada: String(this.resultadoTraspaso.IdEntrada),
+    };
+
+    this.finalizando = true;
+    this.traspasosService.finalizarTraspaso(payload).subscribe({
+      next: () => {
+        this.finalizando = false;
+        this.resetPantalla();
+        this.mensajeGeneracion = 'Traspaso enviado correctamente.';
+        this.markForCheck();
+      },
+      error: (error) => {
+        this.errorGeneracion = error?.message ?? 'No se pudo finalizar el traspaso.';
+        this.finalizando = false;
+        this.markForCheck();
+      },
+    });
+  }
+
   private cargarDetalleTraspaso(idSalida: number): void {
     this.cargandoDetalle = true;
     this.detalleError = '';
@@ -186,7 +215,26 @@ export class TraspasosComponent {
     this.detalleTraspaso = [];
     this.detalleMensaje = '';
     this.detalleError = '';
+    this.finalizando = false;
+    this.insertandoDetalle = false;
+    this.isGenerando = false;
+    this.cargandoDetalle = false;
     this.markForCheck();
+  }
+
+  private resetPantalla(): void {
+    this.traspasoForm.reset({
+      origen: '',
+      destino: '',
+      referencia: '',
+    });
+    this.detalleForm.reset({
+      codigo: '',
+      descripcion: '',
+      cantidad: null,
+      costo: null,
+    });
+    this.resetMensajes();
   }
 
   private markForCheck(): void {

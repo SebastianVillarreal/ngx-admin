@@ -64,11 +64,26 @@ interface DetalleTraspasoApiResponse {
   };
 }
 
+export interface FinalizarTraspasoPayload {
+  Salida: string;
+  Entrada: string;
+}
+
+interface FinalizarTraspasoApiResponse {
+  StatusCode: number;
+  success: boolean;
+  message: string;
+  response?: {
+    data?: number;
+  };
+}
+
 @Injectable({ providedIn: 'root' })
 export class TraspasosService {
   private readonly nuevoTraspasoEndpoint = '/api/INV_NuevoTraspaso';
   private readonly insertRenglonEndpoint = '/api/INV_InsertRenglonTraspaso';
   private readonly detalleEndpoint = '/api/GetDetalleTraspasosEnTransito';
+  private readonly finalizarEndpoint = '/api/INV_EnviarTraspaso';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -113,6 +128,22 @@ export class TraspasosService {
       catchError((error) => {
         console.error('GetDetalleTraspasosEnTransito error', error);
         const message = error?.message || 'No se pudo obtener el detalle del traspaso.';
+        return throwError(() => new Error(message));
+      }),
+    );
+  }
+
+  finalizarTraspaso(payload: FinalizarTraspasoPayload): Observable<boolean> {
+    return this.http.post<FinalizarTraspasoApiResponse>(this.finalizarEndpoint, payload).pipe(
+      map((res) => {
+        if (!res.success) {
+          throw new Error(res.message || 'No se pudo finalizar el traspaso.');
+        }
+        return true;
+      }),
+      catchError((error) => {
+        console.error('INV_EnviarTraspaso error', error);
+        const message = error?.message || 'No se pudo finalizar el traspaso.';
         return throwError(() => new Error(message));
       }),
     );

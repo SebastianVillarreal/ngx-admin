@@ -98,6 +98,17 @@
           <h3>Detalle de productos</h3>
           <p>Agrega los renglones que formarán parte del traspaso.</p>
         </div>
+        <div class="detalle-actions" *ngIf="resultadoTraspaso">
+          <button
+            nbButton
+            status="success"
+            type="button"
+            (click)="onFinalizarTraspaso()"
+            [disabled]="!resultadoTraspaso || finalizando"
+          >
+            {{ finalizando ? 'Enviando...' : 'Finalizar traspaso' }}
+          </button>
+        </div>
       </header>
 
       <form [formGroup]="detalleForm" class="detalle-form">
