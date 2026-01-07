@@ -162,6 +162,14 @@ export const MENU_ITEMS: NbMenuItem[] = [
             title: 'Recibir traspasos',
             link: '/pages/inventarios/recibir-traspasos',
           },
+          {
+            title: 'Traspasos enviados',
+            link: '/pages/inventarios/traspasos-enviados',
+          },
+          {
+            title: 'En transito',
+            link: '/pages/inventarios/traspasos-en-transito',
+          },
         ]
       },
       {

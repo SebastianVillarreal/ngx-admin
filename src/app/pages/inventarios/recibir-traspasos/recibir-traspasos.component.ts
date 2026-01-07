@@ -2,11 +2,15 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, TemplateRef, Vie
 import { FormBuilder, Validators } from '@angular/forms';
 import { NbDialogRef, NbDialogService } from '@nebular/theme';
 
-import { DetalleTraspasoItem, TraspasoPendiente, TraspasosService } from '../traspasos/traspasos.service';
+import {
+  ActualizarCantidadRecibidaPayload,
+  DetalleTraspasoItem,
+  RecibirTraspasoPayload,
+  TraspasoPendiente,
+  TraspasosService,
+} from '../traspasos/traspasos.service';
 
-interface DetalleTraspasoEditable extends DetalleTraspasoItem {
-  cantidadRecibida: number;
-}
+type DetalleTraspasoEditable = DetalleTraspasoItem & { cantidadRecibida: number };
 
 interface SucursalOption {
   value: string;
@@ -42,8 +46,11 @@ export class RecibirTraspasosComponent {
   detalleRenglones: DetalleTraspasoEditable[] = [];
   detalleCargando = false;
   detalleError = '';
+  detalleMensaje = '';
   autorizarMensaje = '';
   autorizarError = '';
+  actualizandoCantidadId: number | null = null;
+  autorizando = false;
 
   private detalleDialogRef: NbDialogRef<unknown> | null = null;
 
@@ -136,8 +143,10 @@ export class RecibirTraspasosComponent {
     this.detalleSeleccionado = pendiente;
     this.detalleRenglones = [];
     this.detalleError = '';
+    this.detalleMensaje = '';
     this.autorizarError = '';
     this.autorizarMensaje = '';
+    this.actualizandoCantidadId = null;
     this.detalleCargando = true;
     this.markForCheck();
 
@@ -151,7 +160,7 @@ export class RecibirTraspasosComponent {
       next: (detalle) => {
         this.detalleRenglones = detalle.map((item) => ({
           ...item,
-          cantidadRecibida: item.Cantidad,
+          cantidadRecibida: item.CantidadRecibida ?? item.Cantidad,
         }));
         this.detalleCargando = false;
         this.markForCheck();
@@ -165,27 +174,55 @@ export class RecibirTraspasosComponent {
   }
 
   onAutorizarTraspaso(): void {
+    if (!this.detalleSeleccionado) {
+      return;
+    }
+
     this.autorizarError = '';
-    this.autorizarMensaje = 'Funcionalidad pendiente de definición.';
+    this.autorizarMensaje = '';
+    this.detalleMensaje = '';
+    this.autorizando = true;
     this.markForCheck();
+
+    const payload: RecibirTraspasoPayload = {
+      IdMovimiento: String(this.detalleSeleccionado.Id),
+      Usuario: '1',
+    };
+
+    this.traspasosService.recibirTraspaso(payload).subscribe({
+      next: () => {
+        const idProcesado = this.detalleSeleccionado?.Id;
+        this.autorizarMensaje = 'Traspaso autorizado correctamente.';
+        this.autorizando = false;
+        if (idProcesado != null) {
+          this.removerTraspasoProcesado(idProcesado);
+        }
+        this.cerrarDetalleSinReset();
+        this.markForCheck();
+      },
+      error: (error) => {
+        this.autorizarError = error?.message ?? 'No se pudo autorizar el traspaso.';
+        this.autorizando = false;
+        this.markForCheck();
+      },
+    });
   }
 
   onCerrarDetalle(): void {
-    if (this.detalleDialogRef) {
-      this.detalleDialogRef.close();
-      this.detalleDialogRef = null;
-    }
-    this.detalleSeleccionado = null;
-    this.detalleRenglones = [];
+    this.cerrarDetalleSinReset();
+    this.detalleMensaje = '';
     this.autorizarMensaje = '';
     this.autorizarError = '';
-    this.markForCheck();
+    this.actualizandoCantidadId = null;
+    this.autorizando = false;
   }
 
   onCantidadRecibidaChange(renglon: DetalleTraspasoEditable, value: string): void {
     const cantidad = Number(value);
     const nuevaCantidad = Number.isFinite(cantidad) ? Math.max(cantidad, 0) : renglon.cantidadRecibida;
 
+    this.detalleMensaje = '';
+    this.detalleError = '';
     this.detalleRenglones = this.detalleRenglones.map((item) =>
       item === renglon ? { ...item, cantidadRecibida: nuevaCantidad } : item,
     );
@@ -193,8 +230,35 @@ export class RecibirTraspasosComponent {
   }
 
   onCantidadRecibidaEnter(renglon: DetalleTraspasoEditable): void {
-    this.autorizarMensaje = `Cantidad capturada para ${renglon.Codigo}: ${renglon.cantidadRecibida}. Pendiente integrar servicio.`;
+    if (this.actualizandoCantidadId) {
+      return;
+    }
+
+    const payload: ActualizarCantidadRecibidaPayload = {
+      IdRenglon: String(renglon.Id),
+      CantidadRecibida: String(renglon.cantidadRecibida),
+    };
+
+    this.actualizandoCantidadId = renglon.Id;
+    this.detalleMensaje = '';
+    this.detalleError = '';
     this.markForCheck();
+
+    this.traspasosService.actualizarCantidadRecibida(payload).subscribe({
+      next: () => {
+        this.detalleRenglones = this.detalleRenglones.map((item) =>
+          item === renglon ? { ...item, CantidadRecibida: renglon.cantidadRecibida } : item,
+        );
+        this.detalleMensaje = `Cantidad recibida actualizada para ${renglon.Codigo}.`;
+        this.actualizandoCantidadId = null;
+        this.markForCheck();
+      },
+      error: (error) => {
+        this.detalleError = error?.message ?? 'No se pudo actualizar la cantidad recibida.';
+        this.actualizandoCantidadId = null;
+        this.markForCheck();
+      },
+    });
   }
 
   private obtenerNombreSucursal(valor: string): string {
@@ -206,6 +270,29 @@ export class RecibirTraspasosComponent {
     this.error = '';
     this.autorizarError = '';
     this.autorizarMensaje = '';
+    this.detalleMensaje = '';
+  }
+
+  private removerTraspasoProcesado(idMovimiento: number): void {
+    this.pendientes = this.pendientes.filter((pendiente) => pendiente.Id !== idMovimiento);
+    if (this.pendientes.length === 0) {
+      this.pageIndex = 1;
+    } else if (this.pageIndex > this.totalPaginas) {
+      this.pageIndex = this.totalPaginas;
+    }
+  }
+
+  private cerrarDetalleSinReset(): void {
+    if (this.detalleDialogRef) {
+      this.detalleDialogRef.close();
+      this.detalleDialogRef = null;
+    }
+    this.detalleSeleccionado = null;
+    this.detalleRenglones = [];
+    this.detalleMensaje = '';
+    this.actualizandoCantidadId = null;
+    this.autorizando = false;
+    this.markForCheck();
   }
 
   private markForCheck(): void {

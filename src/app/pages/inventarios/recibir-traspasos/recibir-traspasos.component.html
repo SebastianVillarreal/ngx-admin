@@ -104,6 +104,7 @@
     <nb-card-body>
       <nb-alert *ngIf="autorizarMensaje" status="info" accent="info">{{ autorizarMensaje }}</nb-alert>
       <nb-alert *ngIf="autorizarError" status="danger" accent="danger">{{ autorizarError }}</nb-alert>
+      <nb-alert *ngIf="detalleMensaje" status="success" accent="success">{{ detalleMensaje }}</nb-alert>
       <nb-alert *ngIf="detalleError" status="danger" accent="danger">{{ detalleError }}</nb-alert>
 
       <div class="tabla-loading" *ngIf="detalleCargando">
@@ -114,6 +115,7 @@
         <table>
           <thead>
             <tr>
+              <th>ID</th>
               <th>Código</th>
               <th>Descripción</th>
               <th>Familia</th>
@@ -125,6 +127,7 @@
           </thead>
           <tbody>
             <tr *ngFor="let renglon of detalleRenglones">
+              <td>{{ renglon.Id }}</td>
               <td>{{ renglon.Codigo }}</td>
               <td>{{ renglon.Descripcion }}</td>
               <td>{{ renglon.Familia }}</td>
@@ -140,6 +143,7 @@
                   [value]="renglon.cantidadRecibida"
                   (input)="onCantidadRecibidaChange(renglon, $event.target.value)"
                   (keydown.enter)="onCantidadRecibidaEnter(renglon)"
+                  [disabled]="actualizandoCantidadId === renglon.Id"
                   placeholder="Captura lo recibido"
                 />
               </td>
@@ -153,8 +157,13 @@
       </p>
     </nb-card-body>
     <nb-card-footer class="dialog-footer">
-      <button nbButton status="success" (click)="onAutorizarTraspaso()" [disabled]="detalleCargando">
-        Autorizar
+      <button
+        nbButton
+        status="success"
+        (click)="onAutorizarTraspaso()"
+        [disabled]="detalleCargando || autorizando"
+      >
+        {{ autorizando ? 'Autorizando...' : 'Autorizar' }}
       </button>
     </nb-card-footer>
   </nb-card>

@@ -47,11 +47,13 @@ interface InsertRenglonTraspasoApiResponse {
 }
 
 export interface DetalleTraspasoItem {
+  Id: number;
   Codigo: string;
   Descripcion: string;
   Familia: string;
   Departamento: string;
   Cantidad: number;
+  CantidadRecibida: number;
   UnidadMedida: string;
 }
 
@@ -94,6 +96,31 @@ interface TraspasosPendientesApiResponse {
   };
 }
 
+export interface ActualizarCantidadRecibidaPayload {
+  IdRenglon: string;
+  CantidadRecibida: string;
+}
+
+interface ActualizarCantidadRecibidaApiResponse {
+  StatusCode: number;
+  success: boolean;
+  message: string;
+}
+
+export interface RecibirTraspasoPayload {
+  IdMovimiento: string;
+  Usuario: string;
+}
+
+interface RecibirTraspasoApiResponse {
+  StatusCode: number;
+  success: boolean;
+  message: string;
+  response?: {
+    data?: number;
+  };
+}
+
 @Injectable({ providedIn: 'root' })
 export class TraspasosService {
   private readonly nuevoTraspasoEndpoint = '/api/INV_NuevoTraspaso';
@@ -101,6 +128,8 @@ export class TraspasosService {
   private readonly detalleEndpoint = '/api/GetDetalleTraspasosEnTransito';
   private readonly finalizarEndpoint = '/api/INV_EnviarTraspaso';
   private readonly pendientesEndpoint = '/api/INV_GetTraspasosPendientesRecibir';
+  private readonly actualizarCantidadEndpoint = '/api/INV_UpdateCantidadRecibidaTraspaso';
+  private readonly recibirTraspasoEndpoint = '/api/INV_RecibirTraspaso';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -173,6 +202,38 @@ export class TraspasosService {
       catchError((error) => {
         console.error('INV_GetTraspasosPendientesRecibir error', error);
         const message = error?.message || 'No se pudieron obtener los traspasos pendientes.';
+        return throwError(() => new Error(message));
+      }),
+    );
+  }
+
+  actualizarCantidadRecibida(payload: ActualizarCantidadRecibidaPayload): Observable<boolean> {
+    return this.http.post<ActualizarCantidadRecibidaApiResponse>(this.actualizarCantidadEndpoint, payload).pipe(
+      map((res) => {
+        if (!res.success) {
+          throw new Error(res.message || 'No se pudo actualizar la cantidad recibida.');
+        }
+        return true;
+      }),
+      catchError((error) => {
+        console.error('INV_UpdateCantidadRecibidaTraspaso error', error);
+        const message = error?.message || 'No se pudo actualizar la cantidad recibida.';
+        return throwError(() => new Error(message));
+      }),
+    );
+  }
+
+  recibirTraspaso(payload: RecibirTraspasoPayload): Observable<boolean> {
+    return this.http.post<RecibirTraspasoApiResponse>(this.recibirTraspasoEndpoint, payload).pipe(
+      map((res) => {
+        if (!res.success) {
+          throw new Error(res.message || 'No se pudo autorizar el traspaso.');
+        }
+        return true;
+      }),
+      catchError((error) => {
+        console.error('INV_RecibirTraspaso error', error);
+        const message = error?.message || 'No se pudo autorizar el traspaso.';
         return throwError(() => new Error(message));
       }),
     );
