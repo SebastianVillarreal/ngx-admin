@@ -9,6 +9,8 @@ import { ImportarFisicosComponent } from './importar-fisicos/importar-fisicos.co
 import { RepartoMermasComponent } from './reparto-mermas/reparto-mermas.component';
 import { TraspasosComponent } from './traspasos/traspasos.component';
 import { RecibirTraspasosComponent } from './recibir-traspasos/recibir-traspasos.component';
+import { TraspasosEnTransitoComponent } from './traspasos-en-transito/traspasos-en-transito.component';
+import { TraspasosEnviadosComponent } from './traspasos-enviados/traspasos-enviados.component';
 
 const routes: Routes = [
   {
@@ -47,6 +49,14 @@ const routes: Routes = [
   {
     path: 'recibir-traspasos',
     component: RecibirTraspasosComponent,
+  },
+  {
+    path: 'traspasos-en-transito',
+    component: TraspasosEnTransitoComponent,
+  },
+  {
+    path: 'traspasos-enviados',
+    component: TraspasosEnviadosComponent,
   },
 ];
 

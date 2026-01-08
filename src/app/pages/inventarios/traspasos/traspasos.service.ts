@@ -121,6 +121,46 @@ interface RecibirTraspasoApiResponse {
   };
 }
 
+export interface TraspasoEnTransito {
+  Id: number;
+  Tipo: string;
+  Folio: number;
+  FechaEnvio: string;
+  UsuarioEnvia: string;
+  SucursalDestino: string;
+}
+
+interface TraspasosEnTransitoApiResponse {
+  StatusCode: number;
+  success: boolean;
+  message: string;
+  response?: {
+    data?: TraspasoEnTransito[];
+  };
+}
+
+export interface TraspasoEnviado {
+  Id: number;
+  Almacen: number;
+  TipoMovimiento: string;
+  Folio: number;
+  Referencia: string;
+  Estatus: string;
+  FechaElaboracion: string;
+  UsuarioEntrega: string;
+  NombreUsuarioEntrega: string;
+  Destino: string;
+}
+
+interface TraspasosEnviadosApiResponse {
+  StatusCode: number;
+  success: boolean;
+  message: string;
+  response?: {
+    data?: TraspasoEnviado[];
+  };
+}
+
 @Injectable({ providedIn: 'root' })
 export class TraspasosService {
   private readonly nuevoTraspasoEndpoint = '/api/INV_NuevoTraspaso';
@@ -130,6 +170,8 @@ export class TraspasosService {
   private readonly pendientesEndpoint = '/api/INV_GetTraspasosPendientesRecibir';
   private readonly actualizarCantidadEndpoint = '/api/INV_UpdateCantidadRecibidaTraspaso';
   private readonly recibirTraspasoEndpoint = '/api/INV_RecibirTraspaso';
+  private readonly traspasosEnTransitoEndpoint = '/api/GetTraspasosEnTransito';
+  private readonly traspasosEnviadosEndpoint = '/api/INV_GetTraspasosEnviadosFechaSucursal';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -234,6 +276,31 @@ export class TraspasosService {
       catchError((error) => {
         console.error('INV_RecibirTraspaso error', error);
         const message = error?.message || 'No se pudo autorizar el traspaso.';
+        return throwError(() => new Error(message));
+      }),
+    );
+  }
+
+  obtenerTraspasosEnTransito(sucursal: string): Observable<TraspasoEnTransito[]> {
+    const params = new HttpParams().set('sucursal', sucursal);
+    return this.http.get<TraspasosEnTransitoApiResponse>(this.traspasosEnTransitoEndpoint, { params }).pipe(
+      map((res) => res.response?.data ?? []),
+      catchError((error) => {
+        console.error('GetTraspasosEnTransito error', error);
+        const message = error?.message || 'No se pudieron obtener los traspasos en tránsito.';
+        return throwError(() => new Error(message));
+      }),
+    );
+  }
+
+  obtenerTraspasosEnviados(sucursal: string, fechaInicial: string, fechaFinal: string): Observable<TraspasoEnviado[]> {
+    let params = new HttpParams().set('sucursal', sucursal);
+    params = params.set('fechaInicial', fechaInicial).set('fechaFinal', fechaFinal);
+    return this.http.get<TraspasosEnviadosApiResponse>(this.traspasosEnviadosEndpoint, { params }).pipe(
+      map((res) => res.response?.data ?? []),
+      catchError((error) => {
+        console.error('INV_GetTraspasosEnviadosFechaSucursal error', error);
+        const message = error?.message || 'No se pudieron obtener los traspasos enviados.';
         return throwError(() => new Error(message));
       }),
     );

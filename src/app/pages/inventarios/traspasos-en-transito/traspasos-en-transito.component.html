@@ -1,0 +1,71 @@
+<nb-card>
+  <nb-card-header>
+    <div>
+      <h2>Traspasos en tránsito</h2>
+      <p>Revisa los traspasos que aún no han sido recibidos en destino.</p>
+    </div>
+  </nb-card-header>
+  <nb-card-body>
+    <form [formGroup]="filtroForm" class="filtro-form">
+      <div class="form-field">
+        <label>Sucursal Origen</label>
+        <nb-select
+          placeholder="Selecciona una sucursal"
+          formControlName="sucursal"
+          [status]="filtroForm.get('sucursal')?.invalid && filtroForm.get('sucursal')?.touched ? 'danger' : 'basic'"
+        >
+          <nb-option *ngFor="let sucursal of sucursales" [value]="sucursal.value">
+            {{ sucursal.label }}
+          </nb-option>
+        </nb-select>
+        <small class="error-text" *ngIf="filtroForm.get('sucursal')?.invalid && filtroForm.get('sucursal')?.touched">
+          Selecciona la sucursal destino para continuar.
+        </small>
+      </div>
+
+      <div class="form-actions">
+        <button nbButton status="primary" type="button" (click)="onBuscar()">
+          Buscar traspasos
+        </button>
+      </div>
+    </form>
+
+    <nb-alert *ngIf="error" status="danger" accent="danger">{{ error }}</nb-alert>
+    <nb-alert *ngIf="mensaje" status="info" accent="info">{{ mensaje }}</nb-alert>
+
+    <div class="tabla-loading" *ngIf="cargando">
+      <nb-spinner size="large"></nb-spinner>
+    </div>
+
+    <div class="tabla-traspasos" *ngIf="!cargando && traspasos.length; else sinTraspasos">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Tipo</th>
+            <th>Folio</th>
+            <th>Fecha de envío</th>
+            <th>Usuario que envía</th>
+            <th>Sucursal destino</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let traspaso of traspasos">
+            <td>{{ traspaso.Id }}</td>
+            <td>{{ traspaso.Tipo }}</td>
+            <td>{{ traspaso.Folio }}</td>
+            <td>{{ traspaso.FechaEnvio }}</td>
+            <td>{{ traspaso.UsuarioEnvia }}</td>
+            <td>{{ traspaso.SucursalDestino }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ng-template #sinTraspasos>
+      <p class="hint-text" *ngIf="!cargando && !mensaje && !error">
+        Usa el filtro para consultar los traspasos en tránsito.
+      </p>
+    </ng-template>
+  </nb-card-body>
+</nb-card>

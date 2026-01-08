@@ -23,6 +23,8 @@ import { ImportarFisicosComponent } from './importar-fisicos/importar-fisicos.co
 import { RepartoMermasComponent } from './reparto-mermas/reparto-mermas.component';
 import { TraspasosComponent } from './traspasos/traspasos.component';
 import { RecibirTraspasosComponent } from './recibir-traspasos/recibir-traspasos.component';
+import { TraspasosEnTransitoComponent } from './traspasos-en-transito/traspasos-en-transito.component';
+import { TraspasosEnviadosComponent } from './traspasos-enviados/traspasos-enviados.component';
 
 @NgModule({
   imports: [
@@ -49,6 +51,8 @@ import { RecibirTraspasosComponent } from './recibir-traspasos/recibir-traspasos
     RepartoMermasComponent,
     TraspasosComponent,
     RecibirTraspasosComponent,
+    TraspasosEnTransitoComponent,
+    TraspasosEnviadosComponent,
   ],
 })
 export class InventariosModule {}

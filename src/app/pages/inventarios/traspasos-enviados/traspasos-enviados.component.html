@@ -1,0 +1,89 @@
+<nb-card>
+  <nb-card-header>
+    <div>
+      <h2>Traspasos enviados</h2>
+      <p>Consulta los traspasos generados por la sucursal seleccionada en un periodo.</p>
+    </div>
+  </nb-card-header>
+  <nb-card-body>
+    <form [formGroup]="filtroForm" class="filtro-form">
+      <div class="form-field">
+        <label>Sucursal origen</label>
+        <nb-select
+          placeholder="Selecciona una sucursal"
+          formControlName="sucursal"
+          [status]="filtroForm.get('sucursal')?.invalid && filtroForm.get('sucursal')?.touched ? 'danger' : 'basic'"
+        >
+          <nb-option *ngFor="let sucursal of sucursales" [value]="sucursal.value">
+            {{ sucursal.label }}
+          </nb-option>
+        </nb-select>
+        <small class="error-text" *ngIf="filtroForm.get('sucursal')?.invalid && filtroForm.get('sucursal')?.touched">
+          Selecciona la sucursal de origen.
+        </small>
+      </div>
+
+      <div class="form-field">
+        <label>Fecha inicial</label>
+        <input nbInput type="date" formControlName="fechaInicial" />
+        <small class="error-text" *ngIf="filtroForm.get('fechaInicial')?.invalid && filtroForm.get('fechaInicial')?.touched">
+          Selecciona la fecha inicial.
+        </small>
+      </div>
+
+      <div class="form-field">
+        <label>Fecha final</label>
+        <input nbInput type="date" formControlName="fechaFinal" />
+        <small class="error-text" *ngIf="filtroForm.get('fechaFinal')?.invalid && filtroForm.get('fechaFinal')?.touched">
+          Selecciona la fecha final.
+        </small>
+      </div>
+
+      <div class="form-actions">
+        <button nbButton status="primary" type="button" (click)="onBuscar()">
+          Buscar traspasos
+        </button>
+      </div>
+    </form>
+
+    <nb-alert *ngIf="error" status="danger" accent="danger">{{ error }}</nb-alert>
+    <nb-alert *ngIf="mensaje" status="info" accent="info">{{ mensaje }}</nb-alert>
+
+    <div class="tabla-loading" *ngIf="cargando">
+      <nb-spinner size="large"></nb-spinner>
+    </div>
+
+    <div class="tabla-traspasos" *ngIf="!cargando && traspasos.length; else sinTraspasos">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Folio</th>
+            <th>Referencia</th>
+            <th>Estatus</th>
+            <th>Fecha elaboración</th>
+            <th>Usuario entrega</th>
+            <th>Destino</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let traspaso of traspasos">
+            <td>{{ traspaso.Id }}</td>
+            <td>{{ traspaso.Folio }}</td>
+            <td>{{ traspaso.Referencia }}</td>
+            <td>{{ traspaso.Estatus }}</td>
+            <td>{{ traspaso.FechaElaboracion }}</td>
+            <td>{{ traspaso.NombreUsuarioEntrega }}</td>
+            <td>{{ traspaso.Destino }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ng-template #sinTraspasos>
+      <p class="hint-text" *ngIf="!cargando && !mensaje && !error">
+        Usa los filtros para consultar traspasos enviados.
+      </p>
+    </ng-template>
+  </nb-card-body>
+</nb-card>
