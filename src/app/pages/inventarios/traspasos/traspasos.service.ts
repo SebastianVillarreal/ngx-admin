@@ -182,6 +182,24 @@ interface TraspasosConDiferenciaApiResponse {
   };
 }
 
+export interface ExistenciaInventario {
+  Fecha: string;
+  Codigo: string;
+  Cantidad: number;
+  Descripcion: string;
+  Familia: string;
+  Departamento: string;
+}
+
+interface ExistenciasInventarioApiResponse {
+  StatusCode: number;
+  success: boolean;
+  message: string;
+  response?: {
+    data?: ExistenciaInventario[];
+  };
+}
+
 @Injectable({ providedIn: 'root' })
 export class TraspasosService {
   private readonly nuevoTraspasoEndpoint = '/api/INV_NuevoTraspaso';
@@ -194,6 +212,7 @@ export class TraspasosService {
   private readonly traspasosEnTransitoEndpoint = '/api/GetTraspasosEnTransito';
   private readonly traspasosEnviadosEndpoint = '/api/INV_GetTraspasosEnviadosFechaSucursal';
   private readonly traspasosConDiferenciaEndpoint = '/api/GetDiferenciasTraspasos';
+  private readonly existenciasEndpoint = '/api/INV_GetFechasCierre';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -339,6 +358,22 @@ export class TraspasosService {
       catchError((error) => {
         console.error('GetDiferenciasTraspasos error', error);
         const message = error?.message || 'No se pudieron obtener los traspasos con diferencia.';
+        return throwError(() => new Error(message));
+      }),
+    );
+  }
+
+  obtenerExistencias(idFamilia: string, idDepartamento: string, fecha: string): Observable<ExistenciaInventario[]> {
+    const params = new HttpParams()
+      .set('id_familia', idFamilia)
+      .set('id_departamento', idDepartamento)
+      .set('fecha', fecha);
+
+    return this.http.get<ExistenciasInventarioApiResponse>(this.existenciasEndpoint, { params }).pipe(
+      map((res) => res.response?.data ?? []),
+      catchError((error) => {
+        console.error('INV_GetFechasCierre error', error);
+        const message = error?.message || 'No se pudieron obtener las existencias.';
         return throwError(() => new Error(message));
       }),
     );

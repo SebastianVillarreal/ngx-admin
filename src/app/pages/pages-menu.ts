@@ -188,6 +188,10 @@ export const MENU_ITEMS: NbMenuItem[] = [
         title: 'Reparto de mermas(Maqueta)',
         link: '/pages/inventarios/reparto-mermas',
       },
+      {
+        title: 'Existencias',
+        link: '/pages/inventarios/existencias'
+      },
       
     ],
   },

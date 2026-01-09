@@ -26,6 +26,7 @@ import { RecibirTraspasosComponent } from './recibir-traspasos/recibir-traspasos
 import { TraspasosEnTransitoComponent } from './traspasos-en-transito/traspasos-en-transito.component';
 import { TraspasosEnviadosComponent } from './traspasos-enviados/traspasos-enviados.component';
 import { TraspasosConDiferenciaComponent } from './traspasos-con-diferencia/traspasos-con-diferencia.component';
+import { ExistenciasComponent } from './existencias/existencias.component';
 
 @NgModule({
   imports: [
@@ -55,6 +56,7 @@ import { TraspasosConDiferenciaComponent } from './traspasos-con-diferencia/tras
     TraspasosEnTransitoComponent,
     TraspasosEnviadosComponent,
     TraspasosConDiferenciaComponent,
+    ExistenciasComponent,
   ],
 })
 export class InventariosModule {}

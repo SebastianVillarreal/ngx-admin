@@ -1,0 +1,95 @@
+<nb-card>
+  <nb-card-header>
+    <div>
+      <h2>Existencias por cierre</h2>
+      <p>Consulta las existencias registradas para la combinación seleccionada.</p>
+    </div>
+  </nb-card-header>
+  <nb-card-body>
+    <form [formGroup]="filtroForm" class="filtro-form">
+      <div class="form-field">
+        <label>Departamento</label>
+        <nb-select
+          placeholder="Selecciona un departamento"
+          formControlName="departamento"
+          [status]="filtroForm.get('departamento')?.invalid && filtroForm.get('departamento')?.touched ? 'danger' : 'basic'"
+        >
+          <nb-option *ngFor="let departamento of departamentos" [value]="departamento.value">
+            {{ departamento.label }}
+          </nb-option>
+        </nb-select>
+        <small class="error-text" *ngIf="filtroForm.get('departamento')?.invalid && filtroForm.get('departamento')?.touched">
+          Selecciona el departamento para continuar.
+        </small>
+      </div>
+
+      <div class="form-field">
+        <label>Familia</label>
+        <nb-select
+          placeholder="Selecciona una familia"
+          formControlName="familia"
+          [status]="filtroForm.get('familia')?.invalid && filtroForm.get('familia')?.touched ? 'danger' : 'basic'"
+        >
+          <nb-option *ngFor="let familia of familias" [value]="familia.value">
+            {{ familia.label }}
+          </nb-option>
+        </nb-select>
+        <small class="error-text" *ngIf="filtroForm.get('familia')?.invalid && filtroForm.get('familia')?.touched">
+          Selecciona la familia para continuar.
+        </small>
+      </div>
+
+      <div class="form-field">
+        <label>Fecha</label>
+        <input nbInput type="date" formControlName="fecha" />
+        <small class="error-text" *ngIf="filtroForm.get('fecha')?.invalid && filtroForm.get('fecha')?.touched">
+          Selecciona la fecha para continuar.
+        </small>
+      </div>
+
+      <div class="form-actions">
+        <button nbButton status="primary" type="button" (click)="onBuscar()">
+          Buscar existencias
+        </button>
+      </div>
+    </form>
+
+    <nb-alert *ngIf="error" status="danger" accent="danger">{{ error }}</nb-alert>
+    <nb-alert *ngIf="mensaje" status="info" accent="info">{{ mensaje }}</nb-alert>
+
+    <div class="tabla-loading" *ngIf="cargando">
+      <nb-spinner size="large"></nb-spinner>
+    </div>
+
+    <div class="tabla-existencias" *ngIf="!cargando && existencias.length; else sinExistencias">
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Código</th>
+            <th>Descripción</th>
+            <th>Departamento</th>
+            <th>Familia</th>
+            <th>Cantidad</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let existencia of existencias">
+            <td>{{ existencia.Fecha }}</td>
+            <td>{{ existencia.Codigo }}</td>
+            <td>{{ existencia.Descripcion }}</td>
+            <td>{{ existencia.Departamento }}</td>
+            <td>{{ existencia.Familia }}</td>
+            <td class="col-cantidad">{{ existencia.Cantidad }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ng-template #sinExistencias>
+      <p class="hint-text" *ngIf="!cargando && !mensaje && !error">
+        Usa los filtros para consultar las existencias.
+      </p>
+    </ng-template>
+  </nb-card-body>
+</nb-card>
