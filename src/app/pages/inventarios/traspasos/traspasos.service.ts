@@ -161,6 +161,27 @@ interface TraspasosEnviadosApiResponse {
   };
 }
 
+export interface TraspasoConDiferencia {
+  Codigo: string;
+  Descripcion: string;
+  CantidadSalida: number;
+  CantidadEntrada: number;
+  Diferencia: number;
+  FolioSalida: number;
+  FolioEntrada: number;
+  FechaEntrada: string;
+  FechaSalida: string;
+}
+
+interface TraspasosConDiferenciaApiResponse {
+  StatusCode: number;
+  success: boolean;
+  message: string;
+  response?: {
+    data?: TraspasoConDiferencia[];
+  };
+}
+
 @Injectable({ providedIn: 'root' })
 export class TraspasosService {
   private readonly nuevoTraspasoEndpoint = '/api/INV_NuevoTraspaso';
@@ -172,6 +193,7 @@ export class TraspasosService {
   private readonly recibirTraspasoEndpoint = '/api/INV_RecibirTraspaso';
   private readonly traspasosEnTransitoEndpoint = '/api/GetTraspasosEnTransito';
   private readonly traspasosEnviadosEndpoint = '/api/INV_GetTraspasosEnviadosFechaSucursal';
+  private readonly traspasosConDiferenciaEndpoint = '/api/GetDiferenciasTraspasos';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -301,6 +323,22 @@ export class TraspasosService {
       catchError((error) => {
         console.error('INV_GetTraspasosEnviadosFechaSucursal error', error);
         const message = error?.message || 'No se pudieron obtener los traspasos enviados.';
+        return throwError(() => new Error(message));
+      }),
+    );
+  }
+
+  obtenerTraspasosConDiferencia(fechaInicial: string, fechaFinal: string, sucursal?: string): Observable<TraspasoConDiferencia[]> {
+    let params = new HttpParams().set('fecha_inicial', fechaInicial).set('fecha_final', fechaFinal);
+    if (sucursal && sucursal.trim()) {
+      params = params.set('sucursal', sucursal.trim());
+    }
+
+    return this.http.get<TraspasosConDiferenciaApiResponse>(this.traspasosConDiferenciaEndpoint, { params }).pipe(
+      map((res) => res.response?.data ?? []),
+      catchError((error) => {
+        console.error('GetDiferenciasTraspasos error', error);
+        const message = error?.message || 'No se pudieron obtener los traspasos con diferencia.';
         return throwError(() => new Error(message));
       }),
     );

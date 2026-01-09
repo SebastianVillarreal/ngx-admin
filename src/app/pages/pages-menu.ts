@@ -170,6 +170,10 @@ export const MENU_ITEMS: NbMenuItem[] = [
             title: 'En transito',
             link: '/pages/inventarios/traspasos-en-transito',
           },
+          {
+            title: 'Traspasos con diferencia',
+            link: '/pages/inventarios/traspasos-con-diferencia',
+          },
         ]
       },
       {

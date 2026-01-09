@@ -11,6 +11,7 @@ import { TraspasosComponent } from './traspasos/traspasos.component';
 import { RecibirTraspasosComponent } from './recibir-traspasos/recibir-traspasos.component';
 import { TraspasosEnTransitoComponent } from './traspasos-en-transito/traspasos-en-transito.component';
 import { TraspasosEnviadosComponent } from './traspasos-enviados/traspasos-enviados.component';
+import { TraspasosConDiferenciaComponent } from './traspasos-con-diferencia/traspasos-con-diferencia.component';
 
 const routes: Routes = [
   {
@@ -57,6 +58,10 @@ const routes: Routes = [
   {
     path: 'traspasos-enviados',
     component: TraspasosEnviadosComponent,
+  },
+  {
+    path: 'traspasos-con-diferencia',
+    component: TraspasosConDiferenciaComponent,
   },
 ];
 

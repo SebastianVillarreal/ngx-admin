@@ -1,0 +1,69 @@
+nb-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+h2 {
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}
+
+.filtro-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-actions {
+  display: flex;
+  align-items: flex-end;
+}
+
+.error-text {
+  color: var(--text-danger-color);
+  font-size: 0.75rem;
+}
+
+.tabla-loading {
+  display: flex;
+  justify-content: center;
+  padding: 1.5rem 0;
+}
+
+.tabla-traspasos table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabla-traspasos th,
+.tabla-traspasos td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--divider-color);
+}
+
+.tabla-traspasos th {
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  color: var(--text-hint-color);
+}
+
+.col-diferencia {
+  font-weight: 600;
+  color: var(--text-danger-color);
+}
+
+.hint-text {
+  color: var(--text-hint-color);
+  font-size: 0.85rem;
+}

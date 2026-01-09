@@ -1,0 +1,93 @@
+<nb-card>
+  <nb-card-header>
+    <div>
+      <h2>Traspasos con diferencia</h2>
+      <p>Identifica artículos cuyo traspaso registró diferencias entre salida y entrada.</p>
+    </div>
+  </nb-card-header>
+  <nb-card-body>
+    <form [formGroup]="filtroForm" class="filtro-form">
+      <div class="form-field">
+        <label>Sucursal</label>
+        <nb-select
+          placeholder="Selecciona una sucursal"
+          formControlName="sucursal"
+          [status]="filtroForm.get('sucursal')?.invalid && filtroForm.get('sucursal')?.touched ? 'danger' : 'basic'"
+        >
+          <nb-option *ngFor="let sucursal of sucursales" [value]="sucursal.value">
+            {{ sucursal.label }}
+          </nb-option>
+        </nb-select>
+        <small class="error-text" *ngIf="filtroForm.get('sucursal')?.invalid && filtroForm.get('sucursal')?.touched">
+          Selecciona la sucursal para continuar.
+        </small>
+      </div>
+
+      <div class="form-field">
+        <label>Fecha inicial</label>
+        <input nbInput type="date" formControlName="fechaInicial" />
+        <small class="error-text" *ngIf="filtroForm.get('fechaInicial')?.invalid && filtroForm.get('fechaInicial')?.touched">
+          Selecciona la fecha inicial.
+        </small>
+      </div>
+
+      <div class="form-field">
+        <label>Fecha final</label>
+        <input nbInput type="date" formControlName="fechaFinal" />
+        <small class="error-text" *ngIf="filtroForm.get('fechaFinal')?.invalid && filtroForm.get('fechaFinal')?.touched">
+          Selecciona la fecha final.
+        </small>
+      </div>
+
+      <div class="form-actions">
+        <button nbButton status="primary" type="button" (click)="onBuscar()">
+          Buscar diferencias
+        </button>
+      </div>
+    </form>
+
+    <nb-alert *ngIf="error" status="danger" accent="danger">{{ error }}</nb-alert>
+    <nb-alert *ngIf="mensaje" status="info" accent="info">{{ mensaje }}</nb-alert>
+
+    <div class="tabla-loading" *ngIf="cargando">
+      <nb-spinner size="large"></nb-spinner>
+    </div>
+
+    <div class="tabla-traspasos" *ngIf="!cargando && traspasos.length; else sinTraspasos">
+      <table>
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Descripción</th>
+            <th>Salida</th>
+            <th>Entrada</th>
+            <th>Diferencia</th>
+            <th>Folio salida</th>
+            <th>Folio entrada</th>
+            <th>Fecha salida</th>
+            <th>Fecha entrada</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let traspaso of traspasos">
+            <td>{{ traspaso.Codigo }}</td>
+            <td>{{ traspaso.Descripcion }}</td>
+            <td>{{ traspaso.CantidadSalida }}</td>
+            <td>{{ traspaso.CantidadEntrada }}</td>
+            <td class="col-diferencia">{{ traspaso.Diferencia }}</td>
+            <td>{{ traspaso.FolioSalida }}</td>
+            <td>{{ traspaso.FolioEntrada }}</td>
+            <td>{{ traspaso.FechaSalida }}</td>
+            <td>{{ traspaso.FechaEntrada }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ng-template #sinTraspasos>
+      <p class="hint-text" *ngIf="!cargando && !mensaje && !error">
+        Usa los filtros para consultar las diferencias.
+      </p>
+    </ng-template>
+  </nb-card-body>
+</nb-card>
