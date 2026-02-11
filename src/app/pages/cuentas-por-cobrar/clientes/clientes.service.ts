@@ -76,6 +76,11 @@ interface ClienteByIdResponse {
   };
 }
 
+interface CancelaClienteResponse {
+  success?: boolean;
+  message?: string;
+}
+
 export interface InsertClientePayload {
   Nombre: string;
   rfc: string;
@@ -103,6 +108,7 @@ export interface InsertClientePayload {
 export class ClientesService {
   private readonly endpoint = `${environment.apiBase}/GetClientes`;
   private readonly insertEndpoint = `${environment.apiBase}/InsertCliente`;
+  private readonly cancelaClienteEndpoint = `${environment.apiBase}/CancelaCliente`;
   private readonly usoCfdiEndpoint = `${environment.apiBase}/Getc_UsoCfdi`;
   private readonly regimenEndpoint = `${environment.apiBase}/Getc_RegimenFiscal`;
   private readonly clienteByIdEndpoint = `${environment.apiBase}/GetDatosCliente`;
@@ -125,6 +131,23 @@ export class ClientesService {
       catchError((error) => {
         console.error('InsertCliente error', error);
         return throwError(() => new Error('No se pudo registrar el cliente.'));
+      }),
+    );
+  }
+
+  toggleClienteEstatus(id: number, estatus: number): Observable<{ success: boolean; message: string }> {
+    const payload = {
+      Id: String(id),
+      Estatus: String(estatus),
+    };
+    return this.http.post<CancelaClienteResponse>(this.cancelaClienteEndpoint, payload).pipe(
+      map((res) => ({
+        success: res?.success ?? true,
+        message: res?.message ?? 'Estatus actualizado correctamente.',
+      })),
+      catchError((error) => {
+        console.error('CancelaCliente error', error);
+        return throwError(() => new Error('No se pudo actualizar el estatus del cliente.'));
       }),
     );
   }

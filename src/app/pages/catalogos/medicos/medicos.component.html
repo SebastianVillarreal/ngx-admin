@@ -145,10 +145,10 @@
               <td>{{ getTelefonoPreferido(medico) }}</td>
               <td>{{ medico.Domicilio }}</td>
               <td>
-                <nb-badge
+                <nb-tag
                   [text]="getEstatusLabel(medico.Estatus)"
                   [status]="getEstatusStatus(medico.Estatus)"
-                ></nb-badge>
+                ></nb-tag>
               </td>
               <td class="acciones">
                 <button nbButton size="tiny" status="basic" hero (click)="onView(medico)">

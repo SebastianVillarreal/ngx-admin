@@ -28,6 +28,9 @@ export class ClientesComponent implements OnInit {
   editingClienteId: number | null = null;
   editingClienteNombre = '';
   editingClienteLoading = false;
+  estatusUpdateError = '';
+  estatusUpdateSuccess = '';
+  private readonly updatingEstatusIds = new Set<number>();
 
   constructor(
     private readonly clientesService: ClientesService,
@@ -173,8 +176,37 @@ export class ClientesComponent implements OnInit {
     return cliente.Telefono || 'Sin teléfono';
   }
 
-  onToggleEstatus(cliente: Cliente): void {
-    console.log('Toggle estatus', cliente);
+  onToggleEstatus(cliente: Cliente, checked: boolean): void {
+    if (!cliente?.Id || this.updatingEstatusIds.has(cliente.Id)) {
+      return;
+    }
+
+    const previousEstatus = cliente.IdEstatus === 1 ? 1 : 0;
+    const nextEstatus = checked ? 1 : 0;
+    if (previousEstatus === nextEstatus) {
+      return;
+    }
+
+    this.estatusUpdateError = '';
+    this.estatusUpdateSuccess = '';
+    this.updatingEstatusIds.add(cliente.Id);
+    cliente.IdEstatus = nextEstatus;
+
+    this.clientesService.toggleClienteEstatus(cliente.Id, nextEstatus).subscribe({
+      next: (res) => {
+        this.updatingEstatusIds.delete(cliente.Id);
+        this.estatusUpdateSuccess = res?.message || 'Estatus actualizado correctamente.';
+      },
+      error: (err) => {
+        this.updatingEstatusIds.delete(cliente.Id);
+        cliente.IdEstatus = previousEstatus;
+        this.estatusUpdateError = err?.message || 'No se pudo actualizar el estatus del cliente.';
+      },
+    });
+  }
+
+  isUpdatingEstatus(cliente: Cliente): boolean {
+    return this.updatingEstatusIds.has(cliente.Id);
   }
 
   onEdit(cliente: Cliente): void {

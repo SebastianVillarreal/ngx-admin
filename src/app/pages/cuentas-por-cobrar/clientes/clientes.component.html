@@ -167,6 +167,13 @@
     </nb-alert>
 
     <div class="table-container" *ngIf="!loading && !errorMessage">
+      <nb-alert status="success" *ngIf="estatusUpdateSuccess">
+        {{ estatusUpdateSuccess }}
+      </nb-alert>
+      <nb-alert status="danger" *ngIf="estatusUpdateError">
+        {{ estatusUpdateError }}
+      </nb-alert>
+
       <div class="controls">
         <div class="search-control">
           <nb-icon icon="search-outline"></nb-icon>
@@ -220,7 +227,11 @@
               <td>{{ cliente.Comentarios || 'Sin comentarios' }}</td>
               <td>{{ cliente.Cfdi || 'N/A' }}</td>
               <td>
-                <nb-checkbox [checked]="cliente.IdEstatus === 1" disabled (checkedChange)="onToggleEstatus(cliente)"></nb-checkbox>
+                <nb-checkbox
+                  [checked]="cliente.IdEstatus === 1"
+                  [disabled]="loading || isUpdatingEstatus(cliente)"
+                  (checkedChange)="onToggleEstatus(cliente, $event)"
+                ></nb-checkbox>
               </td>
               <td class="acciones">
                 <button nbButton size="tiny" status="warning" (click)="onEdit(cliente)">
