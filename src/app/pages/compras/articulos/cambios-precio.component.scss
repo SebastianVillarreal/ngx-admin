@@ -1,0 +1,139 @@
+:host {
+  display: block;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.file-name {
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+  color: var(--text-hint-color);
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.search-control {
+  min-width: 260px;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.state {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.error-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-hint-color);
+  padding: 1.5rem 0;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.cambios-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.cambios-table th,
+.cambios-table td {
+  padding: 0.7rem;
+  border-bottom: 1px solid var(--divider-color);
+  text-align: left;
+  vertical-align: middle;
+  overflow-wrap: anywhere;
+}
+
+.cambios-table th {
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  color: var(--text-hint-color);
+  cursor: pointer;
+  user-select: none;
+}
+
+.cambios-table th.num,
+.cambios-table td.num {
+  text-align: right;
+}
+
+.cambios-table th:nth-child(1),
+.cambios-table td:nth-child(1) {
+  width: 18%;
+}
+
+.cambios-table th:nth-child(2),
+.cambios-table td:nth-child(2) {
+  width: 30%;
+}
+
+.cambios-table th:nth-child(3),
+.cambios-table td:nth-child(3),
+.cambios-table th:nth-child(4),
+.cambios-table td:nth-child(4),
+.cambios-table th:nth-child(5),
+.cambios-table td:nth-child(5),
+.cambios-table th:nth-child(6),
+.cambios-table td:nth-child(6) {
+  width: 13%;
+}
+
+.pagination {
+  margin-top: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.page-size {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.range {
+  color: var(--text-hint-color);
+  font-size: 0.88rem;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}

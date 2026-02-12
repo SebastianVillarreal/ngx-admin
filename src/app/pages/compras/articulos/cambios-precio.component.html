@@ -1,0 +1,128 @@
+<nb-card>
+  <nb-card-header>Cambios de precio</nb-card-header>
+  <nb-card-body>
+    <div class="actions">
+      <input
+        type="file"
+        accept=".xlsx,.xls"
+        (change)="onFileSelected($event)"
+      />
+      <button nbButton status="primary" (click)="onImportar()" [disabled]="importing || !selectedFile">
+        Importar
+      </button>
+      <button nbButton status="success" (click)="onGuardar()" [disabled]="importing">
+        Guardar
+      </button>
+    </div>
+
+    <p class="file-name" *ngIf="fileName">Archivo: {{ fileName }}</p>
+
+    <nb-alert status="info" *ngIf="importing">
+      Procesando archivo y guardando cambios...
+    </nb-alert>
+    <nb-alert status="success" *ngIf="successMessage">
+      {{ successMessage }}
+    </nb-alert>
+    <nb-alert status="warning" *ngIf="summaryMessage">
+      {{ summaryMessage }}
+    </nb-alert>
+    <nb-alert status="danger" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </nb-alert>
+  </nb-card-body>
+</nb-card>
+
+<nb-card>
+  <nb-card-header class="table-header">
+    <div class="search-control">
+      <nb-icon icon="search-outline"></nb-icon>
+      <input
+        nbInput
+        fullWidth
+        type="text"
+        placeholder="Buscar por codigo o descripcion"
+        [disabled]="cambiosLoading || !items.length"
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="onSearch($event)"
+      />
+    </div>
+    <div class="header-actions">
+      <button nbButton size="small" status="info" (click)="retryCambiosPrecio()" [disabled]="cambiosLoading">
+        Recargar
+      </button>
+      <button nbButton size="small" status="success" (click)="exportToExcel()" [disabled]="!displayItems.length || cambiosLoading">
+        Exportar
+      </button>
+    </div>
+  </nb-card-header>
+
+  <nb-card-body>
+    <div class="state" *ngIf="cambiosLoading">
+      <nb-spinner status="primary"></nb-spinner>
+      <span>Cargando cambios de precio...</span>
+    </div>
+
+    <nb-alert status="danger" *ngIf="!cambiosLoading && cambiosError">
+      <div class="error-wrap">
+        <span>{{ cambiosError }}</span>
+        <button nbButton size="tiny" status="danger" outline (click)="retryCambiosPrecio()">Reintentar</button>
+      </div>
+    </nb-alert>
+
+    <ng-container *ngIf="!cambiosLoading && !cambiosError">
+      <div class="empty-state" *ngIf="!items.length">
+        <nb-icon icon="inbox-outline"></nb-icon>
+        <p>No hay datos para mostrar. Importa un archivo para cargar la tabla.</p>
+      </div>
+
+      <div class="empty-state" *ngIf="items.length && !displayItems.length">
+        <nb-icon icon="search-outline"></nb-icon>
+        <p>Sin coincidencias para "{{ searchTerm }}".</p>
+      </div>
+
+      <ng-container *ngIf="displayItems.length">
+        <div class="table-wrap">
+          <table class="cambios-table">
+            <thead>
+              <tr>
+                <th (click)="toggleSort('Codigo')">Codigo {{ sortIndicator('Codigo') }}</th>
+                <th (click)="toggleSort('Descripcion')">Descripcion {{ sortIndicator('Descripcion') }}</th>
+                <th class="num" (click)="toggleSort('Costo')">Costo {{ sortIndicator('Costo') }}</th>
+                <th class="num" (click)="toggleSort('PrecioFinal')">Precio Final {{ sortIndicator('PrecioFinal') }}</th>
+                <th class="num" (click)="toggleSort('PrecioMayoreo')">Precio Mayoreo {{ sortIndicator('PrecioMayoreo') }}</th>
+                <th class="num" (click)="toggleSort('PrecioMayoreoCred')">Precio Mayoreo Cred {{ sortIndicator('PrecioMayoreoCred') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of paginatedItems; trackBy: trackByCodigo">
+                <td>{{ item.Codigo }}</td>
+                <td>{{ item.Descripcion || '---' }}</td>
+                <td class="num">{{ item.Costo | number: '1.2-2' }}</td>
+                <td class="num">{{ item.PrecioFinal | number: '1.2-2' }}</td>
+                <td class="num">{{ item.PrecioMayoreo | number: '1.2-2' }}</td>
+                <td class="num">{{ item.PrecioMayoreoCred | number: '1.2-2' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pagination">
+          <div class="page-size">
+            <span>Mostrar</span>
+            <nb-select size="small" [(selected)]="pageSize" (selectedChange)="changePageSize($event)">
+              <nb-option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</nb-option>
+            </nb-select>
+          </div>
+          <div class="range">
+            {{ pageStart }}-{{ pageEnd }} de {{ displayItems.length }}
+          </div>
+          <div class="nav">
+            <button nbButton size="tiny" (click)="previousPage()" [disabled]="currentPage <= 1">Anterior</button>
+            <span>Pag. {{ currentPage }} / {{ totalPages }}</span>
+            <button nbButton size="tiny" (click)="nextPage()" [disabled]="currentPage >= totalPages">Siguiente</button>
+          </div>
+        </div>
+      </ng-container>
+    </ng-container>
+  </nb-card-body>
+</nb-card>

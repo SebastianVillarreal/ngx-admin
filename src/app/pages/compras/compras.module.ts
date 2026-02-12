@@ -18,6 +18,7 @@ import { ComprasRoutingModule } from './compras-routing.module';
 import { ComprasComponent } from './compras.component';
 import { ArticulosComponent } from './articulos/articulos.component';
 import { ArticuloToggleCellComponent } from './articulos/articulo-toggle-cell.component';
+import { CambiosPrecioComponent } from './articulos/cambios-precio.component';
 import { NuevoArticuloComponent } from './articulos/nuevo-articulo.component';
 import { CotizacionesComponent } from './cotizaciones/cotizaciones.component';
 import { CotizacionesListaComponent } from './cotizaciones/cotizaciones-lista.component';
@@ -44,6 +45,7 @@ import { ProveedoresComponent } from './proveedores/proveedores.component';
     ComprasComponent,
     ArticuloToggleCellComponent,
     ArticulosComponent,
+    CambiosPrecioComponent,
     NuevoArticuloComponent,
     CotizacionesComponent,
     CotizacionesListaComponent,

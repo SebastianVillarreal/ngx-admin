@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { ComprasComponent } from './compras.component';
 import { ArticulosComponent } from './articulos/articulos.component';
+import { CambiosPrecioComponent } from './articulos/cambios-precio.component';
 import { NuevoArticuloComponent } from './articulos/nuevo-articulo.component';
 import { CotizacionesComponent } from './cotizaciones/cotizaciones.component';
 import { CotizacionesListaComponent } from './cotizaciones/cotizaciones-lista.component';
@@ -19,6 +20,10 @@ const routes: Routes = [
       {
         path: 'articulos/nuevo',
         component: NuevoArticuloComponent,
+      },
+      {
+        path: 'articulos/cambios-precio',
+        component: CambiosPrecioComponent,
       },
       {
         path: 'cotizaciones',

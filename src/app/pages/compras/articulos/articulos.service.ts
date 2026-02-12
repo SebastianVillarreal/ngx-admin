@@ -90,11 +90,38 @@ export interface ActivarArticuloPayload {
   Usuario: string;
 }
 
+export interface InsertFolioCambioPrecioPayload {
+  IdSucursal: string;
+  IdUsuario: string;
+}
+
+export interface InsertCambioPrecioPayload {
+  Codigo: string;
+  Costo: string;
+  PrecioFinal: string;
+  PrecioMayoreo: string;
+  PrecioMayoreoCred: string;
+  IdUsuario: string;
+}
+
+export interface CambioPrecioItem {
+  Codigo: string;
+  Descripcion: string;
+  PrecioFinal: number;
+  Costo: number;
+  PrecioMayoreo: number;
+  PrecioMayoreoCred: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ArticulosService {
   private readonly url = '/api/GetArticulos';
   private readonly createUrl = '/api/InsertArticulo';
   private readonly activarArticuloUrl = '/api/ActivarArticulo';
+  private readonly insertFolioCambioPrecioUrl = '/api/InsertFolioCambioPrecio';
+  private readonly insertCambioPrecioUrl = '/api/InsertCambioPrecio';
+  private readonly getCambiosPrecioUrl = '/api/GetCambiosPrecio';
+  private readonly ejecutarCambioPreciosUrl = '/api/EjecutarCambioPrecios';
 
   constructor(private http: HttpClient) {}
 
@@ -158,6 +185,46 @@ export class ArticulosService {
       map((res) => !!res && (res.success === true || res.StatusCode === 200)),
       catchError((err) => {
         console.error('Error activando articulo', err);
+        return of(false);
+      }),
+    );
+  }
+
+  insertFolioCambioPrecio(payload: InsertFolioCambioPrecioPayload): Observable<boolean> {
+    return this.http.post<ApiResponse<any>>(this.insertFolioCambioPrecioUrl, payload).pipe(
+      map((res) => !!res && (res.success === true || res.StatusCode === 200)),
+      catchError((err) => {
+        console.error('Error creando folio de cambio de precio', err);
+        return of(false);
+      }),
+    );
+  }
+
+  insertCambioPrecio(payload: InsertCambioPrecioPayload): Observable<boolean> {
+    return this.http.post<ApiResponse<any>>(this.insertCambioPrecioUrl, payload).pipe(
+      map((res) => !!res && (res.success === true || res.StatusCode === 200)),
+      catchError((err) => {
+        console.error('Error insertando renglon de cambio de precio', err);
+        return of(false);
+      }),
+    );
+  }
+
+  getCambiosPrecio(): Observable<CambioPrecioItem[]> {
+    return this.http.post<ApiResponse<CambioPrecioItem>>(this.getCambiosPrecioUrl, {}).pipe(
+      map((res) => (res && res.response && (res.response as any).data) || []),
+      catchError((err) => {
+        console.error('Error obteniendo cambios de precio', err);
+        return of([]);
+      }),
+    );
+  }
+
+  ejecutarCambioPrecios(): Observable<boolean> {
+    return this.http.post<ApiResponse<any>>(this.ejecutarCambioPreciosUrl, {}).pipe(
+      map((res) => !!res && (res.success === true || res.StatusCode === 200)),
+      catchError((err) => {
+        console.error('Error ejecutando cambio de precios', err);
         return of(false);
       }),
     );
