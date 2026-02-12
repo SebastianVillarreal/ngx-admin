@@ -1,8 +1,7 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { Subscription, of } from 'rxjs';
 import { debounceTime, distinctUntilChanged, finalize, map, switchMap } from 'rxjs/operators';
-import jsPDF from 'jspdf';
 
 import {
   CotizacionesService,
@@ -10,6 +9,7 @@ import {
   ProveedorDto,
 } from './cotizaciones.service';
 import { AutocompleteArticuloOption, InventariosService } from '../../inventarios/inventarios.service';
+import { exportMasterDetailPdf, PdfTableColumn } from '../../../@core/utils/master-detail-pdf.util';
 
 interface ProveedorOption {
   value: string;
@@ -28,6 +28,10 @@ interface ArticuloOpcion {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CotizacionesComponent implements OnInit, OnDestroy {
+  @ViewChild('codigoInput') codigoInput?: ElementRef<HTMLInputElement>;
+  @ViewChild('cantidadInput') cantidadInput?: ElementRef<HTMLInputElement>;
+  @ViewChild('costoInput') costoInput?: ElementRef<HTMLInputElement>;
+
   readonly cotizacionForm = this.fb.group({
     proveedor: this.fb.control('', Validators.required),
     sucursal: this.fb.control('', Validators.required),
@@ -57,6 +61,10 @@ export class CotizacionesComponent implements OnInit, OnDestroy {
   detalles: DetalleCotizacionItem[] = [];
   detalleLoading = false;
   detalleError = '';
+
+  get totalRenglones(): number {
+    return this.detalles.reduce((acc, item) => acc + (Number(item?.Total) || 0), 0);
+  }
 
   codigoOptions: ArticuloOpcion[] = [];
   descripcionOptions: ArticuloOpcion[] = [];
@@ -211,11 +219,68 @@ export class CotizacionesComponent implements OnInit, OnDestroy {
           this.mensajeExito = 'Detalle agregado correctamente.';
           this.resetDetalleFormulario();
           this.cargarDetalle(this.folioCotizacion!);
+          this.focusCodigoInput();
         },
         error: (error: Error) => {
           this.mensajeError = error.message;
         },
       });
+  }
+
+  onCodigoEnter(event: Event): void {
+    event.preventDefault();
+    const codigo = String(this.detalleForm.get('codigo')?.value || '').trim();
+    const sucursal = String(this.cotizacionForm.get('sucursal')?.value || '').trim();
+
+    if (!codigo) {
+      return;
+    }
+
+    if (!sucursal) {
+      this.mensajeError = 'Selecciona una sucursal antes de consultar el artículo.';
+      return;
+    }
+
+    this.codigoAutocompleteError = '';
+    this.codigoAutocompleteLoading = true;
+    this.inventariosService
+      .obtenerExistenciaArticulo(codigo, sucursal)
+      .pipe(
+        finalize(() => {
+          this.codigoAutocompleteLoading = false;
+          this.cdr.markForCheck();
+        }),
+      )
+      .subscribe({
+        next: (item) => {
+          if (!item) {
+            this.codigoAutocompleteError = 'No se encontró información del artículo.';
+            return;
+          }
+          this.detalleForm.patchValue(
+            {
+              codigo: item.Codigo || codigo,
+              descripcion: item.Descripcion || '',
+              costo: Number(item.Costo) || 0,
+            },
+            { emitEvent: false },
+          );
+          this.focusCantidadInput();
+        },
+        error: (error: Error) => {
+          this.codigoAutocompleteError = error.message || 'No se pudo consultar el artículo.';
+        },
+      });
+  }
+
+  onCantidadEnter(event: Event): void {
+    event.preventDefault();
+    this.focusCostoInput();
+  }
+
+  onCostoEnter(event: Event): void {
+    event.preventDefault();
+    this.focusCodigoInput();
   }
 
   onRefrescarDetalle(): void {
@@ -439,30 +504,50 @@ export class CotizacionesComponent implements OnInit, OnDestroy {
     if (!this.detalles.length || !this.folioCotizacion) {
       return;
     }
-    const doc = new jsPDF();
-    doc.setFontSize(16);
-    doc.text('Comprobante de Cotización', 105, 18, { align: 'center' });
 
-    doc.setFontSize(11);
-    doc.text(`Folio: ${this.folioCotizacion}`, 14, 30);
-    doc.text(`Proveedor: ${this.getProveedorLabel(this.cotizacionForm.get('proveedor')?.value)}`, 14, 38);
-    doc.text(`Sucursal: ${this.getSucursalLabel(this.cotizacionForm.get('sucursal')?.value)}`, 14, 46);
-    doc.text(`Fecha llegada: ${this.cotizacionForm.get('fechaLlegada')?.value || '-'}`, 14, 54);
+    const authUser = this.getAuthUserData();
+    const folio = String(this.folioCotizacion);
+    const proveedor = this.getProveedorLabel(this.cotizacionForm.get('proveedor')?.value);
+    const sucursal = this.getSucursalLabel(this.cotizacionForm.get('sucursal')?.value);
+    const fechaLlegada = this.cotizacionForm.get('fechaLlegada')?.value || '-';
+    const usuario = this.pickString(authUser, ['Nombre', 'Usuario', 'UserName', 'username']) || 'N/D';
+    const tiendaNombre = this.pickString(authUser, ['NombreSucursal', 'Sucursal', 'sucursal']) || sucursal;
+    const tiendaId = this.pickString(authUser, ['IdSucursal', 'idSucursal']) || 'N/D';
 
-    const headers = ['Código', 'Descripción', 'Cantidad', 'Costo', 'Total'];
-    const startY = 62;
-    let currentY = startY;
-    doc.setFontSize(10);
-    doc.text(headers.join(' | '), 14, currentY);
-    currentY += 6;
+    const columns: PdfTableColumn<DetalleCotizacionItem>[] = [
+      { header: 'Codigo', width: 28, value: (row) => String(row?.Codigo || '-') },
+      { header: 'Descripcion', width: 78, value: (row) => String(row?.Descripcion || '-') },
+      { header: 'Cant.', width: 20, align: 'right', value: (row) => this.formatNumber(row?.Cantidad) },
+      { header: 'Costo', width: 28, align: 'right', value: (row) => this.formatCurrency(row?.Costo) },
+      { header: 'Total', width: 32, align: 'right', value: (row) => this.formatCurrency(row?.Total) },
+    ];
 
-    this.detalles.forEach((item) => {
-      const line = `${item.Codigo} | ${item.Descripcion} | ${item.Cantidad} | $${item.Costo.toFixed(2)} | $${item.Total.toFixed(2)}`;
-      doc.text(line, 14, currentY, { maxWidth: 180 });
-      currentY += 6;
+    exportMasterDetailPdf({
+      fileName: `cotizacion-${folio}.pdf`,
+      title: 'COTIZACION DE COMPRA',
+      folio,
+      store: `${tiendaNombre} (ID ${tiendaId})`,
+      user: usuario,
+      generatedAt: new Date().toLocaleString('es-MX'),
+      masterTitle: 'Datos generales',
+      detailTitle: 'Detalle',
+      logoPlaceholderText: 'LOGO',
+      footerNote: 'Documento generado automaticamente desde el modulo de compras.',
+      masterFieldsLeft: [
+        { label: 'Proveedor', value: proveedor },
+        { label: 'Sucursal', value: sucursal },
+        { label: 'Fecha llegada', value: fechaLlegada },
+      ],
+      masterFieldsRight: [
+        { label: 'Folio visible', value: folio },
+        { label: 'Usuario captura', value: usuario },
+        { label: 'Renglones', value: String(this.detalles.length) },
+      ],
+      columns,
+      rows: this.detalles,
+      totalLabel: 'TOTAL',
+      totalValue: this.formatCurrency(this.totalRenglones),
     });
-
-    doc.save(`cotizacion-${this.folioCotizacion}.pdf`);
   }
 
   private getProveedorLabel(value: string | null | undefined): string {
@@ -475,4 +560,72 @@ export class CotizacionesComponent implements OnInit, OnDestroy {
     return match?.label || 'Sin sucursal';
   }
 
+  private getAuthUserData(): Record<string, unknown> {
+    try {
+      const raw = localStorage.getItem('auth_user');
+      if (!raw) {
+        return {};
+      }
+      const parsed = JSON.parse(raw);
+      return parsed && typeof parsed === 'object' ? parsed as Record<string, unknown> : {};
+    } catch {
+      return {};
+    }
+  }
+
+  private pickString(source: Record<string, unknown>, keys: string[]): string {
+    for (const key of keys) {
+      const value = source[key];
+      if (value === null || value === undefined) {
+        continue;
+      }
+      const text = String(value).trim();
+      if (text) {
+        return text;
+      }
+    }
+    return '';
+  }
+
+  private formatCurrency(value: unknown): string {
+    const amount = Number(value) || 0;
+    return new Intl.NumberFormat('es-MX', {
+      style: 'currency',
+      currency: 'MXN',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  }
+
+  private formatNumber(value: unknown): string {
+    const amount = Number(value) || 0;
+    return new Intl.NumberFormat('es-MX', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  }
+
+  private focusCodigoInput(): void {
+    setTimeout(() => {
+      this.codigoInput?.nativeElement.focus();
+      this.codigoInput?.nativeElement.select();
+    }, 0);
+  }
+
+  private focusCantidadInput(): void {
+    setTimeout(() => {
+      this.cantidadInput?.nativeElement.focus();
+      this.cantidadInput?.nativeElement.select();
+    }, 0);
+  }
+
+  private focusCostoInput(): void {
+    setTimeout(() => {
+      this.costoInput?.nativeElement.focus();
+      this.costoInput?.nativeElement.select();
+    }, 0);
+  }
+
 }
+
+
