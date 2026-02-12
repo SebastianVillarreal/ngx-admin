@@ -10,6 +10,7 @@ import { CotizacionesPedidoSugeridoComponent } from './cotizaciones/cotizaciones
 import { ProveedoresComponent } from './proveedores/proveedores.component';
 import { ListaPreciosDetalleComponent } from './proveedores/lista-precios-detalle.component';
 import { ProveedoresListasPreciosComponent } from './proveedores/listas-precios.component';
+import { MargenesFamiliasComponent } from './margenes-familias/margenes-familias.component';
 
 const routes: Routes = [
   {
@@ -51,6 +52,10 @@ const routes: Routes = [
       {
         path: 'proveedores/listas-precios/:id',
         component: ListaPreciosDetalleComponent,
+      },
+      {
+        path: 'margenes-familias',
+        component: MargenesFamiliasComponent,
       },
       {
         path: '',

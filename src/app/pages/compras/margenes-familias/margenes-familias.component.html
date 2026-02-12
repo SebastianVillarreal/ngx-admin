@@ -1,0 +1,86 @@
+<nb-card>
+  <nb-card-header class="card-header">
+    <div>
+      <h2>Compras | Márgenes familias</h2>
+      <p>Selecciona una familia y captura los márgenes de referencia.</p>
+    </div>
+  </nb-card-header>
+  <nb-card-body>
+    <form [formGroup]="form" class="margenes-form">
+      <div class="form-field">
+        <label for="familia">Familia</label>
+        <div class="field-status" *ngIf="familiasLoading">
+          <nb-spinner status="primary" size="tiny"></nb-spinner>
+          <span>Cargando familias…</span>
+        </div>
+        <nb-select
+          id="familia"
+          fullWidth
+          placeholder="Selecciona una familia"
+          formControlName="familia"
+          [disabled]="familiasLoading || !familias.length"
+          [status]="form.get('familia')?.invalid && form.get('familia')?.touched ? 'danger' : 'basic'"
+        >
+          <nb-option *ngFor="let familia of familias" [value]="familia.value">
+            {{ familia.label }}
+          </nb-option>
+        </nb-select>
+        <small class="error-text" *ngIf="form.get('familia')?.invalid && form.get('familia')?.touched">
+          Selecciona una familia.
+        </small>
+      </div>
+
+      <div class="form-field">
+        <label for="margenMinimo">Margen mínimo (%)</label>
+        <input
+          nbInput
+          id="margenMinimo"
+          type="number"
+          min="0"
+          step="0.01"
+          formControlName="margenMinimo"
+          [status]="form.get('margenMinimo')?.invalid && form.get('margenMinimo')?.touched ? 'danger' : 'basic'"
+        />
+      </div>
+
+      <div class="form-field">
+        <label for="margenObjetivo">Margen objetivo (%)</label>
+        <input
+          nbInput
+          id="margenObjetivo"
+          type="number"
+          min="0"
+          step="0.01"
+          formControlName="margenObjetivo"
+          [status]="form.get('margenObjetivo')?.invalid && form.get('margenObjetivo')?.touched ? 'danger' : 'basic'"
+        />
+      </div>
+
+      <div class="form-field">
+        <label for="margenMaximo">Margen máximo (%)</label>
+        <input
+          nbInput
+          id="margenMaximo"
+          type="number"
+          min="0"
+          step="0.01"
+          formControlName="margenMaximo"
+          [status]="form.get('margenMaximo')?.invalid && form.get('margenMaximo')?.touched ? 'danger' : 'basic'"
+        />
+      </div>
+    </form>
+
+    <div class="acciones">
+      <button nbButton status="primary" (click)="onGuardar()">Guardar</button>
+      <button nbButton ghost status="info" *ngIf="familiasError" (click)="onReintentar()">Reintentar familias</button>
+    </div>
+
+    <nb-alert *ngIf="familiasError" status="danger">
+      {{ familiasError }}
+    </nb-alert>
+
+    <nb-alert *ngIf="mensaje && !familiasError" status="info">
+      {{ mensaje }}
+    </nb-alert>
+  </nb-card-body>
+</nb-card>
