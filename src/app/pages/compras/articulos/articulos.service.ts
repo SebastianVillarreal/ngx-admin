@@ -83,10 +83,18 @@ export interface FamiliaDto {
   NombreDepartamento: string;
 }
 
+export interface ActivarArticuloPayload {
+  Codigo: string;
+  Estatus: string;
+  Inventariable: string;
+  Usuario: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ArticulosService {
   private readonly url = '/api/GetArticulos';
   private readonly createUrl = '/api/InsertArticulo';
+  private readonly activarArticuloUrl = '/api/ActivarArticulo';
 
   constructor(private http: HttpClient) {}
 
@@ -143,5 +151,15 @@ export class ArticulosService {
           return of([]);
         })
       );
+  }
+
+  activarArticulo(payload: ActivarArticuloPayload): Observable<boolean> {
+    return this.http.post<ApiResponse<any>>(this.activarArticuloUrl, payload).pipe(
+      map((res) => !!res && (res.success === true || res.StatusCode === 200)),
+      catchError((err) => {
+        console.error('Error activando articulo', err);
+        return of(false);
+      }),
+    );
   }
 }

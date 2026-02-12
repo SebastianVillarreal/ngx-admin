@@ -4,8 +4,8 @@
   </nb-card-header>
   <nb-card-body>
     <div class="form-row">
-      <label for="codigo" class="label">*Código:</label>
-      <input nbInput fullWidth placeholder="Ingrese código" id="codigo" [(ngModel)]="codigoBusqueda" />
+      <label for="codigo" class="label">*Codigo:</label>
+      <input nbInput fullWidth placeholder="Ingrese codigo" id="codigo" [(ngModel)]="codigoBusqueda" />
       <button nbButton status="primary" class="buscar-btn" (click)="onBuscar()">Buscar</button>
     </div>
   </nb-card-body>
@@ -32,7 +32,9 @@
     </div>
   </nb-card-header>
   <nb-card-body>
+    <nb-alert status="danger" *ngIf="toggleMessage">
+      {{ toggleMessage }}
+    </nb-alert>
     <ng2-smart-table [settings]="settings" [source]="source"></ng2-smart-table>
-    <div class="help-text">Mostrando registros de diseño (mock). Funcionalidad pendiente de integrar servicio.</div>
   </nb-card-body>
 </nb-card>

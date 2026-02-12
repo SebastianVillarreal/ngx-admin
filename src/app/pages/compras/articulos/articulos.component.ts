@@ -1,7 +1,9 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { LocalDataSource } from 'ng2-smart-table';
 import { Subscription } from 'rxjs';
-import { ArticulosService, ArticuloDto } from './articulos.service';
+
+import { ArticuloDto, ArticulosService } from './articulos.service';
+import { ArticuloToggleCellComponent, ArticuloToggleEvent } from './articulo-toggle-cell.component';
 
 interface ArticuloRow {
   codigo: string;
@@ -25,13 +27,14 @@ interface ArticuloRow {
   templateUrl: './articulos.component.html',
 })
 export class ArticulosComponent implements OnInit, OnDestroy {
-  // UI state
   codigoBusqueda = '';
   pageSize = 10;
   quickSearch = '';
   totalCount = 0;
+  toggleMessage = '';
   private page = 1;
   private sourceSub?: Subscription;
+  private togglePendingByCodigo = new Set<string>();
   articulosFull: ArticuloDto[] = [];
 
   settings = {
@@ -54,8 +57,8 @@ export class ArticulosComponent implements OnInit, OnDestroy {
     },
     hideSubHeader: true,
     columns: {
-      codigo: { title: 'Código', type: 'string', width: '140px' },
-      descripcion: { title: 'Descripción', type: 'string' },
+      codigo: { title: 'Codigo', type: 'string', width: '140px' },
+      descripcion: { title: 'Descripcion', type: 'string' },
       departamento: { title: 'Departamento', type: 'string' },
       familia: { title: 'Familia', type: 'string' },
       ultimoCosto: { title: 'Ultimo Costo', type: 'string' },
@@ -66,20 +69,28 @@ export class ArticulosComponent implements OnInit, OnDestroy {
       claveSat: { title: 'Clave Sat', type: 'string' },
       inventariable: {
         title: 'Inventariable',
-        type: 'html',
-        valuePrepareFunction: (v: boolean) => v ? '✓' : '',
+        type: 'custom',
+        renderComponent: ArticuloToggleCellComponent,
+        onComponentInitFunction: (instance: ArticuloToggleCellComponent) => {
+          instance.field = 'inventariable';
+          instance.onToggle = (event) => this.handleToggle(event);
+        },
         width: '120px',
       },
       estatus: {
         title: 'Estatus',
-        type: 'html',
-        valuePrepareFunction: (v: boolean) => v ? '✓' : '',
+        type: 'custom',
+        renderComponent: ArticuloToggleCellComponent,
+        onComponentInitFunction: (instance: ArticuloToggleCellComponent) => {
+          instance.field = 'estatus';
+          instance.onToggle = (event) => this.handleToggle(event);
+        },
         width: '90px',
       },
       piso: {
         title: 'Piso',
         type: 'html',
-        valuePrepareFunction: (v: boolean) => v ? '✓' : '',
+        valuePrepareFunction: (value: boolean) => value ? 'OK' : '',
         width: '80px',
       },
     },
@@ -92,7 +103,6 @@ export class ArticulosComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadArticulos(0, this.pageSize, this.getSearchTerm());
 
-    // Listen for table paging to request server with skip
     this.sourceSub = this.source.onChanged().subscribe((change: any) => {
       if (change && change.action === 'page' && change.paging) {
         this.page = change.paging.page || 1;
@@ -106,9 +116,7 @@ export class ArticulosComponent implements OnInit, OnDestroy {
     this.sourceSub?.unsubscribe();
   }
 
-  // UI handlers
   onBuscar(): void {
-    // Se prioriza búsqueda por código
     this.page = 1;
     this.loadArticulos(0, this.pageSize, this.codigoBusqueda?.trim() || '');
   }
@@ -122,7 +130,6 @@ export class ArticulosComponent implements OnInit, OnDestroy {
   onPageSizeChange(size: number): void {
     this.pageSize = size;
     (this.settings as any).pager = { display: true, perPage: size };
-    // Force smart table to rebuild settings binding
     this.settings = { ...(this.settings as any) };
     this.page = 1;
     this.loadArticulos(0, this.pageSize, this.getSearchTerm());
@@ -136,9 +143,58 @@ export class ArticulosComponent implements OnInit, OnDestroy {
     this.articulosSvc.getArticulos({ skip, pageSize, search }).subscribe(({ rows, total }) => {
       this.totalCount = total || 0;
       this.articulosFull = rows;
-      const tableRows: ArticuloRow[] = rows.map((r) => this.mapToTableRow(r));
-      this.source.load(tableRows);
+      this.loadCurrentRowsToTable();
     });
+  }
+
+  private handleToggle(event: ArticuloToggleEvent): void {
+    const codigo = String(event?.rowData?.codigo || '').trim();
+    if (!codigo) {
+      return;
+    }
+
+    const dto = this.articulosFull.find((item) => (item.Codigo || '').trim() === codigo);
+    if (!dto) {
+      return;
+    }
+
+    if (this.togglePendingByCodigo.has(codigo)) {
+      this.loadCurrentRowsToTable();
+      return;
+    }
+
+    const prevInventariable = (dto.Inventariable || 0) === 1;
+    const prevEstatus = (dto.Estatus || 0) === 1;
+    const nextInventariable = event.field === 'inventariable' ? event.checked : prevInventariable;
+    const nextEstatus = event.field === 'estatus' ? event.checked : prevEstatus;
+
+    this.toggleMessage = '';
+    this.togglePendingByCodigo.add(codigo);
+
+    this.articulosSvc.activarArticulo({
+      Codigo: codigo,
+      Estatus: nextEstatus ? '1' : '0',
+      Inventariable: nextInventariable ? '1' : '0',
+      Usuario: '1',
+    }).subscribe((ok) => {
+      this.togglePendingByCodigo.delete(codigo);
+
+      if (!ok) {
+        this.toggleMessage = `No se pudo actualizar el articulo ${codigo}.`;
+        this.loadCurrentRowsToTable();
+        return;
+      }
+
+      dto.Inventariable = nextInventariable ? 1 : 0;
+      dto.Estatus = nextEstatus ? 1 : 0;
+      this.toggleMessage = '';
+      this.loadCurrentRowsToTable();
+    });
+  }
+
+  private loadCurrentRowsToTable(): void {
+    const tableRows: ArticuloRow[] = this.articulosFull.map((row) => this.mapToTableRow(row));
+    this.source.load(tableRows);
   }
 
   private mapToTableRow(dto: ArticuloDto): ArticuloRow {
@@ -160,7 +216,7 @@ export class ArticulosComponent implements OnInit, OnDestroy {
   }
 
   private formatCurrency(value: number | null | undefined): string {
-    const v = typeof value === 'number' ? value : 0;
-    return `$${v.toFixed(2)}`;
+    const safeValue = typeof value === 'number' ? value : 0;
+    return `$${safeValue.toFixed(2)}`;
   }
 }
