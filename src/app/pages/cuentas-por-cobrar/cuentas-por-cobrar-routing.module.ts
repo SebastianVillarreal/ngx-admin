@@ -10,6 +10,7 @@ import { CorteAbonosComponent } from './creditos/corte-abonos/corte-abonos.compo
 import { HistoricoComponent } from './creditos/historico/historico.component';
 import { SeparadosExistenciasComponent } from './separados/existencias/existencias.component';
 import { EstadoCuentaComponent } from './reportes/estado-cuenta/estado-cuenta.component';
+import { EstadoCuentaPeriodoComponent } from './reportes/estado-cuenta-periodo/estado-cuenta-periodo.component';
 
 const routes: Routes = [
   {
@@ -47,6 +48,10 @@ const routes: Routes = [
       {
         path: 'reportes/estado-cuenta',
         component: EstadoCuentaComponent,
+      },
+      {
+        path: 'reportes/estado-cuenta-periodo',
+        component: EstadoCuentaPeriodoComponent,
       },
       {
         path: '',

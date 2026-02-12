@@ -1,0 +1,156 @@
+:host {
+  display: block;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.card-header.secondary {
+  border-top: 3px solid #0f172a;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--text-hint-color);
+  font-size: 0.9rem;
+}
+
+.filters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.field label {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-hint-color);
+}
+
+.alert-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.header-tools {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.search-control {
+  min-width: 260px;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.search-control nb-icon {
+  color: var(--text-hint-color);
+}
+
+.state {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-hint-color);
+  padding: 1.5rem 0;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.estado-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.estado-table th,
+.estado-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--divider-color);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.estado-table th {
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  color: var(--text-hint-color);
+  cursor: pointer;
+  user-select: none;
+}
+
+.estado-table th.num,
+.estado-table td.num {
+  text-align: right;
+}
+
+.estado-table tfoot td {
+  font-weight: 700;
+  background: rgba(15, 23, 42, 0.04);
+  border-top: 2px solid var(--divider-color);
+}
+
+.estado-table .totals-label {
+  text-align: right;
+  color: var(--text-basic-color);
+}
+
+.pagination {
+  margin-top: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.page-size {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.range {
+  color: var(--text-hint-color);
+  font-size: 0.88rem;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+

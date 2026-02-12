@@ -24,6 +24,7 @@ import { CorteAbonosComponent } from './creditos/corte-abonos/corte-abonos.compo
 import { HistoricoComponent } from './creditos/historico/historico.component';
 import { SeparadosExistenciasComponent } from './separados/existencias/existencias.component';
 import { EstadoCuentaComponent } from './reportes/estado-cuenta/estado-cuenta.component';
+import { EstadoCuentaPeriodoComponent } from './reportes/estado-cuenta-periodo/estado-cuenta-periodo.component';
 
 @NgModule({
   imports: [
@@ -52,6 +53,7 @@ import { EstadoCuentaComponent } from './reportes/estado-cuenta/estado-cuenta.co
     HistoricoComponent,
     SeparadosExistenciasComponent,
     EstadoCuentaComponent,
+    EstadoCuentaPeriodoComponent,
   ],
 })
 export class CuentasPorCobrarModule {}
