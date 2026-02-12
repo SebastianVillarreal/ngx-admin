@@ -1,89 +1,125 @@
 <nb-card>
-  <nb-card-header>
+  <nb-card-header class="card-header">
     <div>
-      <h2>Traspasos enviados</h2>
-      <p>Consulta los traspasos generados por la sucursal seleccionada en un periodo.</p>
+      <h2 class="title">Traspasos enviados</h2>
+      <p class="subtitle">Consulta traspasos enviados por rango de fechas.</p>
     </div>
+    <button nbButton status="primary" type="button" (click)="onBuscar()" [disabled]="cargando">
+      Consultar
+    </button>
   </nb-card-header>
-  <nb-card-body>
-    <form [formGroup]="filtroForm" class="filtro-form">
-      <div class="form-field">
-        <label>Sucursal origen</label>
-        <nb-select
-          placeholder="Selecciona una sucursal"
-          formControlName="sucursal"
-          [status]="filtroForm.get('sucursal')?.invalid && filtroForm.get('sucursal')?.touched ? 'danger' : 'basic'"
-        >
-          <nb-option *ngFor="let sucursal of sucursales" [value]="sucursal.value">
-            {{ sucursal.label }}
-          </nb-option>
-        </nb-select>
-        <small class="error-text" *ngIf="filtroForm.get('sucursal')?.invalid && filtroForm.get('sucursal')?.touched">
-          Selecciona la sucursal de origen.
-        </small>
-      </div>
 
-      <div class="form-field">
+  <nb-card-body>
+    <form [formGroup]="filtroForm" class="filters-grid">
+      <div class="field">
         <label>Fecha inicial</label>
         <input nbInput type="date" formControlName="fechaInicial" />
-        <small class="error-text" *ngIf="filtroForm.get('fechaInicial')?.invalid && filtroForm.get('fechaInicial')?.touched">
-          Selecciona la fecha inicial.
-        </small>
       </div>
 
-      <div class="form-field">
+      <div class="field">
         <label>Fecha final</label>
         <input nbInput type="date" formControlName="fechaFinal" />
-        <small class="error-text" *ngIf="filtroForm.get('fechaFinal')?.invalid && filtroForm.get('fechaFinal')?.touched">
-          Selecciona la fecha final.
-        </small>
-      </div>
-
-      <div class="form-actions">
-        <button nbButton status="primary" type="button" (click)="onBuscar()">
-          Buscar traspasos
-        </button>
       </div>
     </form>
 
-    <nb-alert *ngIf="error" status="danger" accent="danger">{{ error }}</nb-alert>
-    <nb-alert *ngIf="mensaje" status="info" accent="info">{{ mensaje }}</nb-alert>
-
-    <div class="tabla-loading" *ngIf="cargando">
-      <nb-spinner size="large"></nb-spinner>
-    </div>
-
-    <div class="tabla-traspasos" *ngIf="!cargando && traspasos.length; else sinTraspasos">
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Folio</th>
-            <th>Referencia</th>
-            <th>Estatus</th>
-            <th>Fecha elaboración</th>
-            <th>Usuario entrega</th>
-            <th>Destino</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let traspaso of traspasos">
-            <td>{{ traspaso.Id }}</td>
-            <td>{{ traspaso.Folio }}</td>
-            <td>{{ traspaso.Referencia }}</td>
-            <td>{{ traspaso.Estatus }}</td>
-            <td>{{ traspaso.FechaElaboracion }}</td>
-            <td>{{ traspaso.NombreUsuarioEntrega }}</td>
-            <td>{{ traspaso.Destino }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <ng-template #sinTraspasos>
-      <p class="hint-text" *ngIf="!cargando && !mensaje && !error">
-        Usa los filtros para consultar traspasos enviados.
-      </p>
-    </ng-template>
+    <nb-alert status="danger" *ngIf="error">
+      <div class="error-wrap">
+        <span>{{ error }}</span>
+        <button nbButton size="tiny" status="danger" outline (click)="retry()">Reintentar</button>
+      </div>
+    </nb-alert>
   </nb-card-body>
 </nb-card>
+
+<nb-card>
+  <nb-card-header class="card-header secondary">
+    <div class="header-tools">
+      <div class="search-control">
+        <nb-icon icon="search-outline"></nb-icon>
+        <input
+          nbInput
+          fullWidth
+          placeholder="Buscar en resultados"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearch($event)"
+          [disabled]="cargando || !items.length"
+        />
+      </div>
+      <button nbButton status="success" size="small" (click)="exportToExcel()" [disabled]="cargando || !displayItems.length">
+        Exportar
+      </button>
+    </div>
+  </nb-card-header>
+
+  <nb-card-body>
+    <div class="state" *ngIf="cargando">
+      <nb-spinner status="primary"></nb-spinner>
+      <span>Cargando traspasos enviados...</span>
+    </div>
+
+    <ng-container *ngIf="!cargando && !error">
+      <div class="empty-state" *ngIf="!items.length">
+        <nb-icon icon="inbox-outline"></nb-icon>
+        <p>No hay resultados para el periodo seleccionado.</p>
+      </div>
+
+      <div class="empty-state" *ngIf="items.length && !displayItems.length">
+        <nb-icon icon="search-outline"></nb-icon>
+        <p>Sin coincidencias para "{{ searchTerm }}".</p>
+      </div>
+
+      <ng-container *ngIf="displayItems.length">
+        <div class="table-wrap">
+          <table class="enviados-table">
+            <thead>
+              <tr>
+                <th (click)="toggleSort('Id')">Id {{ sortIndicator('Id') }}</th>
+                <th (click)="toggleSort('Folio')">Folio {{ sortIndicator('Folio') }}</th>
+                <th (click)="toggleSort('Movimiento')">Movimiento {{ sortIndicator('Movimiento') }}</th>
+                <th (click)="toggleSort('Fecha')">Fecha {{ sortIndicator('Fecha') }}</th>
+                <th (click)="toggleSort('Referencia')">Referencia {{ sortIndicator('Referencia') }}</th>
+                <th (click)="toggleSort('FolioEntrada')">Folio entrada {{ sortIndicator('FolioEntrada') }}</th>
+                <th (click)="toggleSort('SucursalDestino')">Sucursal destino {{ sortIndicator('SucursalDestino') }}</th>
+                <th (click)="toggleSort('EstatusDestino')">Estatus destino {{ sortIndicator('EstatusDestino') }}</th>
+                <th (click)="toggleSort('EstatusOrigen')">Estatus origen {{ sortIndicator('EstatusOrigen') }}</th>
+                <th (click)="toggleSort('FechaEntrada')">Fecha entrada {{ sortIndicator('FechaEntrada') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of paginatedItems; trackBy: trackById">
+                <td>{{ item.Id }}</td>
+                <td>{{ item.Folio }}</td>
+                <td>{{ item.Movimiento }}</td>
+                <td>{{ item.Fecha }}</td>
+                <td>{{ item.Referencia }}</td>
+                <td>{{ item.FolioEntrada }}</td>
+                <td>{{ item.SucursalDestino }}</td>
+                <td>{{ item.EstatusDestino }}</td>
+                <td>{{ item.EstatusOrigen }}</td>
+                <td>{{ item.FechaEntrada }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pagination">
+          <div class="page-size">
+            <span>Mostrar</span>
+            <nb-select size="small" [(selected)]="pageSize" (selectedChange)="changePageSize($event)">
+              <nb-option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</nb-option>
+            </nb-select>
+          </div>
+          <div class="range">
+            {{ pageStart }}-{{ pageEnd }} de {{ displayItems.length }}
+          </div>
+          <div class="nav">
+            <button nbButton size="tiny" (click)="previousPage()" [disabled]="currentPage <= 1">Anterior</button>
+            <span>Pag. {{ currentPage }} / {{ totalPages }}</span>
+            <button nbButton size="tiny" (click)="nextPage()" [disabled]="currentPage >= totalPages">Siguiente</button>
+          </div>
+        </div>
+      </ng-container>
+    </ng-container>
+  </nb-card-body>
+</nb-card>
+

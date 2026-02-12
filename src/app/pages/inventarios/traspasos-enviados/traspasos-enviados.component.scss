@@ -1,64 +1,136 @@
-nb-card-header {
+:host {
+  display: block;
+}
+
+.card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-
-h2 {
-  margin: 0;
-}
-
-p {
-  margin: 0;
-}
-
-.filtro-form {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  flex-wrap: wrap;
   gap: 1rem;
-  margin-bottom: 1.5rem;
 }
 
-.form-field {
+.card-header.secondary {
+  border-top: 3px solid #0f172a;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--text-hint-color);
+  font-size: 0.9rem;
+}
+
+.filters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.field {
   display: flex;
   flex-direction: column;
+  gap: 0.35rem;
+}
+
+.field label {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-hint-color);
+}
+
+.header-tools {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.search-control {
+  min-width: 260px;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.state {
+  display: flex;
+  align-items: center;
   gap: 0.5rem;
 }
 
-.form-actions {
+.error-wrap {
   display: flex;
-  align-items: flex-end;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
 }
 
-.error-text {
-  color: var(--text-danger-color);
-  font-size: 0.75rem;
-}
-
-.tabla-loading {
+.empty-state {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-hint-color);
   padding: 1.5rem 0;
 }
 
-.tabla-traspasos table {
+.table-wrap {
+  overflow-x: auto;
+}
+
+.enviados-table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.tabla-traspasos th,
-.tabla-traspasos td {
-  padding: 0.5rem 0.75rem;
+.enviados-table th,
+.enviados-table td {
+  padding: 0.7rem;
   border-bottom: 1px solid var(--divider-color);
+  text-align: left;
+  white-space: nowrap;
 }
 
-.tabla-traspasos th {
+.enviados-table th {
   text-transform: uppercase;
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   color: var(--text-hint-color);
+  cursor: pointer;
+  user-select: none;
 }
 
-.hint-text {
-  color: var(--text-hint-color);
-  font-size: 0.85rem;
+.pagination {
+  margin-top: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
+
+.page-size {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.range {
+  color: var(--text-hint-color);
+  font-size: 0.88rem;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+

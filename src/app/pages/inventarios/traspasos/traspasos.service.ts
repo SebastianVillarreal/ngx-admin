@@ -141,15 +141,15 @@ interface TraspasosEnTransitoApiResponse {
 
 export interface TraspasoEnviado {
   Id: number;
-  Almacen: number;
-  TipoMovimiento: string;
   Folio: number;
+  Movimiento: string;
+  Fecha: string;
   Referencia: string;
-  Estatus: string;
-  FechaElaboracion: string;
-  UsuarioEntrega: string;
-  NombreUsuarioEntrega: string;
-  Destino: string;
+  FolioEntrada: string;
+  SucursalDestino: string;
+  EstatusDestino: string;
+  EstatusOrigen: string;
+  FechaEntrada: string;
 }
 
 interface TraspasosEnviadosApiResponse {
@@ -210,7 +210,7 @@ export class TraspasosService {
   private readonly actualizarCantidadEndpoint = '/api/INV_UpdateCantidadRecibidaTraspaso';
   private readonly recibirTraspasoEndpoint = '/api/INV_RecibirTraspaso';
   private readonly traspasosEnTransitoEndpoint = '/api/GetTraspasosEnTransito';
-  private readonly traspasosEnviadosEndpoint = '/api/INV_GetTraspasosEnviadosFechaSucursal';
+  private readonly traspasosEnviadosEndpoint = '/api/GetTraspasosEnviados';
   private readonly traspasosConDiferenciaEndpoint = '/api/GetDiferenciasTraspasos';
   private readonly existenciasEndpoint = '/api/INV_GetFechasCierre';
 
@@ -334,13 +334,14 @@ export class TraspasosService {
     );
   }
 
-  obtenerTraspasosEnviados(sucursal: string, fechaInicial: string, fechaFinal: string): Observable<TraspasoEnviado[]> {
-    let params = new HttpParams().set('sucursal', sucursal);
-    params = params.set('fechaInicial', fechaInicial).set('fechaFinal', fechaFinal);
+  obtenerTraspasosEnviados(fechaInicial: string, fechaFinal: string): Observable<TraspasoEnviado[]> {
+    const params = new HttpParams()
+      .set('fecha_inicial', fechaInicial)
+      .set('fecha_final', fechaFinal);
     return this.http.get<TraspasosEnviadosApiResponse>(this.traspasosEnviadosEndpoint, { params }).pipe(
       map((res) => res.response?.data ?? []),
       catchError((error) => {
-        console.error('INV_GetTraspasosEnviadosFechaSucursal error', error);
+        console.error('GetTraspasosEnviados error', error);
         const message = error?.message || 'No se pudieron obtener los traspasos enviados.';
         return throwError(() => new Error(message));
       }),
