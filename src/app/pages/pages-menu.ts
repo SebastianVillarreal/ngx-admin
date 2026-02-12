@@ -64,6 +64,10 @@ export const MENU_ITEMS: NbMenuItem[] = [
             title: 'Lista de cotizaciones',
             link: '/pages/compras/cotizaciones/lista',
           },
+          {
+            title: 'Pedido sugerido',
+            link: '/pages/compras/cotizaciones/pedido-sugerido',
+          },
         ],
       },
       {

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
@@ -107,6 +107,7 @@ export class CotizacionesService {
   private readonly insertarDetalleEndpoint = '/api/InsertarDetalleCotizacion';
   private readonly finalizarEndpoint = '/api/FinalizarCotizacion';
   private readonly cotizacionesEndpoint = '/api/GetCotizaciones';
+  private readonly pedidoSugeridoEndpoint = '/api/HerramientaCompras_Nuevo';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -167,6 +168,28 @@ export class CotizacionesService {
       catchError((error) => {
         console.error('FinalizarCotizacion error', error);
         return throwError(() => new Error('No se pudo finalizar la cotización.'));
+      }),
+    );
+  }
+
+  descargarPedidoSugerido(
+    fechaInicial: string,
+    fechaFinal: string,
+    fechaExistencia: string,
+  ): Observable<HttpResponse<Blob>> {
+    const params = new HttpParams()
+      .set('fecha_inicial', fechaInicial)
+      .set('fecha_final', fechaFinal)
+      .set('fecha_existencia', fechaExistencia);
+
+    return this.http.get(this.pedidoSugeridoEndpoint, {
+      params,
+      observe: 'response',
+      responseType: 'blob',
+    }).pipe(
+      catchError((error) => {
+        console.error('HerramientaCompras_Nuevo error', error);
+        return throwError(() => new Error('No se pudo descargar el pedido sugerido.'));
       }),
     );
   }

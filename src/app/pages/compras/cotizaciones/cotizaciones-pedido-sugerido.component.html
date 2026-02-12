@@ -1,0 +1,56 @@
+<nb-card>
+  <nb-card-header class="card-header">
+    <div>
+      <h2>Compras | Cotizaciones | Pedido sugerido</h2>
+      <p>Genera y descarga el archivo Excel con el pedido sugerido por rango de fechas.</p>
+    </div>
+  </nb-card-header>
+  <nb-card-body>
+    <form [formGroup]="filtrosForm" class="filtros-form">
+      <div class="form-field">
+        <label for="fechaInicial">Fecha inicial</label>
+        <input
+          nbInput
+          id="fechaInicial"
+          type="date"
+          formControlName="fechaInicial"
+          [status]="filtrosForm.get('fechaInicial')?.invalid && filtrosForm.get('fechaInicial')?.touched ? 'danger' : 'basic'"
+        />
+      </div>
+
+      <div class="form-field">
+        <label for="fechaFinal">Fecha final</label>
+        <input
+          nbInput
+          id="fechaFinal"
+          type="date"
+          formControlName="fechaFinal"
+          [status]="filtrosForm.get('fechaFinal')?.invalid && filtrosForm.get('fechaFinal')?.touched ? 'danger' : 'basic'"
+        />
+      </div>
+
+      <div class="form-field">
+        <label for="fechaExistencia">Fecha existencia</label>
+        <input
+          nbInput
+          id="fechaExistencia"
+          type="date"
+          formControlName="fechaExistencia"
+          [status]="filtrosForm.get('fechaExistencia')?.invalid && filtrosForm.get('fechaExistencia')?.touched ? 'danger' : 'basic'"
+        />
+      </div>
+    </form>
+
+    <div class="acciones">
+      <button nbButton status="success" (click)="onDescargar()" [disabled]="descargando || filtrosForm.invalid">
+        <nb-spinner *ngIf="descargando" size="tiny"></nb-spinner>
+        <span *ngIf="!descargando">Descargar pedido sugerido</span>
+      </button>
+    </div>
+
+    <nb-alert *ngIf="error" status="danger">
+      {{ error }}
+      <button nbButton ghost size="tiny" status="danger" (click)="onReintentar()">Reintentar</button>
+    </nb-alert>
+  </nb-card-body>
+</nb-card>

@@ -1,0 +1,27 @@
+.card-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.card-header p {
+  margin: 0.25rem 0 0;
+  color: var(--text-hint-color);
+}
+
+.filtros-form {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.acciones {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.75rem;
+}

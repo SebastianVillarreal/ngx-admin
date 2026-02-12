@@ -22,6 +22,7 @@ import { CambiosPrecioComponent } from './articulos/cambios-precio.component';
 import { NuevoArticuloComponent } from './articulos/nuevo-articulo.component';
 import { CotizacionesComponent } from './cotizaciones/cotizaciones.component';
 import { CotizacionesListaComponent } from './cotizaciones/cotizaciones-lista.component';
+import { CotizacionesPedidoSugeridoComponent } from './cotizaciones/cotizaciones-pedido-sugerido.component';
 import { ListaPreciosDetalleComponent } from './proveedores/lista-precios-detalle.component';
 import { ProveedoresComponent } from './proveedores/proveedores.component';
 import { ProveedoresListasPreciosComponent } from './proveedores/listas-precios.component';
@@ -51,6 +52,7 @@ import { ProveedoresListasPreciosComponent } from './proveedores/listas-precios.
     NuevoArticuloComponent,
     CotizacionesComponent,
     CotizacionesListaComponent,
+    CotizacionesPedidoSugeridoComponent,
     ListaPreciosDetalleComponent,
     ProveedoresComponent,
     ProveedoresListasPreciosComponent,
