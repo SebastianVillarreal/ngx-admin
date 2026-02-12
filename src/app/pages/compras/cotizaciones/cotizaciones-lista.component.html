@@ -73,7 +73,18 @@
     </div>
 
     <div class="detalle-consulta" *ngIf="cotizacionSeleccionada">
-      <h3>Detalle de la cotización {{ cotizacionSeleccionada?.Id }}</h3>
+      <div class="detalle-header">
+        <h3>Detalle de la cotización {{ cotizacionSeleccionada?.Id }}</h3>
+        <button
+          nbButton
+          size="small"
+          status="success"
+          (click)="onExportarPdf()"
+          [disabled]="detalleLoading || !detalleSeleccionado.length"
+        >
+          Exportar PDF
+        </button>
+      </div>
       <div class="estado" *ngIf="detalleLoading">
         <nb-spinner status="info"></nb-spinner>
         <span>Cargando detalle…</span>
@@ -100,6 +111,12 @@
             <td>{{ item.Total | currency: 'MXN' }}</td>
           </tr>
         </tbody>
+        <tfoot>
+          <tr>
+            <th colspan="4" style="text-align: right;">Total</th>
+            <th>{{ totalDetalleSeleccionado | currency: 'MXN' }}</th>
+          </tr>
+        </tfoot>
       </table>
       <p class="hint-text" *ngIf="!detalleLoading && !detalleSeleccionado.length && !detalleError">
         Esta cotización no tiene productos registrados.
