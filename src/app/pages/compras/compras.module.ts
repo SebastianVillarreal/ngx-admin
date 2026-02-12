@@ -27,6 +27,7 @@ import { ListaPreciosDetalleComponent } from './proveedores/lista-precios-detall
 import { ProveedoresComponent } from './proveedores/proveedores.component';
 import { ProveedoresListasPreciosComponent } from './proveedores/listas-precios.component';
 import { MargenesFamiliasComponent } from './margenes-familias/margenes-familias.component';
+import { PreciosProgramadosComponent } from './precios-programados/precios-programados.component';
 
 @NgModule({
   imports: [
@@ -58,6 +59,7 @@ import { MargenesFamiliasComponent } from './margenes-familias/margenes-familias
     ProveedoresComponent,
     ProveedoresListasPreciosComponent,
     MargenesFamiliasComponent,
+    PreciosProgramadosComponent,
   ],
 })
 export class ComprasModule { }

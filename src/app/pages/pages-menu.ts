@@ -88,6 +88,10 @@ export const MENU_ITEMS: NbMenuItem[] = [
         title: 'Margenes familias',
         link: '/pages/compras/margenes-familias',
       },
+      {
+        title: 'Precios programados',
+        link: '/pages/compras/precios-programados',
+      },
       
     ],
   },
