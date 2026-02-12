@@ -1,0 +1,114 @@
+<nb-card>
+  <nb-card-header>
+    <div class="header-main">
+      <h2>Detalle de lista de precios</h2>
+      <button nbButton status="success" size="small" (click)="exportToExcel()" [disabled]="loading || !displayItems.length">
+        Exportar
+      </button>
+    </div>
+  </nb-card-header>
+  <nb-card-body>
+    <div class="state" *ngIf="loading">
+      <nb-spinner status="primary"></nb-spinner>
+      <span>Cargando detalle...</span>
+    </div>
+
+    <nb-alert status="danger" *ngIf="!loading && error">
+      <div class="error-wrap">
+        <span>{{ error }}</span>
+        <button nbButton status="danger" size="tiny" outline (click)="retry()">Reintentar</button>
+      </div>
+    </nb-alert>
+
+    <ng-container *ngIf="!loading && !error && header">
+      <div class="header-grid">
+        <div><strong>Id:</strong> {{ header.Id }}</div>
+        <div><strong>Folio:</strong> {{ header.Folio }}</div>
+        <div><strong>Id Proveedor:</strong> {{ header.IdProveedor }}</div>
+        <div><strong>Usuario:</strong> {{ header.Usuario || '---' }}</div>
+        <div class="full"><strong>Proveedor:</strong> {{ header.Proveedor }}</div>
+      </div>
+    </ng-container>
+  </nb-card-body>
+</nb-card>
+
+<nb-card>
+  <nb-card-header class="table-header">
+    <div class="search-control">
+      <nb-icon icon="search-outline"></nb-icon>
+      <input
+        nbInput
+        fullWidth
+        placeholder="Buscar en renglones"
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="onSearch($event)"
+        [disabled]="loading || !items.length"
+      />
+    </div>
+  </nb-card-header>
+  <nb-card-body>
+    <ng-container *ngIf="!loading && !error">
+      <div class="empty-state" *ngIf="!items.length">
+        <nb-icon icon="inbox-outline"></nb-icon>
+        <p>No hay renglones para esta lista.</p>
+      </div>
+
+      <div class="empty-state" *ngIf="items.length && !displayItems.length">
+        <nb-icon icon="search-outline"></nb-icon>
+        <p>Sin coincidencias para "{{ searchTerm }}".</p>
+      </div>
+
+      <ng-container *ngIf="displayItems.length">
+        <div class="table-wrap">
+          <table class="detalle-table">
+            <thead>
+              <tr>
+                <th (click)="toggleSort('Codigo')">Codigo {{ sortIndicator('Codigo') }}</th>
+                <th (click)="toggleSort('Descripcion')">Descripcion {{ sortIndicator('Descripcion') }}</th>
+                <th class="num" (click)="toggleSort('CostoAD')">Costo AD {{ sortIndicator('CostoAD') }}</th>
+                <th class="num" (click)="toggleSort('CostoDD')">Costo DD {{ sortIndicator('CostoDD') }}</th>
+                <th (click)="toggleSort('PD')">PD {{ sortIndicator('PD') }}</th>
+                <th class="num" (click)="toggleSort('D1')">D1 {{ sortIndicator('D1') }}</th>
+                <th class="num" (click)="toggleSort('D2')">D2 {{ sortIndicator('D2') }}</th>
+                <th class="num" (click)="toggleSort('D3')">D3 {{ sortIndicator('D3') }}</th>
+                <th class="num" (click)="toggleSort('D4')">D4 {{ sortIndicator('D4') }}</th>
+                <th class="num" (click)="toggleSort('D5')">D5 {{ sortIndicator('D5') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of paginatedItems; trackBy: trackByRenglon">
+                <td>{{ item.Codigo }}</td>
+                <td>{{ item.Descripcion }}</td>
+                <td class="num">{{ item.CostoAD | number: '1.2-2' }}</td>
+                <td class="num">{{ item.CostoDD | number: '1.2-2' }}</td>
+                <td>{{ item.PD || '---' }}</td>
+                <td class="num">{{ item.D1 | number: '1.2-2' }}</td>
+                <td class="num">{{ item.D2 | number: '1.2-2' }}</td>
+                <td class="num">{{ item.D3 | number: '1.2-2' }}</td>
+                <td class="num">{{ item.D4 | number: '1.2-2' }}</td>
+                <td class="num">{{ item.D5 | number: '1.2-2' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pagination">
+          <div class="page-size">
+            <span>Mostrar</span>
+            <nb-select size="small" [(selected)]="pageSize" (selectedChange)="changePageSize($event)">
+              <nb-option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</nb-option>
+            </nb-select>
+          </div>
+          <div class="range">
+            {{ pageStart }}-{{ pageEnd }} de {{ displayItems.length }}
+          </div>
+          <div class="nav">
+            <button nbButton size="tiny" (click)="previousPage()" [disabled]="currentPage <= 1">Anterior</button>
+            <span>Pag. {{ currentPage }} / {{ totalPages }}</span>
+            <button nbButton size="tiny" (click)="nextPage()" [disabled]="currentPage >= totalPages">Siguiente</button>
+          </div>
+        </div>
+      </ng-container>
+    </ng-container>
+  </nb-card-body>
+</nb-card>

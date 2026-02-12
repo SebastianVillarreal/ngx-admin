@@ -69,6 +69,16 @@ export const MENU_ITEMS: NbMenuItem[] = [
       {
         title: 'Proveedores',
         link: '/pages/compras/proveedores',
+        children: [
+          {
+            title: 'Catalogo',
+            link: '/pages/compras/proveedores',
+          },
+          {
+            title: 'Listas de precios',
+            link: '/pages/compras/proveedores/listas-precios',
+          },
+        ],
       },
       
     ],

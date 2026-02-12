@@ -1,0 +1,143 @@
+<nb-card>
+  <nb-card-header class="card-header">
+    <div>
+      <h2 class="title">Listas de precios</h2>
+      <p class="subtitle">Consulta de listas filtradas por usuario, codigo, proveedor y folio.</p>
+    </div>
+    <button nbButton status="primary" (click)="buscar()" [disabled]="loading">
+      Buscar
+    </button>
+  </nb-card-header>
+  <nb-card-body>
+    <div class="filters-grid">
+      <div class="field">
+        <label>IdUsuario</label>
+        <input nbInput fullWidth [(ngModel)]="filtros.IdUsuario" />
+      </div>
+      <div class="field">
+        <label>Codigo</label>
+        <input nbInput fullWidth [(ngModel)]="filtros.Codigo" />
+      </div>
+      <div class="field">
+        <label>Proveedor</label>
+        <nb-select
+          fullWidth
+          placeholder="Selecciona proveedor"
+          [(selected)]="filtros.Proveedor"
+          [disabled]="proveedoresLoading"
+        >
+          <nb-option *ngFor="let option of proveedoresOptions" [value]="option.value">
+            {{ option.label }}
+          </nb-option>
+        </nb-select>
+      </div>
+      <div class="field">
+        <label>Folio</label>
+        <input nbInput fullWidth [(ngModel)]="filtros.Folio" />
+      </div>
+    </div>
+    <nb-alert status="info" *ngIf="proveedoresLoading">
+      Cargando proveedores...
+    </nb-alert>
+    <nb-alert status="danger" *ngIf="!proveedoresLoading && proveedoresError">
+      <div class="error-wrap">
+        <span>{{ proveedoresError }}</span>
+        <button nbButton status="danger" size="tiny" outline (click)="retryProveedores()">Reintentar</button>
+      </div>
+    </nb-alert>
+  </nb-card-body>
+</nb-card>
+
+<nb-card>
+  <nb-card-header class="card-header secondary">
+    <div class="header-tools">
+      <div class="search-control">
+        <nb-icon icon="search-outline"></nb-icon>
+        <input
+          nbInput
+          fullWidth
+          placeholder="Buscar en resultados"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearch($event)"
+          [disabled]="loading || !items.length"
+        />
+      </div>
+      <button nbButton status="success" size="small" (click)="exportToExcel()" [disabled]="loading || !displayItems.length">
+        Exportar
+      </button>
+    </div>
+  </nb-card-header>
+  <nb-card-body>
+    <div class="state" *ngIf="loading">
+      <nb-spinner status="primary"></nb-spinner>
+      <span>Cargando listas de precios...</span>
+    </div>
+
+    <nb-alert status="danger" *ngIf="!loading && error">
+      <div class="error-wrap">
+        <span>{{ error }}</span>
+        <button nbButton status="danger" size="tiny" outline (click)="retry()">Reintentar</button>
+      </div>
+    </nb-alert>
+
+    <ng-container *ngIf="!loading && !error">
+      <div class="empty-state" *ngIf="!items.length">
+        <nb-icon icon="inbox-outline"></nb-icon>
+        <p>No hay resultados para los filtros actuales.</p>
+      </div>
+
+      <div class="empty-state" *ngIf="items.length && !displayItems.length">
+        <nb-icon icon="search-outline"></nb-icon>
+        <p>Sin coincidencias para "{{ searchTerm }}".</p>
+      </div>
+
+      <ng-container *ngIf="displayItems.length">
+        <div class="table-wrap">
+          <table class="listas-table">
+            <thead>
+              <tr>
+                <th (click)="toggleSort('Id')">Id {{ sortIndicator('Id') }}</th>
+                <th (click)="toggleSort('Proveedor')">Proveedor {{ sortIndicator('Proveedor') }}</th>
+                <th (click)="toggleSort('IdProveedor')">IdProveedor {{ sortIndicator('IdProveedor') }}</th>
+                <th (click)="toggleSort('Folio')">Folio {{ sortIndicator('Folio') }}</th>
+                <th (click)="toggleSort('Usuario')">Usuario {{ sortIndicator('Usuario') }}</th>
+                <th>Accion</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of paginatedItems; trackBy: trackById">
+                <td>{{ item.Id }}</td>
+                <td>{{ item.Proveedor }}</td>
+                <td>{{ item.IdProveedor }}</td>
+                <td>{{ item.Folio }}</td>
+                <td>{{ item.Usuario }}</td>
+                <td>
+                  <button nbButton size="tiny" status="info" (click)="verLista(item.Id)">
+                    Ver lista
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pagination">
+          <div class="page-size">
+            <span>Mostrar</span>
+            <nb-select size="small" [(selected)]="pageSize" (selectedChange)="changePageSize($event)">
+              <nb-option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</nb-option>
+            </nb-select>
+          </div>
+          <div class="range">
+            {{ pageStart }}-{{ pageEnd }} de {{ displayItems.length }}
+          </div>
+          <div class="nav">
+            <button nbButton size="tiny" (click)="previousPage()" [disabled]="currentPage <= 1">Anterior</button>
+            <span>Pag. {{ currentPage }} / {{ totalPages }}</span>
+            <button nbButton size="tiny" (click)="nextPage()" [disabled]="currentPage >= totalPages">Siguiente</button>
+          </div>
+        </div>
+      </ng-container>
+    </ng-container>
+  </nb-card-body>
+</nb-card>

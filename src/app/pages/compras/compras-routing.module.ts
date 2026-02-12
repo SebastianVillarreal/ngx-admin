@@ -7,6 +7,8 @@ import { NuevoArticuloComponent } from './articulos/nuevo-articulo.component';
 import { CotizacionesComponent } from './cotizaciones/cotizaciones.component';
 import { CotizacionesListaComponent } from './cotizaciones/cotizaciones-lista.component';
 import { ProveedoresComponent } from './proveedores/proveedores.component';
+import { ListaPreciosDetalleComponent } from './proveedores/lista-precios-detalle.component';
+import { ProveedoresListasPreciosComponent } from './proveedores/listas-precios.component';
 
 const routes: Routes = [
   {
@@ -36,6 +38,14 @@ const routes: Routes = [
       {
         path: 'proveedores',
         component: ProveedoresComponent,
+      },
+      {
+        path: 'proveedores/listas-precios',
+        component: ProveedoresListasPreciosComponent,
+      },
+      {
+        path: 'proveedores/listas-precios/:id',
+        component: ListaPreciosDetalleComponent,
       },
       {
         path: '',

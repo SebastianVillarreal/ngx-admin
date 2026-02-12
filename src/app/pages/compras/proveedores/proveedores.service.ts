@@ -85,10 +85,78 @@ interface InsertProveedorApiResponse {
   };
 }
 
+export interface GetListasPreciosPayload {
+  IdUsuario: string;
+  Codigo: string;
+  Proveedor: string;
+  Folio: string;
+}
+
+export interface ListaPrecioItem {
+  Id: number;
+  Proveedor: string;
+  IdProveedor: number;
+  Folio: number;
+  Usuario: string;
+}
+
+interface ListasPreciosApiResponse {
+  StatusCode: number;
+  success: boolean;
+  message: string;
+  response?: {
+    data?: ListaPrecioItem[];
+  };
+}
+
+export interface DatosListaHeader {
+  Id: number;
+  Proveedor: string;
+  IdProveedor: number;
+  Folio: number;
+  Usuario: string | null;
+}
+
+interface DatosListaApiResponse {
+  StatusCode: number;
+  success: boolean;
+  message: string;
+  response?: {
+    data?: DatosListaHeader;
+  };
+}
+
+export interface RenglonListaItem {
+  Id: number;
+  IdLista: number;
+  Codigo: string;
+  Descripcion: string;
+  CostoAD: number;
+  CostoDD: number;
+  PD: string;
+  D1: number;
+  D2: number;
+  D3: number;
+  D4: number;
+  D5: number;
+}
+
+interface RenglonesListaApiResponse {
+  StatusCode: number;
+  success: boolean;
+  message: string;
+  response?: {
+    data?: RenglonListaItem[];
+  };
+}
+
 @Injectable({ providedIn: 'root' })
 export class ProveedoresService {
   private readonly endpoint = '/api/GetProveedores';
   private readonly insertEndpoint = '/api/InsertProveedor';
+  private readonly listasPreciosEndpoint = '/api/GetListasPrecios';
+  private readonly datosListaEndpoint = '/api/GetDatosLista';
+  private readonly renglonesListaEndpoint = '/api/GetRenglonesLista';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -108,6 +176,36 @@ export class ProveedoresService {
       catchError((error) => {
         console.error('InsertProveedor error', error);
         return throwError(() => new Error('No se pudo registrar el proveedor.'));
+      }),
+    );
+  }
+
+  obtenerListasPrecios(payload: GetListasPreciosPayload): Observable<ListaPrecioItem[]> {
+    return this.http.post<ListasPreciosApiResponse>(this.listasPreciosEndpoint, payload).pipe(
+      map((res) => res.response?.data ?? []),
+      catchError((error) => {
+        console.error('GetListasPrecios error', error);
+        return throwError(() => new Error('No se pudieron obtener las listas de precios.'));
+      }),
+    );
+  }
+
+  obtenerDatosLista(id: number): Observable<DatosListaHeader | null> {
+    return this.http.post<DatosListaApiResponse>(this.datosListaEndpoint, { Id: id }).pipe(
+      map((res) => res.response?.data ?? null),
+      catchError((error) => {
+        console.error('GetDatosLista error', error);
+        return throwError(() => new Error('No se pudo obtener el encabezado de la lista.'));
+      }),
+    );
+  }
+
+  obtenerRenglonesLista(id: number): Observable<RenglonListaItem[]> {
+    return this.http.post<RenglonesListaApiResponse>(this.renglonesListaEndpoint, { Id: id }).pipe(
+      map((res) => res.response?.data ?? []),
+      catchError((error) => {
+        console.error('GetRenglonesLista error', error);
+        return throwError(() => new Error('No se pudieron obtener los renglones de la lista.'));
       }),
     );
   }

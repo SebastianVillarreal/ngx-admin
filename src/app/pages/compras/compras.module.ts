@@ -22,7 +22,9 @@ import { CambiosPrecioComponent } from './articulos/cambios-precio.component';
 import { NuevoArticuloComponent } from './articulos/nuevo-articulo.component';
 import { CotizacionesComponent } from './cotizaciones/cotizaciones.component';
 import { CotizacionesListaComponent } from './cotizaciones/cotizaciones-lista.component';
+import { ListaPreciosDetalleComponent } from './proveedores/lista-precios-detalle.component';
 import { ProveedoresComponent } from './proveedores/proveedores.component';
+import { ProveedoresListasPreciosComponent } from './proveedores/listas-precios.component';
 
 @NgModule({
   imports: [
@@ -49,7 +51,9 @@ import { ProveedoresComponent } from './proveedores/proveedores.component';
     NuevoArticuloComponent,
     CotizacionesComponent,
     CotizacionesListaComponent,
+    ListaPreciosDetalleComponent,
     ProveedoresComponent,
+    ProveedoresListasPreciosComponent,
   ],
 })
 export class ComprasModule { }
