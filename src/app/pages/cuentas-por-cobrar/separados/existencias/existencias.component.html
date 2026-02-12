@@ -1,0 +1,93 @@
+<nb-card>
+  <nb-card-header class="card-header">
+    <div>
+      <h2 class="title">Separados - Existencias</h2>
+      <p class="subtitle">Consulta de existencias para articulos separados.</p>
+    </div>
+  </nb-card-header>
+
+  <nb-card-body>
+    <div class="state" *ngIf="loading">
+      <nb-spinner status="primary"></nb-spinner>
+      <span>Cargando informacion...</span>
+    </div>
+
+    <nb-alert status="danger" *ngIf="!loading && errorMessage">
+      <div class="alert-content">
+        <span>{{ errorMessage }}</span>
+        <button nbButton status="danger" size="tiny" outline (click)="loadExistencias()">
+          Reintentar
+        </button>
+      </div>
+    </nb-alert>
+
+    <div class="table-container" *ngIf="!loading && !errorMessage">
+      <ngx-table-toolbar
+        [searchTerm]="searchTerm"
+        [searchPlaceholder]="'Buscar por id, codigo, descripcion, cantidad o precio'"
+        [loading]="loading"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="pageSizeOptions"
+        [exportDisabled]="!displayExistencias.length"
+        [exportLabel]="'Exportar Excel'"
+        [refreshLabel]="'Actualizar'"
+        (searchTermChange)="onSearch($event)"
+        (pageSizeChange)="changePageSize($event)"
+        (refresh)="loadExistencias()"
+        (export)="exportToExcel()"
+      ></ngx-table-toolbar>
+
+      <table class="existencias-table">
+        <thead>
+          <tr>
+            <th class="sortable" (click)="setSort('Id')">
+              ID
+              <nb-icon *ngIf="isSortColumn('Id')" [icon]="sortDirection === 'asc' ? 'arrow-up-outline' : 'arrow-down-outline'"></nb-icon>
+            </th>
+            <th class="sortable" (click)="setSort('Codigo')">
+              Codigo
+              <nb-icon *ngIf="isSortColumn('Codigo')" [icon]="sortDirection === 'asc' ? 'arrow-up-outline' : 'arrow-down-outline'"></nb-icon>
+            </th>
+            <th class="sortable" (click)="setSort('Descripcion')">
+              Descripcion
+              <nb-icon *ngIf="isSortColumn('Descripcion')" [icon]="sortDirection === 'asc' ? 'arrow-up-outline' : 'arrow-down-outline'"></nb-icon>
+            </th>
+            <th class="sortable" (click)="setSort('Cantidad')">
+              Cantidad
+              <nb-icon *ngIf="isSortColumn('Cantidad')" [icon]="sortDirection === 'asc' ? 'arrow-up-outline' : 'arrow-down-outline'"></nb-icon>
+            </th>
+            <th class="sortable" (click)="setSort('PrecioVenta')">
+              Precio venta
+              <nb-icon *ngIf="isSortColumn('PrecioVenta')" [icon]="sortDirection === 'asc' ? 'arrow-up-outline' : 'arrow-down-outline'"></nb-icon>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of paginatedExistencias; trackBy: trackById">
+            <td>{{ item.Id }}</td>
+            <td>{{ item.Codigo }}</td>
+            <td>{{ item.Descripcion }}</td>
+            <td>{{ item.Cantidad }}</td>
+            <td>{{ item.PrecioVenta | number: '1.2-2' }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="empty-state" *ngIf="!displayExistencias.length">
+        <nb-icon icon="inbox-outline"></nb-icon>
+        <p>Sin registros para el criterio de busqueda actual.</p>
+      </div>
+
+      <ngx-table-pagination
+        [totalItems]="totalItems"
+        [rangeStart]="rangeStart"
+        [rangeEnd]="rangeEnd"
+        [page]="page"
+        [totalPages]="totalPages"
+        [disabled]="loading"
+        (previous)="goToPreviousPage()"
+        (next)="goToNextPage()"
+      ></ngx-table-pagination>
+    </div>
+  </nb-card-body>
+</nb-card>

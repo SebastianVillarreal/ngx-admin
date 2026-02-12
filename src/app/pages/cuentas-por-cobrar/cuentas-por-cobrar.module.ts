@@ -22,6 +22,7 @@ import { CreditosDetalleComponent } from './creditos/detalle/creditos-detalle.co
 import { FoliosPagosComponent } from './creditos/folios-pagos/folios-pagos.component';
 import { CorteAbonosComponent } from './creditos/corte-abonos/corte-abonos.component';
 import { HistoricoComponent } from './creditos/historico/historico.component';
+import { SeparadosExistenciasComponent } from './separados/existencias/existencias.component';
 
 @NgModule({
   imports: [
@@ -48,6 +49,7 @@ import { HistoricoComponent } from './creditos/historico/historico.component';
     FoliosPagosComponent,
     CorteAbonosComponent,
     HistoricoComponent,
+    SeparadosExistenciasComponent,
   ],
 })
 export class CuentasPorCobrarModule {}

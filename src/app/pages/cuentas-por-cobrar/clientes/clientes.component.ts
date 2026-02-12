@@ -70,6 +70,11 @@ export class ClientesComponent implements OnInit {
     this.loadClientes(this.searchTerm);
   }
 
+  onSearchTermChange(term: string): void {
+    this.searchTerm = term;
+    this.onSearch();
+  }
+
   onRefresh(): void {
     this.loadClientes(this.lastSearch);
   }

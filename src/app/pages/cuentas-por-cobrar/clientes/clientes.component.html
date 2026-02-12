@@ -2,7 +2,7 @@
   <nb-card-header class="card-header">
     <div>
       <h2 class="title">Nuevo cliente</h2>
-      <p class="subtitle">Completa la información para registrar un cliente.</p>
+      <p class="subtitle">Completa la informacion para registrar un cliente.</p>
     </div>
     <button
       nbButton
@@ -28,12 +28,12 @@
           Editando {{ editingClienteNombre || ('cliente #' + editingClienteId) }}. Realiza los ajustes necesarios y
           presiona Actualizar.
         </span>
-        <button nbButton status="info" size="tiny" outline (click)="cancelEdit()">Cancelar edición</button>
+        <button nbButton status="info" size="tiny" outline (click)="cancelEdit()">Cancelar edicion</button>
       </div>
     </nb-alert>
     <div class="form-state" *ngIf="editingClienteLoading">
       <nb-spinner status="primary"></nb-spinner>
-      <span>Cargando información del cliente…</span>
+      <span>Cargando informacion del cliente...</span>
     </div>
 
     <form [formGroup]="clienteForm" (ngSubmit)="submitCliente()" class="form-grid">
@@ -46,28 +46,28 @@
         <input nbInput fullWidth formControlName="rfc" placeholder="RFC" />
       </div>
       <div class="form-field">
-        <label>Condición de pago</label>
-        <input nbInput fullWidth formControlName="condicionPago" placeholder="Condición de pago" />
+        <label>Condicion de pago</label>
+        <input nbInput fullWidth formControlName="condicionPago" placeholder="Condicion de pago" />
       </div>
       <div class="form-field">
-        <label>Límite de crédito</label>
-        <input nbInput fullWidth formControlName="limiteCredito" placeholder="Límite de crédito" />
+        <label>Limite de credito</label>
+        <input nbInput fullWidth formControlName="limiteCredito" placeholder="Limite de credito" />
       </div>
       <div class="form-field">
         <label>Correo</label>
         <input nbInput fullWidth formControlName="correo" placeholder="correo@dominio.com" />
       </div>
       <div class="form-field">
-        <label>Dirección</label>
-        <input nbInput fullWidth formControlName="direccion" placeholder="Calle y número" />
+        <label>Direccion</label>
+        <input nbInput fullWidth formControlName="direccion" placeholder="Calle y numero" />
       </div>
       <div class="form-field">
-        <label>Teléfono</label>
-        <input nbInput fullWidth formControlName="telefono" placeholder="Número telefónico" />
+        <label>Telefono</label>
+        <input nbInput fullWidth formControlName="telefono" placeholder="Numero telefonico" />
       </div>
       <div class="form-field">
-        <label>Código postal</label>
-        <input nbInput fullWidth formControlName="codPostal" placeholder="Código postal" />
+        <label>Codigo postal</label>
+        <input nbInput fullWidth formControlName="codPostal" placeholder="Codigo postal" />
       </div>
       <div class="form-field">
         <label>Ciudad</label>
@@ -106,20 +106,20 @@
         <input nbInput fullWidth formControlName="Aval" placeholder="Nombre del aval" />
       </div>
       <div class="form-field">
-        <label>Teléfono aval</label>
-        <input nbInput fullWidth formControlName="TelefonoAval" placeholder="Teléfono del aval" />
+        <label>Telefono aval</label>
+        <input nbInput fullWidth formControlName="TelefonoAval" placeholder="Telefono del aval" />
       </div>
       <div class="form-field">
         <label>Uso de CFDI</label>
         <nb-select fullWidth formControlName="Cfdi" placeholder="Selecciona">
-          <nb-option value="">Selecciona una opción</nb-option>
+          <nb-option value="">Selecciona una opcion</nb-option>
           <nb-option *ngFor="let option of cfdiOptions" [value]="option.value">{{ option.label }}</nb-option>
         </nb-select>
       </div>
       <div class="form-field">
-        <label>Régimen fiscal</label>
+        <label>Regimen fiscal</label>
         <nb-select fullWidth formControlName="regimen" placeholder="Selecciona">
-          <nb-option value="">Selecciona una opción</nb-option>
+          <nb-option value="">Selecciona una opcion</nb-option>
           <nb-option *ngFor="let option of regimenOptions" [value]="option.value">{{ option.label }}</nb-option>
         </nb-select>
       </div>
@@ -131,30 +131,14 @@
   <nb-card-header class="card-header">
     <div>
       <h2 class="title">Clientes</h2>
-      <p class="subtitle">Listado de clientes y condiciones de crédito.</p>
-    </div>
-    <div class="header-actions">
-      <button
-        nbButton
-        status="success"
-        size="small"
-        (click)="exportToExcel()"
-        [disabled]="loading || !clientes.length"
-      >
-        <nb-icon icon="download-outline"></nb-icon>
-        Exportar Excel
-      </button>
-      <button nbButton status="info" size="small" (click)="onRefresh()" [disabled]="loading">
-        <nb-icon icon="refresh-outline"></nb-icon>
-        Actualizar
-      </button>
+      <p class="subtitle">Listado de clientes y condiciones de credito.</p>
     </div>
   </nb-card-header>
 
   <nb-card-body>
     <div class="state" *ngIf="loading">
       <nb-spinner status="primary"></nb-spinner>
-      <span>Cargando información, por favor espera…</span>
+      <span>Cargando informacion, por favor espera...</span>
     </div>
 
     <nb-alert status="danger" *ngIf="!loading && errorMessage">
@@ -174,27 +158,20 @@
         {{ estatusUpdateError }}
       </nb-alert>
 
-      <div class="controls">
-        <div class="search-control">
-          <nb-icon icon="search-outline"></nb-icon>
-          <input
-            nbInput
-            fullWidth
-            placeholder="Buscar por nombre"
-            [(ngModel)]="searchTerm"
-            (keyup.enter)="onSearch()"
-          />
-          <button nbButton status="primary" size="small" (click)="onSearch()" [disabled]="loading">
-            Buscar
-          </button>
-        </div>
-        <div class="page-size-control">
-          <label>Registros por página</label>
-          <nb-select size="small" [selected]="pageSize" (selectedChange)="changePageSize($event)">
-            <nb-option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</nb-option>
-          </nb-select>
-        </div>
-      </div>
+      <ngx-table-toolbar
+        [searchTerm]="searchTerm"
+        [searchPlaceholder]="'Buscar por nombre'"
+        [loading]="loading"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="pageSizeOptions"
+        [exportDisabled]="!clientes.length"
+        [exportLabel]="'Exportar Excel'"
+        [refreshLabel]="'Actualizar'"
+        (searchTermChange)="onSearchTermChange($event)"
+        (pageSizeChange)="changePageSize($event)"
+        (refresh)="onRefresh()"
+        (export)="exportToExcel()"
+      ></ngx-table-toolbar>
 
       <ng-container *ngIf="paginatedClientes.length; else emptyState">
         <table class="clientes-table">
@@ -204,14 +181,14 @@
               <th>Nombre</th>
               <th>RFC</th>
               <th>Correo</th>
-              <th>Dirección</th>
-              <th>Teléfono</th>
+              <th>Direccion</th>
+              <th>Telefono</th>
               <th>Banco</th>
               <th>Cuenta</th>
               <th>Comentarios</th>
               <th>CFDI</th>
               <th>Estatus</th>
-              <th class="acciones">Acción</th>
+              <th class="acciones">Accion</th>
             </tr>
           </thead>
           <tbody>
@@ -250,24 +227,16 @@
         </div>
       </ng-template>
 
-      <div class="pagination-bar" *ngIf="totalItems">
-        <span>Mostrando {{ rangeStart }} - {{ rangeEnd }} de {{ totalItems }} registros</span>
-        <div class="pagination-controls">
-          <button nbButton size="tiny" status="basic" (click)="goToPreviousPage()" [disabled]="page === 1">
-            <nb-icon icon="arrow-back-outline"></nb-icon>
-          </button>
-          <span>Página {{ page }} de {{ totalPages }}</span>
-          <button
-            nbButton
-            size="tiny"
-            status="basic"
-            (click)="goToNextPage()"
-            [disabled]="page === totalPages"
-          >
-            <nb-icon icon="arrow-forward-outline"></nb-icon>
-          </button>
-        </div>
-      </div>
+      <ngx-table-pagination
+        [totalItems]="totalItems"
+        [rangeStart]="rangeStart"
+        [rangeEnd]="rangeEnd"
+        [page]="page"
+        [totalPages]="totalPages"
+        [disabled]="loading"
+        (previous)="goToPreviousPage()"
+        (next)="goToNextPage()"
+      ></ngx-table-pagination>
     </div>
   </nb-card-body>
 </nb-card>

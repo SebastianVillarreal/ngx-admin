@@ -1,0 +1,33 @@
+<div class="toolbar">
+  <div class="search-control">
+    <nb-icon icon="search-outline"></nb-icon>
+    <input
+      nbInput
+      fullWidth
+      type="text"
+      [placeholder]="searchPlaceholder"
+      [value]="searchTerm"
+      (input)="onSearchInput($event)"
+    />
+  </div>
+
+  <div class="toolbar-actions">
+    <div class="page-size-control" *ngIf="showPageSize">
+      <label>Registros por pagina</label>
+      <nb-select size="small" [selected]="pageSize" (selectedChange)="onPageSizeChange($event)">
+        <nb-option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</nb-option>
+      </nb-select>
+    </div>
+
+    <button nbButton status="success" size="small" *ngIf="showExport" (click)="onExport()" [disabled]="loading || exportDisabled">
+      <nb-icon icon="download-outline"></nb-icon>
+      {{ exportLabel }}
+    </button>
+
+    <button nbButton status="primary" size="small" (click)="onRefresh()" [disabled]="loading">
+      <nb-icon icon="refresh-outline"></nb-icon>
+      {{ refreshLabel }}
+    </button>
+  </div>
+</div>
+

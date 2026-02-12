@@ -101,7 +101,13 @@ export const MENU_ITEMS: NbMenuItem[] = [
       },
       {
         title: 'Separados',
-        link: '/pages/cuentas-por-cobrar/clientes',
+        link: '/pages/cuentas-por-cobrar/separados/existencias',
+        children: [
+          {
+            title: 'Existencias',
+            link: '/pages/cuentas-por-cobrar/separados/existencias',
+          },
+        ],
       },
       {
         title: 'Creditos',

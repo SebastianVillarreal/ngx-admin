@@ -1,32 +1,16 @@
 <nb-card>
   <nb-card-header class="card-header">
     <div>
-      <h2 class="title">Médicos</h2>
-      <p class="subtitle">Directorio de médicos con sus datos de contacto y estatus.</p>
-    </div>
-    <div class="header-actions">
-      <button
-        nbButton
-        status="success"
-        size="small"
-        (click)="exportToExcel()"
-        [disabled]="loading || !filteredMedicos.length"
-      >
-        <nb-icon icon="download-outline"></nb-icon>
-        Exportar Excel
-      </button>
-      <button nbButton status="primary" size="small" (click)="loadMedicos()" [disabled]="loading">
-        <nb-icon icon="refresh-outline"></nb-icon>
-        Actualizar
-      </button>
+      <h2 class="title">Medicos</h2>
+      <p class="subtitle">Directorio de medicos con sus datos de contacto y estatus.</p>
     </div>
   </nb-card-header>
 
   <nb-card-body>
     <section class="create-section">
       <div>
-        <h3 class="section-title">Registrar nuevo médico</h3>
-        <p class="section-subtitle">Completa la información para agregar médicos al catálogo.</p>
+        <h3 class="section-title">Registrar nuevo medico</h3>
+        <p class="section-subtitle">Completa la informacion para agregar medicos al catalogo.</p>
       </div>
 
       <nb-alert status="success" *ngIf="createSuccess">
@@ -40,14 +24,14 @@
       <form [formGroup]="createForm" (ngSubmit)="submitNewMedico()" class="create-form">
         <div class="form-grid">
           <div class="form-field">
-            <label>Número *</label>
+            <label>Numero *</label>
             <input nbInput fullWidth formControlName="Numero" placeholder="Ej. 101" />
-            <span class="field-error" *ngIf="hasFieldError('Numero')">El número es obligatorio.</span>
+            <span class="field-error" *ngIf="hasFieldError('Numero')">El numero es obligatorio.</span>
           </div>
           <div class="form-field">
-            <label>Cédula *</label>
+            <label>Cedula *</label>
             <input nbInput fullWidth formControlName="Cedula" placeholder="Ej. 1153182" />
-            <span class="field-error" *ngIf="hasFieldError('Cedula')">La cédula es obligatoria.</span>
+            <span class="field-error" *ngIf="hasFieldError('Cedula')">La cedula es obligatoria.</span>
           </div>
           <div class="form-field">
             <label>Nombre *</label>
@@ -65,22 +49,22 @@
           </div>
           <div class="form-field domicilio">
             <label>Domicilio *</label>
-            <textarea nbInput rows="2" formControlName="Domicilio" placeholder="Dirección completa"></textarea>
+            <textarea nbInput rows="2" formControlName="Domicilio" placeholder="Direccion completa"></textarea>
             <span class="field-error" *ngIf="hasFieldError('Domicilio')">El domicilio es obligatorio.</span>
           </div>
           <div class="form-field">
-            <label>Teléfono móvil</label>
-            <input nbInput fullWidth formControlName="Telefono" placeholder="10 dígitos" />
+            <label>Telefono movil</label>
+            <input nbInput fullWidth formControlName="Telefono" placeholder="10 digitos" />
           </div>
           <div class="form-field">
-            <label>Teléfono casa</label>
-            <input nbInput fullWidth formControlName="TelefonoCasa" placeholder="10 dígitos" />
+            <label>Telefono casa</label>
+            <input nbInput fullWidth formControlName="TelefonoCasa" placeholder="10 digitos" />
           </div>
         </div>
 
         <div class="form-actions">
           <button nbButton status="primary" type="submit" [disabled]="isSubmitDisabled">
-            {{ creating ? 'Guardando…' : 'Registrar médico' }}
+            {{ creating ? 'Guardando...' : 'Registrar medico' }}
           </button>
           <button nbButton status="basic" type="button" (click)="resetCreateForm()" [disabled]="creating">
             Limpiar
@@ -91,7 +75,7 @@
 
     <div class="state" *ngIf="loading">
       <nb-spinner status="primary"></nb-spinner>
-      <span>Cargando información, por favor espera…</span>
+      <span>Cargando informacion, por favor espera...</span>
     </div>
 
     <nb-alert status="danger" *ngIf="!loading && errorMessage">
@@ -104,34 +88,29 @@
     </nb-alert>
 
     <div class="table-container" *ngIf="!loading && !errorMessage">
-      <div class="controls">
-        <div class="search-control">
-          <nb-icon icon="search-outline"></nb-icon>
-          <input
-            nbInput
-            fullWidth
-            type="text"
-            placeholder="Buscar por número, cédula, nombre o domicilio"
-            [(ngModel)]="searchTerm"
-            (ngModelChange)="onSearch($event)"
-          />
-        </div>
-        <div class="page-size-control">
-          <label>Registros por página</label>
-          <nb-select size="small" [selected]="pageSize" (selectedChange)="changePageSize($event)">
-            <nb-option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</nb-option>
-          </nb-select>
-        </div>
-      </div>
+      <ngx-table-toolbar
+        [searchTerm]="searchTerm"
+        [searchPlaceholder]="'Buscar por numero, cedula, nombre o domicilio'"
+        [loading]="loading"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="pageSizeOptions"
+        [exportDisabled]="!filteredMedicos.length"
+        [exportLabel]="'Exportar Excel'"
+        [refreshLabel]="'Actualizar'"
+        (searchTermChange)="onSearch($event)"
+        (pageSizeChange)="changePageSize($event)"
+        (refresh)="loadMedicos()"
+        (export)="exportToExcel()"
+      ></ngx-table-toolbar>
 
       <ng-container *ngIf="paginatedMedicos.length; else emptyState">
         <table class="medicos-table">
           <thead>
             <tr>
-              <th>Número</th>
+              <th>Numero</th>
               <th>Nombre</th>
-              <th>Cédula</th>
-              <th>Teléfono</th>
+              <th>Cedula</th>
+              <th>Telefono</th>
               <th>Domicilio</th>
               <th>Estatus</th>
               <th class="acciones">Acciones</th>
@@ -169,28 +148,20 @@
       <ng-template #emptyState>
         <div class="empty-state">
           <nb-icon icon="inbox-outline"></nb-icon>
-          <p>No encontramos resultados que coincidan con tu búsqueda.</p>
+          <p>No encontramos resultados que coincidan con tu busqueda.</p>
         </div>
       </ng-template>
 
-      <div class="pagination-bar" *ngIf="totalItems">
-        <span>Mostrando {{ rangeStart }} - {{ rangeEnd }} de {{ totalItems }} registros</span>
-        <div class="pagination-controls">
-          <button nbButton size="tiny" status="basic" (click)="goToPreviousPage()" [disabled]="page === 1">
-            <nb-icon icon="arrow-back-outline"></nb-icon>
-          </button>
-          <span>Página {{ page }} de {{ totalPages }}</span>
-          <button
-            nbButton
-            size="tiny"
-            status="basic"
-            (click)="goToNextPage()"
-            [disabled]="page === totalPages"
-          >
-            <nb-icon icon="arrow-forward-outline"></nb-icon>
-          </button>
-        </div>
-      </div>
+      <ngx-table-pagination
+        [totalItems]="totalItems"
+        [rangeStart]="rangeStart"
+        [rangeEnd]="rangeEnd"
+        [page]="page"
+        [totalPages]="totalPages"
+        [disabled]="loading"
+        (previous)="goToPreviousPage()"
+        (next)="goToNextPage()"
+      ></ngx-table-pagination>
     </div>
   </nb-card-body>
 </nb-card>

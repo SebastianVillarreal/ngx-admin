@@ -9,6 +9,7 @@ import {
   NbUserModule,
   NbContextMenuModule,
   NbButtonModule,
+  NbInputModule,
   NbSelectModule,
   NbIconModule,
   NbThemeModule,
@@ -20,6 +21,8 @@ import {
   FooterComponent,
   HeaderComponent,
   SearchInputComponent,
+  TablePaginationComponent,
+  TableToolbarComponent,
   TinyMCEComponent,
 } from './components';
 import {
@@ -49,6 +52,7 @@ const NB_MODULES = [
   NbContextMenuModule,
   NbSecurityModule,
   NbButtonModule,
+  NbInputModule,
   NbSelectModule,
   NbIconModule,
   NbEvaIconsModule,
@@ -57,6 +61,8 @@ const COMPONENTS = [
   HeaderComponent,
   FooterComponent,
   SearchInputComponent,
+  TableToolbarComponent,
+  TablePaginationComponent,
   TinyMCEComponent,
   OneColumnLayoutComponent,
   ThreeColumnsLayoutComponent,

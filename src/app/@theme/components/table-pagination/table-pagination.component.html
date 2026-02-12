@@ -1,0 +1,13 @@
+<div class="pagination-bar" *ngIf="totalItems">
+  <span>Mostrando {{ rangeStart }} - {{ rangeEnd }} de {{ totalItems }} registros</span>
+  <div class="pagination-controls">
+    <button nbButton size="tiny" status="basic" (click)="onPrevious()" [disabled]="disabled || page === 1">
+      <nb-icon icon="arrow-back-outline"></nb-icon>
+    </button>
+    <span>Pagina {{ page }} de {{ totalPages }}</span>
+    <button nbButton size="tiny" status="basic" (click)="onNext()" [disabled]="disabled || page === totalPages">
+      <nb-icon icon="arrow-forward-outline"></nb-icon>
+    </button>
+  </div>
+</div>
+
