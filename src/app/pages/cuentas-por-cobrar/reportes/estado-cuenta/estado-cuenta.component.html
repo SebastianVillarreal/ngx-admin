@@ -1,0 +1,174 @@
+<nb-card>
+  <nb-card-header class="card-header">
+    <div>
+      <h2 class="title">Estado Cuenta</h2>
+      <p class="subtitle">Consulta saldos por cliente a una fecha determinada.</p>
+    </div>
+    <button
+      nbButton
+      status="success"
+      size="small"
+      (click)="buscarEstadoCuenta()"
+      [disabled]="loading || clientesLoading"
+    >
+      <nb-icon icon="search-outline"></nb-icon>
+      Consultar
+    </button>
+  </nb-card-header>
+
+  <nb-card-body>
+    <div class="filters-grid">
+      <div class="field">
+        <label>*Cliente</label>
+        <nb-select
+          fullWidth
+          placeholder="Selecciona un cliente"
+          [(selected)]="selectedCliente"
+          [disabled]="clientesLoading"
+        >
+          <nb-option *ngFor="let cliente of clientes" [value]="cliente.value">
+            {{ cliente.label }}
+          </nb-option>
+        </nb-select>
+      </div>
+      <div class="field">
+        <label>*Fecha</label>
+        <input
+          nbInput
+          fullWidth
+          type="date"
+          [(ngModel)]="selectedFecha"
+          [disabled]="loading"
+        />
+      </div>
+    </div>
+
+    <nb-alert status="info" *ngIf="clientesLoading">Cargando clientes...</nb-alert>
+
+    <nb-alert status="danger" *ngIf="!clientesLoading && clientesError">
+      <div class="alert-content">
+        <span>{{ clientesError }}</span>
+        <button nbButton size="tiny" status="danger" outline (click)="retryLoad()">Reintentar</button>
+      </div>
+    </nb-alert>
+
+    <nb-alert status="danger" *ngIf="error">
+      <div class="alert-content">
+        <span>{{ error }}</span>
+        <button nbButton size="tiny" status="danger" outline (click)="retryLoad()">Reintentar</button>
+      </div>
+    </nb-alert>
+  </nb-card-body>
+</nb-card>
+
+<nb-card>
+  <nb-card-header class="card-header secondary">
+    <div class="header-tools">
+      <div class="search-control">
+        <nb-icon icon="search-outline"></nb-icon>
+        <input
+          nbInput
+          fullWidth
+          type="text"
+          placeholder="Buscar en resultados"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearch($event)"
+          [disabled]="!items.length || loading"
+        />
+      </div>
+      <button
+        nbButton
+        size="small"
+        status="success"
+        (click)="exportToExcel()"
+        [disabled]="!displayItems.length || loading"
+      >
+        <nb-icon icon="download-outline"></nb-icon>
+        Exportar
+      </button>
+      <button
+        nbButton
+        size="small"
+        status="info"
+        (click)="exportToPdf()"
+        [disabled]="!displayItems.length || loading"
+      >
+        <nb-icon icon="file-text-outline"></nb-icon>
+        PDF
+      </button>
+    </div>
+  </nb-card-header>
+
+  <nb-card-body>
+    <div class="state" *ngIf="loading">
+      <nb-spinner status="primary"></nb-spinner>
+      <span>Consultando estado de cuenta...</span>
+    </div>
+
+    <ng-container *ngIf="!loading">
+      <div class="empty-state" *ngIf="!items.length && !error">
+        <nb-icon icon="inbox-outline"></nb-icon>
+        <p>No hay resultados. Selecciona filtros y presiona "Consultar".</p>
+      </div>
+
+      <div class="empty-state" *ngIf="items.length && !displayItems.length">
+        <nb-icon icon="search-outline"></nb-icon>
+        <p>Sin coincidencias para "{{ searchTerm }}".</p>
+      </div>
+
+      <ng-container *ngIf="displayItems.length">
+        <div class="table-wrap">
+          <table class="estado-table">
+            <thead>
+              <tr>
+                <th (click)="toggleSort('FolioInterno')">Folio Interno {{ sortIndicator('FolioInterno') }}</th>
+                <th (click)="toggleSort('Cliente')">Cliente {{ sortIndicator('Cliente') }}</th>
+                <th (click)="toggleSort('Fecha')">Fecha {{ sortIndicator('Fecha') }}</th>
+                <th (click)="toggleSort('FechaVencimiento')">Vencimiento {{ sortIndicator('FechaVencimiento') }}</th>
+                <th class="num" (click)="toggleSort('Total')">Total {{ sortIndicator('Total') }}</th>
+                <th class="num" (click)="toggleSort('Abonado')">Abonado {{ sortIndicator('Abonado') }}</th>
+                <th class="num" (click)="toggleSort('Resto')">Resto {{ sortIndicator('Resto') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of paginatedItems; trackBy: trackByItem">
+                <td>{{ item.FolioInterno }}</td>
+                <td>{{ item.Cliente }}</td>
+                <td>{{ item.FechaDate ? (item.FechaDate | date: 'dd/MM/yyyy') : item.Fecha }}</td>
+                <td>{{ item.FechaVencimientoDate ? (item.FechaVencimientoDate | date: 'dd/MM/yyyy') : item.FechaVencimiento }}</td>
+                <td class="num">{{ item.Total | currency: 'MXN':'symbol-narrow' }}</td>
+                <td class="num">{{ item.Abonado | currency: 'MXN':'symbol-narrow' }}</td>
+                <td class="num">{{ item.Resto | currency: 'MXN':'symbol-narrow' }}</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="4" class="totals-label">Totales (filtro actual)</td>
+                <td class="num">{{ totalGeneral | currency: 'MXN':'symbol-narrow' }}</td>
+                <td class="num">{{ abonadoGeneral | currency: 'MXN':'symbol-narrow' }}</td>
+                <td class="num">{{ restoGeneral | currency: 'MXN':'symbol-narrow' }}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div class="pagination">
+          <div class="page-size">
+            <span>Mostrar</span>
+            <nb-select size="small" [(selected)]="pageSize" (selectedChange)="changePageSize($event)">
+              <nb-option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</nb-option>
+            </nb-select>
+          </div>
+          <div class="range">
+            {{ pageStart }}-{{ pageEnd }} de {{ displayItems.length }}
+          </div>
+          <div class="nav">
+            <button nbButton size="tiny" (click)="previousPage()" [disabled]="currentPage <= 1">Anterior</button>
+            <span>Pag. {{ currentPage }} / {{ totalPages }}</span>
+            <button nbButton size="tiny" (click)="nextPage()" [disabled]="currentPage >= totalPages">Siguiente</button>
+          </div>
+        </div>
+      </ng-container>
+    </ng-container>
+  </nb-card-body>
+</nb-card>

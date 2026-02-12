@@ -232,6 +232,27 @@ interface HistoricoTcApiResponse {
   };
 }
 
+export interface EstadoCuentaItem {
+  Abonado: number;
+  IdTicketCredito: number;
+  Resto: number;
+  Id: number;
+  Fecha: string;
+  Total: number;
+  FolioInterno: string;
+  Cliente: string;
+  FechaVencimiento: string;
+}
+
+interface EstadoCuentaApiResponse {
+  StatusCode: number;
+  success: boolean;
+  message: string;
+  response?: {
+    data?: EstadoCuentaItem[];
+  };
+}
+
 @Injectable({ providedIn: 'root' })
 export class CreditosService {
   private readonly endpoint = `${environment.apiBase}/GetClientesCreditos`;
@@ -243,6 +264,7 @@ export class CreditosService {
   private readonly finalizarFolioAbonoEndpoint = `${environment.apiBase}/FinalizarFolioAbono`;
   private readonly foliosAbonoEndpoint = `${environment.apiBase}/GetFoliosAbono`;
   private readonly historicoTcEndpoint = `${environment.apiBase}/GetHistoricoTC`;
+  private readonly estadoCuentaEndpoint = `${environment.apiBase}/GetEstadoCuentaCliente`;
 
   constructor(private readonly http: HttpClient) {}
 
@@ -373,6 +395,20 @@ export class CreditosService {
       catchError((error) => {
         console.error('GetHistoricoTC error', error);
         return throwError(() => new Error('No se pudo obtener el histórico de créditos.'));
+      }),
+    );
+  }
+
+  fetchEstadoCuentaCliente(idCliente: string, fecha: string): Observable<EstadoCuentaItem[]> {
+    const params = new HttpParams()
+      .set('cliente', idCliente)
+      .set('fecha', fecha);
+
+    return this.http.get<EstadoCuentaApiResponse>(this.estadoCuentaEndpoint, { params }).pipe(
+      map((res) => res.response?.data ?? []),
+      catchError((error) => {
+        console.error('GetEstadoCuentaCliente error', error);
+        return throwError(() => new Error('No se pudo recuperar el estado de cuenta.'));
       }),
     );
   }

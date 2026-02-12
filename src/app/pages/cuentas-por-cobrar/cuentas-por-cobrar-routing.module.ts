@@ -9,6 +9,7 @@ import { FoliosPagosComponent } from './creditos/folios-pagos/folios-pagos.compo
 import { CorteAbonosComponent } from './creditos/corte-abonos/corte-abonos.component';
 import { HistoricoComponent } from './creditos/historico/historico.component';
 import { SeparadosExistenciasComponent } from './separados/existencias/existencias.component';
+import { EstadoCuentaComponent } from './reportes/estado-cuenta/estado-cuenta.component';
 
 const routes: Routes = [
   {
@@ -42,6 +43,10 @@ const routes: Routes = [
       {
         path: 'separados/existencias',
         component: SeparadosExistenciasComponent,
+      },
+      {
+        path: 'reportes/estado-cuenta',
+        component: EstadoCuentaComponent,
       },
       {
         path: '',

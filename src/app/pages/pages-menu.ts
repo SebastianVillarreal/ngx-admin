@@ -131,6 +131,16 @@ export const MENU_ITEMS: NbMenuItem[] = [
           },
         ],
       },
+      {
+        title: 'Reportes',
+        link: '/pages/cuentas-por-cobrar/reportes/estado-cuenta',
+        children: [
+          {
+            title: 'Estado Cuenta',
+            link: '/pages/cuentas-por-cobrar/reportes/estado-cuenta',
+          },
+        ],
+      },
       
     ],
   },
