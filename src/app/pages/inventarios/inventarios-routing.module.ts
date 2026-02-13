@@ -13,6 +13,7 @@ import { TraspasosEnTransitoComponent } from './traspasos-en-transito/traspasos-
 import { TraspasosEnviadosComponent } from './traspasos-enviados/traspasos-enviados.component';
 import { TraspasosConDiferenciaComponent } from './traspasos-con-diferencia/traspasos-con-diferencia.component';
 import { ExistenciasComponent } from './existencias/existencias.component';
+import { HistoricoExistenciasComponent } from './historico-existencias/historico-existencias.component';
 
 const routes: Routes = [
   {
@@ -67,6 +68,10 @@ const routes: Routes = [
   {
     path: 'existencias',
     component: ExistenciasComponent,
+  },
+  {
+    path: 'existencias/historico-existencias',
+    component: HistoricoExistenciasComponent,
   },
 ];
 

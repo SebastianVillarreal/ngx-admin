@@ -12,6 +12,7 @@
         <nb-select
           placeholder="Selecciona un departamento"
           formControlName="departamento"
+          [disabled]="departamentosLoading || !departamentos.length"
           [status]="filtroForm.get('departamento')?.invalid && filtroForm.get('departamento')?.touched ? 'danger' : 'basic'"
         >
           <nb-option *ngFor="let departamento of departamentos" [value]="departamento.value">
@@ -28,6 +29,7 @@
         <nb-select
           placeholder="Selecciona una familia"
           formControlName="familia"
+          [disabled]="familiasLoading || !familias.length"
           [status]="filtroForm.get('familia')?.invalid && filtroForm.get('familia')?.touched ? 'danger' : 'basic'"
         >
           <nb-option *ngFor="let familia of familias" [value]="familia.value">
@@ -53,6 +55,19 @@
         </button>
       </div>
     </form>
+
+    <nb-alert *ngIf="departamentosLoading" status="info" accent="info">
+      Cargando departamentos...
+    </nb-alert>
+    <nb-alert *ngIf="!departamentosLoading && departamentosError" status="danger" accent="danger">
+      {{ departamentosError }}
+    </nb-alert>
+    <nb-alert *ngIf="familiasLoading" status="info" accent="info">
+      Cargando familias...
+    </nb-alert>
+    <nb-alert *ngIf="!familiasLoading && familiasError" status="danger" accent="danger">
+      {{ familiasError }}
+    </nb-alert>
 
     <nb-alert *ngIf="error" status="danger" accent="danger">{{ error }}</nb-alert>
     <nb-alert *ngIf="mensaje" status="info" accent="info">{{ mensaje }}</nb-alert>

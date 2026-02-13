@@ -28,8 +28,8 @@ export class FamiliasService {
 
   constructor(private readonly http: HttpClient) {}
 
-  fetchFamilias(): Observable<Familia[]> {
-    return this.http.post<FamiliasApiResponse>(this.endpoint, { IdDepartamento: '0' }).pipe(
+  fetchFamilias(idDepartamento = '0'): Observable<Familia[]> {
+    return this.http.post<FamiliasApiResponse>(this.endpoint, { IdDepartamento: idDepartamento }).pipe(
       map((payload) => payload.response?.data ?? []),
       catchError((error) => {
         console.error('FamiliasService error', error);

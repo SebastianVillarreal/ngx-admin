@@ -241,7 +241,17 @@ export const MENU_ITEMS: NbMenuItem[] = [
       },
       {
         title: 'Existencias',
-        link: '/pages/inventarios/existencias'
+        link: '/pages/inventarios/existencias',
+        children: [
+          {
+            title: 'Existencias',
+            link: '/pages/inventarios/existencias',
+          },
+          {
+            title: 'Historico existencias',
+            link: '/pages/inventarios/existencias/historico-existencias',
+          },
+        ],
       },
       
     ],

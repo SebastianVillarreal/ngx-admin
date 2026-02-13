@@ -1,7 +1,9 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 
-import { TraspasosService, ExistenciaInventario } from '../traspasos/traspasos.service';
+import { DepartamentosService } from '../../catalogos/departamentos/departamentos.service';
+import { FamiliasService } from '../../catalogos/familias/familias.service';
+import { ExistenciaInventario, TraspasosService } from '../traspasos/traspasos.service';
 
 interface SeleccionOption {
   value: string;
@@ -21,25 +23,20 @@ interface FiltroFormValue {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ExistenciasComponent implements OnInit {
-  readonly departamentos: SeleccionOption[] = [
-    { value: '1041', label: 'Lácteos (01)' },
-    { value: '2001', label: 'Abarrotes (02)' },
-    { value: '3001', label: 'Carnes (03)' },
-  ];
-
-  readonly familias: SeleccionOption[] = [
-    { value: '1013', label: 'Natillas' },
-    { value: '2020', label: 'Conservas' },
-    { value: '3030', label: 'Embutidos' },
-  ];
+  departamentos: SeleccionOption[] = [];
+  familias: SeleccionOption[] = [];
 
   readonly filtroForm = this.fb.group({
-    departamento: this.fb.control(this.departamentos[0]?.value ?? '', Validators.required),
-    familia: this.fb.control(this.familias[0]?.value ?? '', Validators.required),
+    departamento: this.fb.control('', Validators.required),
+    familia: this.fb.control('', Validators.required),
     fecha: this.fb.control('', Validators.required),
   });
 
   cargando = false;
+  departamentosLoading = false;
+  departamentosError = '';
+  familiasLoading = false;
+  familiasError = '';
   mensaje = '';
   error = '';
   existencias: ExistenciaInventario[] = [];
@@ -47,11 +44,15 @@ export class ExistenciasComponent implements OnInit {
   constructor(
     private readonly fb: FormBuilder,
     private readonly traspasosService: TraspasosService,
+    private readonly departamentosService: DepartamentosService,
+    private readonly familiasService: FamiliasService,
     private readonly cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
     this.establecerFechaInicial();
+    this.suscribirCambiosDepartamento();
+    this.cargarDepartamentos();
   }
 
   onBuscar(): void {
@@ -90,6 +91,68 @@ export class ExistenciasComponent implements OnInit {
     });
   }
 
+  private cargarDepartamentos(): void {
+    this.departamentosLoading = true;
+    this.departamentosError = '';
+    this.departamentos = [];
+    this.markForCheck();
+
+    this.departamentosService.fetchDepartamentos().subscribe({
+      next: (data) => {
+        this.departamentos = (data || []).map((item) => ({
+          value: String(item.Id),
+          label: item.Nombre || `Departamento #${item.Id}`,
+        }));
+        this.filtroForm.patchValue({ departamento: this.departamentos[0]?.value ?? '' });
+        this.departamentosLoading = false;
+        this.markForCheck();
+      },
+      error: (error) => {
+        this.departamentosLoading = false;
+        this.departamentosError = error?.message || 'No se pudo cargar el catalogo de departamentos.';
+        this.markForCheck();
+      },
+    });
+  }
+
+  private suscribirCambiosDepartamento(): void {
+    this.filtroForm.get('departamento')?.valueChanges.subscribe((value) => {
+      const idDepartamento = String(value || '').trim();
+      this.cargarFamilias(idDepartamento);
+    });
+  }
+
+  private cargarFamilias(idDepartamento: string): void {
+    this.familiasLoading = true;
+    this.familiasError = '';
+    this.familias = [];
+    this.filtroForm.patchValue({ familia: '' }, { emitEvent: false });
+    this.markForCheck();
+
+    if (!idDepartamento) {
+      this.familiasLoading = false;
+      this.markForCheck();
+      return;
+    }
+
+    this.familiasService.fetchFamilias(idDepartamento).subscribe({
+      next: (data) => {
+        this.familias = (data || []).map((item) => ({
+          value: String(item.Id),
+          label: item.Nombre || `Familia #${item.Id}`,
+        }));
+        this.filtroForm.patchValue({ familia: this.familias[0]?.value ?? '' }, { emitEvent: false });
+        this.familiasLoading = false;
+        this.markForCheck();
+      },
+      error: (error) => {
+        this.familiasLoading = false;
+        this.familiasError = error?.message || 'No se pudo cargar el catalogo de familias.';
+        this.markForCheck();
+      },
+    });
+  }
+
   private establecerFechaInicial(): void {
     const hoy = new Date();
     this.filtroForm.patchValue({
@@ -106,10 +169,11 @@ export class ExistenciasComponent implements OnInit {
   }
 
   private obtenerEtiqueta(opciones: SeleccionOption[], valor: string): string {
-    return opciones.find((opcion) => opcion.value === valor)?.label ?? 'la opción seleccionada';
+    return opciones.find((opcion) => opcion.value === valor)?.label ?? 'la opcion seleccionada';
   }
 
   private markForCheck(): void {
     this.cdr.markForCheck();
   }
 }
+
