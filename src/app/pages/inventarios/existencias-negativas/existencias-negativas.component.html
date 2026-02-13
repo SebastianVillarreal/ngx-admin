@@ -1,0 +1,100 @@
+<nb-card>
+  <nb-card-header class="card-header">
+    <div>
+      <h2 class="title">Existencias negativas</h2>
+      <p class="subtitle">Consulta de articulos con existencia menor a cero.</p>
+    </div>
+    <button nbButton status="primary" (click)="retry()" [disabled]="cargando">
+      Recargar
+    </button>
+  </nb-card-header>
+</nb-card>
+
+<nb-card>
+  <nb-card-header class="card-header secondary">
+    <div class="header-tools">
+      <div class="search-control">
+        <nb-icon icon="search-outline"></nb-icon>
+        <input
+          nbInput
+          fullWidth
+          placeholder="Buscar en resultados"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearch($event)"
+          [disabled]="cargando || !items.length"
+        />
+      </div>
+      <button nbButton status="success" size="small" (click)="exportToExcel()" [disabled]="cargando || !displayItems.length">
+        Exportar
+      </button>
+    </div>
+  </nb-card-header>
+
+  <nb-card-body>
+    <div class="state" *ngIf="cargando">
+      <nb-spinner status="primary"></nb-spinner>
+      <span>Cargando existencias negativas...</span>
+    </div>
+
+    <nb-alert status="danger" *ngIf="!cargando && error">
+      <div class="error-wrap">
+        <span>{{ error }}</span>
+        <button nbButton status="danger" size="tiny" outline (click)="retry()">Reintentar</button>
+      </div>
+    </nb-alert>
+
+    <ng-container *ngIf="!cargando && !error">
+      <div class="empty-state" *ngIf="!items.length">
+        <nb-icon icon="inbox-outline"></nb-icon>
+        <p>No hay existencias negativas.</p>
+      </div>
+
+      <div class="empty-state" *ngIf="items.length && !displayItems.length">
+        <nb-icon icon="search-outline"></nb-icon>
+        <p>Sin coincidencias para "{{ searchTerm }}".</p>
+      </div>
+
+      <ng-container *ngIf="displayItems.length">
+        <div class="table-wrap">
+          <table class="negativas-table">
+            <thead>
+              <tr>
+                <th (click)="toggleSort('Codigo')">Codigo {{ sortIndicator('Codigo') }}</th>
+                <th (click)="toggleSort('Descripcion')">Descripcion {{ sortIndicator('Descripcion') }}</th>
+                <th (click)="toggleSort('Existencia')">Existencia {{ sortIndicator('Existencia') }}</th>
+                <th (click)="toggleSort('Departamento')">Departamento {{ sortIndicator('Departamento') }}</th>
+                <th (click)="toggleSort('Familia')">Familia {{ sortIndicator('Familia') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of paginatedItems; trackBy: trackByCodigo">
+                <td>{{ item.Codigo }}</td>
+                <td>{{ item.Descripcion }}</td>
+                <td>{{ item.Existencia | number: '1.0-4' }}</td>
+                <td>{{ item.Departamento }}</td>
+                <td>{{ item.Familia }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pagination">
+          <div class="page-size">
+            <span>Mostrar</span>
+            <nb-select size="small" [(selected)]="pageSize" (selectedChange)="changePageSize($event)">
+              <nb-option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</nb-option>
+            </nb-select>
+          </div>
+          <div class="range">
+            {{ pageStart }}-{{ pageEnd }} de {{ displayItems.length }}
+          </div>
+          <div class="nav">
+            <button nbButton size="tiny" (click)="previousPage()" [disabled]="currentPage <= 1">Anterior</button>
+            <span>Pag. {{ currentPage }} / {{ totalPages }}</span>
+            <button nbButton size="tiny" (click)="nextPage()" [disabled]="currentPage >= totalPages">Siguiente</button>
+          </div>
+        </div>
+      </ng-container>
+    </ng-container>
+  </nb-card-body>
+</nb-card>

@@ -200,6 +200,24 @@ interface ExistenciasInventarioApiResponse {
   };
 }
 
+export interface ExistenciaNegativaItem {
+  Codigo: string;
+  Descripcion: string;
+  Cantidad: number;
+  Existencia: number;
+  Departamento: string;
+  Familia: string;
+}
+
+interface ExistenciasNegativasApiResponse {
+  StatusCode: number;
+  success: boolean;
+  message: string;
+  response?: {
+    data?: ExistenciaNegativaItem[];
+  };
+}
+
 @Injectable({ providedIn: 'root' })
 export class TraspasosService {
   private readonly nuevoTraspasoEndpoint = '/api/INV_NuevoTraspaso';
@@ -213,6 +231,7 @@ export class TraspasosService {
   private readonly traspasosEnviadosEndpoint = '/api/GetTraspasosEnviados';
   private readonly traspasosConDiferenciaEndpoint = '/api/GetDiferenciasTraspasos';
   private readonly existenciasEndpoint = '/api/INV_GetFechasCierre';
+  private readonly existenciasNegativasEndpoint = '/api/GetExistenciasNegativas';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -375,6 +394,17 @@ export class TraspasosService {
       catchError((error) => {
         console.error('INV_GetFechasCierre error', error);
         const message = error?.message || 'No se pudieron obtener las existencias.';
+        return throwError(() => new Error(message));
+      }),
+    );
+  }
+
+  obtenerExistenciasNegativas(): Observable<ExistenciaNegativaItem[]> {
+    return this.http.get<ExistenciasNegativasApiResponse>(this.existenciasNegativasEndpoint).pipe(
+      map((res) => res.response?.data ?? []),
+      catchError((error) => {
+        console.error('GetExistenciasNegativas error', error);
+        const message = error?.message || 'No se pudieron obtener las existencias negativas.';
         return throwError(() => new Error(message));
       }),
     );

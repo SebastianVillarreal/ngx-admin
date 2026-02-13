@@ -251,6 +251,10 @@ export const MENU_ITEMS: NbMenuItem[] = [
             title: 'Historico existencias',
             link: '/pages/inventarios/existencias/historico-existencias',
           },
+          {
+            title: 'Existencias negativas',
+            link: '/pages/inventarios/existencias/existencias-negativas',
+          },
         ],
       },
       
