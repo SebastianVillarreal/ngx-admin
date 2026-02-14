@@ -3,6 +3,8 @@ import { RouterModule, Routes } from '@angular/router';
 import { CuentasPorPagarComponent } from './cuentas-por-pagar.component';
 import { FacturasComponent } from './facturas/facturas.component';
 import { NotasDeCargoComponent } from './notas-de-cargo/notas-de-cargo.component';
+import { NotasDeCargoInsertarComponent } from './notas-de-cargo-insertar/notas-de-cargo-insertar.component';
+import { NotasDeCargoListaComponent } from './notas-de-cargo-lista/notas-de-cargo-lista.component';
 import { PagosReportesComponent } from './pagos-reportes/pagos-reportes.component';
 import { PagosSpeiComponent } from './pagos-spei/pagos-spei.component';
 import { PagosSpeiListComponent } from './pagos-spei-list/pagos-spei-list.component';
@@ -36,6 +38,21 @@ const routes: Routes = [
       {
         path: 'notas-de-cargo',
         component: NotasDeCargoComponent,
+        children: [
+          {
+            path: 'insertar',
+            component: NotasDeCargoInsertarComponent,
+          },
+          {
+            path: 'lista',
+            component: NotasDeCargoListaComponent,
+          },
+          {
+            path: '',
+            redirectTo: 'insertar',
+            pathMatch: 'full',
+          },
+        ],
       },
       {
         path: 'pagos-spei/lista',

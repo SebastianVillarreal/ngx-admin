@@ -159,7 +159,16 @@ export const MENU_ITEMS: NbMenuItem[] = [
       },
       {
         title: 'Notas de cargo',
-        link: '/pages/cuentas-por-pagar/notas-de-cargo',
+        children: [
+          {
+            title: 'Insertar',
+            link: '/pages/cuentas-por-pagar/notas-de-cargo/insertar',
+          },
+          {
+            title: 'Lista',
+            link: '/pages/cuentas-por-pagar/notas-de-cargo/lista',
+          },
+        ],
       },
     ],
   },

@@ -1,0 +1,101 @@
+<nb-card>
+  <nb-card-header class="card-header">
+    <div>
+      <h2 class="title">Notas de cargo</h2>
+      <p class="subtitle">Listado de notas de cargo por sucursal y proveedor.</p>
+    </div>
+    <div class="filters-inline">
+      <div class="field">
+        <label for="idSucursal">Sucursal</label>
+        <input nbInput id="idSucursal" type="number" [formControl]="form.controls.idSucursal">
+      </div>
+      <div class="field field-proveedor">
+        <label for="idProveedor">Proveedor</label>
+        <nb-select id="idProveedor" fullWidth [formControl]="form.controls.idProveedor" [disabled]="loadingProveedores">
+          <nb-option *ngFor="let p of proveedores" [value]="p.id">{{ p.nombre }}</nb-option>
+        </nb-select>
+      </div>
+      <button nbButton status="primary" size="small" (click)="buscar()" [disabled]="loading">Buscar</button>
+    </div>
+  </nb-card-header>
+
+  <nb-card-body>
+    <div class="state" *ngIf="loading">
+      <nb-spinner status="primary"></nb-spinner>
+      <span>Cargando informacion, por favor espera...</span>
+    </div>
+
+    <nb-alert status="danger" *ngIf="!loading && errorMessage">
+      <div class="alert-content">
+        <span>{{ errorMessage }}</span>
+        <button nbButton status="danger" size="tiny" outline (click)="retry()">Reintentar</button>
+      </div>
+    </nb-alert>
+
+    <div class="table-container" *ngIf="!loading && !errorMessage">
+      <ngx-table-toolbar
+        [searchTerm]="searchTerm"
+        [searchPlaceholder]="'Buscar notas de cargo'"
+        [loading]="loading"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="pageSizeOptions"
+        [exportDisabled]="!displayItems.length"
+        [exportLabel]="'Exportar Excel'"
+        [refreshLabel]="'Actualizar'"
+        (searchTermChange)="onSearchTermChange($event)"
+        (pageSizeChange)="changePageSize($event)"
+        (refresh)="onRefresh()"
+        (export)="exportExcel()"
+      ></ngx-table-toolbar>
+
+      <ng-container *ngIf="paginatedItems.length; else emptyState">
+        <table class="clientes-table">
+          <thead>
+            <tr>
+              <th (click)="setSort('id')" class="sortable">ID</th>
+              <th (click)="setSort('proveedor')" class="sortable">Proveedor</th>
+              <th (click)="setSort('sucursal')" class="sortable">Sucursal</th>
+              <th (click)="setSort('remision')" class="sortable">Remision</th>
+              <th (click)="setSort('subtotal')" class="sortable">Subtotal</th>
+              <th (click)="setSort('ieps')" class="sortable">IEPS</th>
+              <th (click)="setSort('iva')" class="sortable">IVA</th>
+              <th (click)="setSort('total')" class="sortable">Total</th>
+              <th (click)="setSort('fecha')" class="sortable">Fecha</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of paginatedItems; trackBy: trackById">
+              <td>{{ item.id }}</td>
+              <td>{{ item.proveedor }}</td>
+              <td>{{ item.sucursal }}</td>
+              <td>{{ item.remision }}</td>
+              <td>{{ item.subtotal | currency:'MXN':'symbol':'1.2-2' }}</td>
+              <td>{{ item.ieps | currency:'MXN':'symbol':'1.2-2' }}</td>
+              <td>{{ item.iva | currency:'MXN':'symbol':'1.2-2' }}</td>
+              <td>{{ item.total | currency:'MXN':'symbol':'1.2-2' }}</td>
+              <td>{{ item.fecha }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </ng-container>
+
+      <ng-template #emptyState>
+        <div class="empty-state">
+          <nb-icon icon="inbox-outline"></nb-icon>
+          <p>No se encontraron notas de cargo para el criterio proporcionado.</p>
+        </div>
+      </ng-template>
+
+      <ngx-table-pagination
+        [totalItems]="totalCount"
+        [rangeStart]="rangeStart"
+        [rangeEnd]="rangeEnd"
+        [page]="page"
+        [totalPages]="totalPages"
+        [disabled]="loading"
+        (previous)="goToPreviousPage()"
+        (next)="goToNextPage()"
+      ></ngx-table-pagination>
+    </div>
+  </nb-card-body>
+</nb-card>

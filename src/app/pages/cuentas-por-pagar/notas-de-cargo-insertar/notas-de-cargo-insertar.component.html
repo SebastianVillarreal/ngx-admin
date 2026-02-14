@@ -1,0 +1,55 @@
+<div class="row">
+  <div class="col-12">
+    <nb-card>
+      <nb-card-header>Notas de cargo | Insertar</nb-card-header>
+      <nb-card-body>
+        <div class="row g-3">
+          <div class="col-md-2">
+            <label class="label" for="idSucursal">Sucursal</label>
+            <input nbInput fullWidth id="idSucursal" type="number" [formControl]="form.controls.idSucursal" disabled>
+          </div>
+          <div class="col-md-4">
+            <label class="label" for="idProveedor">Proveedor</label>
+            <nb-select
+              id="idProveedor"
+              fullWidth
+              [formControl]="form.controls.idProveedor"
+              [disabled]="loadingProveedores"
+              (selectedChange)="onProveedorChange()">
+              <nb-option *ngFor="let p of proveedores" [value]="p.id">{{ p.nombre }}</nb-option>
+            </nb-select>
+          </div>
+          <div class="col-md-2">
+            <label class="label" for="idRemision">Id Remision</label>
+            <nb-select id="idRemision" fullWidth [formControl]="form.controls.idRemision" [disabled]="loadingRemisiones">
+              <nb-option *ngFor="let r of remisiones" [value]="r.id">{{ r.id }} - {{ r.factura }}</nb-option>
+            </nb-select>
+          </div>
+          <div class="col-md-2">
+            <label class="label" for="concepto">Concepto</label>
+            <nb-select id="concepto" fullWidth [formControl]="form.controls.concepto" [disabled]="loadingConceptos">
+              <nb-option *ngFor="let c of conceptos" [value]="c.id.toString()">{{ c.descripcion }}</nb-option>
+            </nb-select>
+          </div>
+          <div class="col-md-2">
+            <label class="label" for="total">Total</label>
+            <input nbInput fullWidth id="total" type="number" [formControl]="form.controls.total" placeholder="1000">
+          </div>
+          <div class="col-md-8">
+            <label class="label" for="referencia">Referencia</label>
+            <input nbInput fullWidth id="referencia" [formControl]="form.controls.referencia" placeholder="TEST">
+          </div>
+          <div class="col-md-2">
+            <label class="label" for="idUsuario">Id Usuario</label>
+            <input nbInput fullWidth id="idUsuario" type="number" [formControl]="form.controls.idUsuario" disabled>
+          </div>
+          <div class="col-md-2 d-flex align-items-end">
+            <button nbButton status="primary" (click)="guardar()" [disabled]="saving || loadingProveedores || loadingConceptos || loadingRemisiones">
+              {{ saving ? 'Guardando...' : 'Guardar' }}
+            </button>
+          </div>
+        </div>
+      </nb-card-body>
+    </nb-card>
+  </div>
+</div>
