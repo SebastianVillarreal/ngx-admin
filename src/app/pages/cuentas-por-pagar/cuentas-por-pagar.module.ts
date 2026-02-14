@@ -15,8 +15,13 @@ import {
 import { ThemeModule } from '../../@theme/theme.module';
 import { CuentasPorPagarRoutingModule } from './cuentas-por-pagar-routing.module';
 import { CuentasPorPagarComponent } from './cuentas-por-pagar.component';
+import { FacturasComponent } from './facturas/facturas.component';
+import { NotasDeCargoComponent } from './notas-de-cargo/notas-de-cargo.component';
+import { PagosReportesComponent } from './pagos-reportes/pagos-reportes.component';
 import { PagosSpeiComponent } from './pagos-spei/pagos-spei.component';
 import { PagosSpeiListComponent } from './pagos-spei-list/pagos-spei-list.component';
+import { RemisionFacturaComponent } from './remision-factura/remision-factura.component';
+import { VerificadorPagosComponent } from './verificador-pagos/verificador-pagos.component';
 
 @NgModule({
   imports: [
@@ -34,6 +39,15 @@ import { PagosSpeiListComponent } from './pagos-spei-list/pagos-spei-list.compon
     FormsModule,
     ReactiveFormsModule,
   ],
-  declarations: [CuentasPorPagarComponent, PagosSpeiComponent, PagosSpeiListComponent],
+  declarations: [
+    CuentasPorPagarComponent,
+    FacturasComponent,
+    NotasDeCargoComponent,
+    PagosReportesComponent,
+    PagosSpeiComponent,
+    PagosSpeiListComponent,
+    RemisionFacturaComponent,
+    VerificadorPagosComponent,
+  ],
 })
 export class CuentasPorPagarModule {}

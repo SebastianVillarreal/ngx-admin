@@ -1,0 +1,49 @@
+.sortable {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.state-box {
+  padding: 1rem;
+  border: 1px dashed #c5cee0;
+  border-radius: 0.5rem;
+  text-align: center;
+  color: #4d5d7d;
+}
+
+.state-error {
+  border-color: #ff708d;
+  color: #a5233a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.hint {
+  display: block;
+  margin-top: 0.25rem;
+  color: #6b7a99;
+}
+
+.dialog-card {
+  width: 680px;
+  max-width: 95vw;
+}
+
+.dialog-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem 1rem;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.error-text {
+  color: #a5233a;
+}

@@ -124,6 +124,46 @@ export const MENU_ITEMS: NbMenuItem[] = [
     ],
   },
   {
+    title: 'Cuentas por pagar',
+    icon: 'settings-2-outline',
+    children: [
+      {
+        title: 'Facturas',
+        children: [
+          {
+            title: 'Remision a factura',
+            link: '/pages/cuentas-por-pagar/facturas/remision-a-factura',
+          },
+        ],
+      },
+      {
+        title: 'Pagos',
+        children: [
+          {
+            title: 'Pagos Spei',
+            link: '/pages/cuentas-por-pagar/pagos-spei',
+          },
+          {
+            title: 'Historico pagos',
+            link: '/pages/cuentas-por-pagar/pagos/historico-pagos',
+          },
+          {
+            title: 'Verificador de pagos',
+            link: '/pages/cuentas-por-pagar/pagos/verificador-pagos',
+          },
+          {
+            title: 'Reportes',
+            link: '/pages/cuentas-por-pagar/pagos/reportes',
+          },
+        ],
+      },
+      {
+        title: 'Notas de cargo',
+        link: '/pages/cuentas-por-pagar/notas-de-cargo',
+      },
+    ],
+  },
+  {
     title: 'Cuentas por cobrar',
     icon: 'settings-2-outline',
     children: [

@@ -1,0 +1,22 @@
+.sortable {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.state-box {
+  padding: 1rem;
+  border: 1px dashed #c5cee0;
+  border-radius: 0.5rem;
+  text-align: center;
+  color: #4d5d7d;
+}
+
+.state-error {
+  border-color: #ff708d;
+  color: #a5233a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
