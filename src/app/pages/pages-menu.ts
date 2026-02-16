@@ -9,7 +9,7 @@ export const MENU_ITEMS: NbMenuItem[] = [
   },
   {
     title: 'Catalogos',
-    icon: 'settings-2-outline',
+    icon: 'grid-outline',
     children: [
       {
         title: 'Familias',
@@ -101,7 +101,7 @@ export const MENU_ITEMS: NbMenuItem[] = [
   },
   {
     title: 'Sistemas',
-    icon: 'settings-2-outline',
+    icon: 'monitor-outline',
     children: [
       {
         title: 'Entradas',
@@ -119,7 +119,7 @@ export const MENU_ITEMS: NbMenuItem[] = [
   },
   {
     title: 'Cuentas por pagar',
-    icon: 'settings-2-outline',
+    icon: 'credit-card-outline',
     children: [
       {
         title: 'Facturas',
@@ -174,7 +174,7 @@ export const MENU_ITEMS: NbMenuItem[] = [
   },
   {
     title: 'Cuentas por cobrar',
-    icon: 'settings-2-outline',
+    icon: 'people-outline',
     children: [
       {
         title: 'Clientes',
@@ -230,7 +230,7 @@ export const MENU_ITEMS: NbMenuItem[] = [
   },
   {
     title: 'Inventarios',
-    icon: 'settings-2-outline',
+    icon: 'archive-outline',
     children: [
       {
         title: 'Movimientos',
