@@ -2,15 +2,10 @@ import { NbMenuItem } from '@nebular/theme';
 
 export const MENU_ITEMS: NbMenuItem[] = [
   {
-    title: 'E-commerce',
-    icon: 'shopping-cart-outline',
-    link: '/pages/dashboard',
-    home: true,
-  },
-    {
-    title: 'IoT Dashboard',
+    title: 'Inicio',
     icon: 'home-outline',
-    link: '/pages/iot-dashboard',
+    link: '/pages/home',
+    home: true,
   },
   {
     title: 'Catalogos',
@@ -25,7 +20,7 @@ export const MENU_ITEMS: NbMenuItem[] = [
         link: '/pages/catalogos/departamentos',
       },
       {
-        title: 'Médicos',
+        title: 'Medicos',
         link: '/pages/catalogos/medicos',
       },
       {
@@ -39,7 +34,7 @@ export const MENU_ITEMS: NbMenuItem[] = [
     icon: 'shopping-bag-outline',
     children: [
       {
-        title: 'Artículos',
+        title: 'Articulos',
         link: '/pages/compras/articulos',
         children: [
           {
@@ -57,7 +52,7 @@ export const MENU_ITEMS: NbMenuItem[] = [
         link: '/pages/compras/cotizaciones',
         children: [
           {
-            title: 'Nueva cotización',
+            title: 'Nueva cotizacion',
             link: '/pages/compras/cotizaciones',
           },
           {
@@ -92,7 +87,6 @@ export const MENU_ITEMS: NbMenuItem[] = [
         title: 'Precios programados',
         link: '/pages/compras/precios-programados',
       },
-      
     ],
   },
   {
@@ -153,7 +147,13 @@ export const MENU_ITEMS: NbMenuItem[] = [
           },
           {
             title: 'Reportes',
-            link: '/pages/cuentas-por-pagar/pagos/reportes',
+            link: '/pages/cuentas-por-pagar/pagos/reportes/resumen-pagos',
+            children: [
+              {
+                title: 'Resumen pagos',
+                link: '/pages/cuentas-por-pagar/pagos/reportes/resumen-pagos',
+              },
+            ],
           },
         ],
       },
@@ -199,11 +199,11 @@ export const MENU_ITEMS: NbMenuItem[] = [
             link: '/pages/cuentas-por-cobrar/creditos',
           },
           {
-            title: 'Folios Pagos',
+            title: 'Folios pagos',
             link: '/pages/cuentas-por-cobrar/creditos/folios-pagos',
           },
           {
-            title: 'Corte Abonos',
+            title: 'Corte abonos',
             link: '/pages/cuentas-por-cobrar/creditos/corte-abonos',
           },
           {
@@ -217,7 +217,7 @@ export const MENU_ITEMS: NbMenuItem[] = [
         link: '/pages/cuentas-por-cobrar/reportes/estado-cuenta',
         children: [
           {
-            title: 'Estado Cuenta',
+            title: 'Estado cuenta',
             link: '/pages/cuentas-por-cobrar/reportes/estado-cuenta',
           },
           {
@@ -245,7 +245,7 @@ export const MENU_ITEMS: NbMenuItem[] = [
             link: '/pages/inventarios/movimientos/editar-autorizar',
           },
           {
-            title: 'Histórico',
+            title: 'Historico',
             link: '/pages/inventarios/movimientos/historico',
           },
         ],
@@ -274,19 +274,15 @@ export const MENU_ITEMS: NbMenuItem[] = [
             title: 'Traspasos con diferencia',
             link: '/pages/inventarios/traspasos-con-diferencia',
           },
-        ]
+        ],
       },
       {
         title: 'Verificador',
         link: '/pages/inventarios/verificador',
       },
       {
-        title: 'Importar físicos',
+        title: 'Importar fisicos',
         link: '/pages/inventarios/importar-fisicos',
-      },
-      {
-        title: 'Reparto de mermas(Maqueta)',
-        link: '/pages/inventarios/reparto-mermas',
       },
       {
         title: 'Existencias',
@@ -305,78 +301,6 @@ export const MENU_ITEMS: NbMenuItem[] = [
             link: '/pages/inventarios/existencias/existencias-negativas',
           },
         ],
-      },
-      
-    ],
-  },
-
-  
-  {
-    title: 'FEATURES',
-    group: true,
-  },
-
-  {
-    title: 'Maps',
-    icon: 'map-outline',
-    children: [
-      {
-        title: 'Google Maps',
-        link: '/pages/maps/gmaps',
-      },
-      {
-        title: 'Leaflet Maps',
-        link: '/pages/maps/leaflet',
-      },
-      {
-        title: 'Bubble Maps',
-        link: '/pages/maps/bubble',
-      },
-      {
-        title: 'Search Maps',
-        link: '/pages/maps/searchmap',
-      },
-    ],
-  },
-  {
-    title: 'Charts',
-    icon: 'pie-chart-outline',
-    children: [
-      {
-        title: 'Echarts',
-        link: '/pages/charts/echarts',
-      },
-      {
-        title: 'Charts.js',
-        link: '/pages/charts/chartjs',
-      },
-      {
-        title: 'D3',
-        link: '/pages/charts/d3',
-      },
-    ],
-  },
-
-
-  {
-    title: 'Auth',
-    icon: 'lock-outline',
-    children: [
-      {
-        title: 'Login',
-        link: '/auth/login',
-      },
-      {
-        title: 'Register',
-        link: '/auth/register',
-      },
-      {
-        title: 'Request Password',
-        link: '/auth/request-password',
-      },
-      {
-        title: 'Reset Password',
-        link: '/auth/reset-password',
       },
     ],
   },

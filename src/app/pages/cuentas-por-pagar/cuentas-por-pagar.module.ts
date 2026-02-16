@@ -22,6 +22,7 @@ import { NotasDeCargoComponent } from './notas-de-cargo/notas-de-cargo.component
 import { NotasDeCargoInsertarComponent } from './notas-de-cargo-insertar/notas-de-cargo-insertar.component';
 import { NotasDeCargoListaComponent } from './notas-de-cargo-lista/notas-de-cargo-lista.component';
 import { PagosReportesComponent } from './pagos-reportes/pagos-reportes.component';
+import { ResumenPagosComponent } from './pagos-reportes/resumen-pagos/resumen-pagos.component';
 import { PagosSpeiComponent } from './pagos-spei/pagos-spei.component';
 import { PagosSpeiListComponent } from './pagos-spei-list/pagos-spei-list.component';
 import { RemisionFacturaComponent } from './remision-factura/remision-factura.component';
@@ -52,6 +53,7 @@ import { VerificadorPagosComponent } from './verificador-pagos/verificador-pagos
     NotasDeCargoInsertarComponent,
     NotasDeCargoListaComponent,
     PagosReportesComponent,
+    ResumenPagosComponent,
     PagosSpeiComponent,
     PagosSpeiListComponent,
     RemisionFacturaComponent,

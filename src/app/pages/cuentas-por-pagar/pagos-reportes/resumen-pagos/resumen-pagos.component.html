@@ -1,0 +1,140 @@
+<div class="row">
+  <div class="col-12">
+    <nb-card>
+      <nb-card-header class="card-header">
+        <div>
+          <h2 class="title">Resumen pagos</h2>
+          <p class="subtitle">Consulta de pagos por rango de fechas.</p>
+        </div>
+        <button nbButton status="primary" (click)="buscar()" [disabled]="loading">
+          Buscar
+        </button>
+      </nb-card-header>
+      <nb-card-body>
+        <div class="row g-3">
+          <div class="col-md-3 col-lg-3">
+            <label class="label" for="fi">Fecha Inicial</label>
+            <input nbInput id="fi" fullWidth placeholder="dd/mm/aaaa" [nbDatepicker]="dpi" [formControl]="form.controls.fechaInicial">
+            <nb-datepicker #dpi></nb-datepicker>
+          </div>
+          <div class="col-md-3 col-lg-3">
+            <label class="label" for="ff">Fecha Final</label>
+            <input nbInput id="ff" fullWidth placeholder="dd/mm/aaaa" [nbDatepicker]="dpf" [formControl]="form.controls.fechaFinal">
+            <nb-datepicker #dpf></nb-datepicker>
+          </div>
+        </div>
+      </nb-card-body>
+    </nb-card>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-12">
+    <nb-card>
+      <nb-card-header class="card-header secondary">
+        <div class="header-tools">
+          <div class="search-control">
+            <nb-icon icon="search-outline"></nb-icon>
+            <input
+              nbInput
+              fullWidth
+              placeholder="Buscar en resultados"
+              [(ngModel)]="search"
+              (ngModelChange)="onSearchChange()"
+              [disabled]="loading || !items.length"
+            />
+          </div>
+          <button nbButton status="success" size="small" (click)="exportExcel()" [disabled]="loading || !displayItems.length">
+            Exportar
+          </button>
+        </div>
+      </nb-card-header>
+      <nb-card-body>
+        <ng-container *ngIf="loading">
+          <div class="state">
+            <nb-spinner status="primary"></nb-spinner>
+            <span>Cargando resumen de pagos...</span>
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="!loading && errorMessage">
+          <nb-alert status="danger">
+            <div class="error-wrap">
+              <span>{{ errorMessage }}</span>
+              <button nbButton status="danger" size="tiny" outline (click)="retry()">Reintentar</button>
+            </div>
+          </nb-alert>
+        </ng-container>
+
+        <ng-container *ngIf="!loading && !errorMessage">
+          <ng-container *ngIf="totalCount > 0; else emptyState">
+            <div class="table-wrap">
+              <table class="listas-table">
+                <thead>
+                  <tr>
+                    <th (click)="setSort('idSpei')">Id Spei {{ sortIndicator('idSpei') }}</th>
+                    <th (click)="setSort('numeroSpei')">Numero Spei {{ sortIndicator('numeroSpei') }}</th>
+                    <th (click)="setSort('folio')">Folio {{ sortIndicator('folio') }}</th>
+                    <th (click)="setSort('referenciaBanco')">Referencia Banco {{ sortIndicator('referenciaBanco') }}</th>
+                    <th (click)="setSort('sucursal')">Sucursal {{ sortIndicator('sucursal') }}</th>
+                    <th (click)="setSort('proveedor')">Proveedor {{ sortIndicator('proveedor') }}</th>
+                    <th (click)="setSort('idProveedor')">IdProveedor {{ sortIndicator('idProveedor') }}</th>
+                    <th (click)="setSort('fechaPago')">Fecha Pago {{ sortIndicator('fechaPago') }}</th>
+                    <th (click)="setSort('total')">Total {{ sortIndicator('total') }}</th>
+                    <th (click)="setSort('nc')">NC {{ sortIndicator('nc') }}</th>
+                    <th (click)="setSort('notasAsignadas')">Notas Asignadas {{ sortIndicator('notasAsignadas') }}</th>
+                    <th (click)="setSort('descuento')">Descuento {{ sortIndicator('descuento') }}</th>
+                    <th (click)="setSort('totalPagar')">Total Pagar {{ sortIndicator('totalPagar') }}</th>
+                    <th (click)="setSort('estatus')">Estatus {{ sortIndicator('estatus') }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let item of paginatedItems; trackBy: trackById">
+                    <td>{{ item.idSpei }}</td>
+                    <td>{{ item.numeroSpei }}</td>
+                    <td>{{ item.folio }}</td>
+                    <td>{{ item.referenciaBanco }}</td>
+                    <td>{{ item.sucursal }}</td>
+                    <td>{{ item.proveedor }}</td>
+                    <td>{{ item.idProveedor }}</td>
+                    <td>{{ item.fechaPago }}</td>
+                    <td>{{ item.total | currency:'MXN':'symbol':'1.2-2' }}</td>
+                    <td>{{ item.nc | currency:'MXN':'symbol':'1.2-2' }}</td>
+                    <td>{{ item.notasAsignadas | currency:'MXN':'symbol':'1.2-2' }}</td>
+                    <td>{{ item.descuento | currency:'MXN':'symbol':'1.2-2' }}</td>
+                    <td>{{ item.totalPagar | currency:'MXN':'symbol':'1.2-2' }}</td>
+                    <td>{{ item.estatus }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="pagination">
+              <div class="page-size">
+                <span>Mostrar</span>
+                <nb-select size="small" [selected]="pageSize" (selectedChange)="setPageSize($event)">
+                  <nb-option *ngFor="let s of pageSizes" [value]="s">{{ s }}</nb-option>
+                </nb-select>
+              </div>
+              <div class="range">
+                {{ startIndex }}-{{ endIndex }} de {{ totalCount }}
+              </div>
+              <div class="nav">
+                <button nbButton size="tiny" [disabled]="page<=1" (click)="gotoPage(page-1)">Anterior</button>
+                <span>Pag. {{ page }} / {{ totalPages }}</span>
+                <button nbButton size="tiny" [disabled]="page>=totalPages" (click)="gotoPage(page+1)">Siguiente</button>
+              </div>
+            </div>
+          </ng-container>
+
+          <ng-template #emptyState>
+            <div class="empty-state">
+              <nb-icon icon="inbox-outline"></nb-icon>
+              <p>No hay resultados para el rango seleccionado.</p>
+            </div>
+          </ng-template>
+        </ng-container>
+      </nb-card-body>
+    </nb-card>
+  </div>
+</div>
