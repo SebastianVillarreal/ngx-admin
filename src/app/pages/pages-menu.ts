@@ -304,4 +304,22 @@ export const MENU_ITEMS: NbMenuItem[] = [
       },
     ],
   },
+  {
+    title: 'Punto Venta',
+    icon: 'shopping-cart-outline',
+    children: [
+      {
+        title: 'Aplicación',
+        link: '/pages/punto-venta/aplicacion',
+      },
+      {
+        title: 'Libro antibioticos',
+        link: '/pages/punto-venta/libro-antibioticos',
+      },
+      {
+        title: 'Reportes',
+        link: '/pages/punto-venta/reportes',
+      },
+    ],
+  },
 ];

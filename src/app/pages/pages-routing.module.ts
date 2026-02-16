@@ -48,6 +48,11 @@ const routes: Routes = [{
         .then(m => m.InventariosModule),
     },
     {
+      path: 'punto-venta',
+      loadChildren: () => import('./punto-venta/punto-venta.module')
+        .then(m => m.PuntoVentaModule),
+    },
+    {
       path: '',
       redirectTo: 'home',
       pathMatch: 'full',

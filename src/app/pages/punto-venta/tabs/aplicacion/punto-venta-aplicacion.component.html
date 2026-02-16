@@ -1,0 +1,316 @@
+<nb-card>
+  <nb-card-header class="card-header">
+    <div>
+      <h2 class="title">Punto Venta | Aplicacion</h2>
+      <p class="subtitle">Captura venta, agrega o elimina articulos y procesa la operacion.</p>
+    </div>
+  </nb-card-header>
+  <nb-card-body>
+    <div class="filters-grid">
+      <div class="field">
+        <label>Folio Interno</label>
+        <input nbInput fullWidth [formControl]="ventaForm.controls.folioInterno" disabled />
+      </div>
+      <div class="field">
+        <label>Caja</label>
+        <input nbInput fullWidth type="number" min="1" [formControl]="ventaForm.controls.caja" />
+      </div>
+      <div class="field field-cliente">
+        <label>Cliente</label>
+        <div class="cliente-row">
+          <input nbInput fullWidth [value]="'#' + selectedClienteId + ' - ' + selectedClienteNombre" disabled />
+          <button nbButton status="info" size="small" type="button" (click)="openClientesModal()">Seleccionar</button>
+        </div>
+      </div>
+    </div>
+  </nb-card-body>
+</nb-card>
+
+<nb-card>
+  <nb-card-header class="card-header secondary">
+    <div class="header-tools">
+      <div class="scan-control">
+        <nb-icon icon="hash-outline"></nb-icon>
+        <input
+          nbInput
+          fullWidth
+          placeholder="Captura codigo (scanner) y Enter"
+          [(ngModel)]="scannerCode"
+          (keydown.enter)="onScannerEnter($event)"
+          [disabled]="scannerLoading"
+        />
+      </div>
+      <div class="search-control">
+        <nb-icon icon="search-outline"></nb-icon>
+        <input
+          nbInput
+          fullWidth
+          placeholder="Buscar articulo por codigo o descripcion"
+          [(ngModel)]="articuloTerm"
+          [disabled]="buscandoArticulos"
+        />
+      </div>
+      <button nbButton status="primary" size="small" (click)="buscarArticulos()" [disabled]="buscandoArticulos">
+        {{ buscandoArticulos ? 'Buscando...' : 'Buscar articulo' }}
+      </button>
+    </div>
+  </nb-card-header>
+  <nb-card-body>
+    <nb-alert status="danger" *ngIf="articulosError">
+      {{ articulosError }}
+    </nb-alert>
+
+    <div class="table-wrap" *ngIf="articulosEncontrados.length">
+      <table class="listas-table">
+        <thead>
+          <tr>
+            <th>Codigo</th>
+            <th>Descripcion</th>
+            <th>Precio PV</th>
+            <th>Existencia</th>
+            <th>Accion</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let art of articulosEncontrados; trackBy: trackByArticuloResultado">
+            <td>{{ art.Codigo }}</td>
+            <td>{{ art.Descripcion }}</td>
+            <td>{{ (art.PrecioPv || art.PrecioFinal || art.PrecioFinalImpuestos || art.Costo || 0) | currency:'MXN':'symbol':'1.2-2' }}</td>
+            <td>{{ art.Existencia }}</td>
+            <td>
+              <button nbButton size="tiny" status="success" (click)="agregarArticulo(art)">Agregar</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </nb-card-body>
+</nb-card>
+
+<ng-template #clientesDialog let-ref="dialogRef">
+  <nb-card class="clientes-modal-card">
+    <nb-card-header class="card-header secondary">
+      <div>
+        <h3 class="title">Seleccionar cliente</h3>
+      </div>
+      <button nbButton size="tiny" status="basic" type="button" (click)="closeClientesModal(ref)">Cerrar</button>
+    </nb-card-header>
+    <nb-card-body>
+      <div class="header-tools">
+        <div class="search-control">
+          <nb-icon icon="search-outline"></nb-icon>
+          <input
+            nbInput
+            fullWidth
+            placeholder="Buscar cliente por nombre"
+            [(ngModel)]="clientesSearch"
+            (keydown.enter)="buscarClientesModal()"
+          />
+        </div>
+        <button nbButton status="primary" size="small" type="button" (click)="buscarClientesModal()" [disabled]="clientesLoading">
+          Buscar
+        </button>
+      </div>
+
+      <div class="state" *ngIf="clientesLoading">
+        <nb-spinner status="primary"></nb-spinner>
+        <span>Cargando clientes...</span>
+      </div>
+
+      <nb-alert status="danger" *ngIf="!clientesLoading && clientesError">
+        {{ clientesError }}
+      </nb-alert>
+
+      <div class="empty-state" *ngIf="!clientesLoading && !clientesError && !clientesItems.length">
+        <nb-icon icon="inbox-outline"></nb-icon>
+        <p>No se encontraron clientes.</p>
+      </div>
+
+      <div class="table-wrap" *ngIf="!clientesLoading && clientesItems.length">
+        <table class="listas-table">
+          <thead>
+            <tr>
+              <th>Id</th>
+              <th>Nombre</th>
+              <th>RFC</th>
+              <th>Telefono</th>
+              <th>Accion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let cliente of paginatedClientesItems; trackBy: trackByClienteId">
+              <td>{{ cliente.Id }}</td>
+              <td>{{ cliente.Nombre }}</td>
+              <td>{{ cliente.Rfc || 'N/A' }}</td>
+              <td>{{ cliente.Telefono || 'N/A' }}</td>
+              <td>
+                <button nbButton size="tiny" status="success" type="button" (click)="seleccionarCliente(cliente, ref)">
+                  Elegir
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination" *ngIf="!clientesLoading && clientesItems.length">
+        <div class="page-size">
+          <span>Mostrar</span>
+          <nb-select size="small" [selected]="clientesPageSize" (selectedChange)="changeClientesPageSize($event)">
+            <nb-option *ngFor="let size of clientesPageSizeOptions" [value]="size">{{ size }}</nb-option>
+          </nb-select>
+        </div>
+        <div class="range">
+          {{ clientesRangeStart }}-{{ clientesRangeEnd }} de {{ clientesItems.length }}
+        </div>
+        <div class="nav">
+          <button nbButton size="tiny" type="button" (click)="previousClientesPage()" [disabled]="clientesPage <= 1">Anterior</button>
+          <span>Pag. {{ clientesPage }} / {{ clientesTotalPages }}</span>
+          <button nbButton size="tiny" type="button" (click)="nextClientesPage()" [disabled]="clientesPage >= clientesTotalPages">Siguiente</button>
+        </div>
+      </div>
+    </nb-card-body>
+  </nb-card>
+</ng-template>
+
+<nb-card>
+  <nb-card-header class="card-header secondary">
+    <div class="header-tools">
+      <div class="search-control">
+        <nb-icon icon="search-outline"></nb-icon>
+        <input
+          nbInput
+          fullWidth
+          placeholder="Buscar en carrito"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearch($event)"
+          [disabled]="!items.length"
+        />
+      </div>
+      <button nbButton status="success" size="small" (click)="exportToExcel()" [disabled]="!displayItems.length">
+        Exportar
+      </button>
+    </div>
+  </nb-card-header>
+  <nb-card-body>
+    <div class="empty-state" *ngIf="!items.length">
+      <nb-icon icon="inbox-outline"></nb-icon>
+      <p>No hay articulos en el carrito.</p>
+    </div>
+
+    <ng-container *ngIf="items.length && !displayItems.length">
+      <div class="empty-state">
+        <nb-icon icon="search-outline"></nb-icon>
+        <p>Sin coincidencias para "{{ searchTerm }}".</p>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="displayItems.length">
+      <div class="table-wrap">
+        <table class="listas-table">
+          <thead>
+            <tr>
+              <th (click)="toggleSort('codigo')">Codigo {{ sortIndicator('codigo') }}</th>
+              <th (click)="toggleSort('descripcion')">Descripcion {{ sortIndicator('descripcion') }}</th>
+              <th (click)="toggleSort('cantidad')">Cantidad {{ sortIndicator('cantidad') }}</th>
+              <th (click)="toggleSort('precioVenta')">Precio {{ sortIndicator('precioVenta') }}</th>
+              <th (click)="toggleSort('importe')">Importe {{ sortIndicator('importe') }}</th>
+              <th>Accion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of paginatedItems; trackBy: trackByCodigo">
+              <td>{{ item.codigo }}</td>
+              <td>{{ item.descripcion }}</td>
+              <td>
+                <input
+                  nbInput
+                  type="number"
+                  min="1"
+                  [value]="item.cantidad"
+                  (change)="actualizarCantidad(item, +$any($event.target).value)"
+                  style="width: 90px;"
+                />
+              </td>
+              <td>
+                <input
+                  nbInput
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  [value]="item.precioVenta"
+                  (change)="actualizarPrecio(item, +$any($event.target).value)"
+                  style="width: 110px;"
+                />
+              </td>
+              <td>{{ (item.cantidad * item.precioVenta) | currency:'MXN':'symbol':'1.2-2' }}</td>
+              <td>
+                <button nbButton size="tiny" status="danger" (click)="quitarArticulo(item)">Quitar</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination">
+        <div class="page-size">
+          <span>Mostrar</span>
+          <nb-select size="small" [(selected)]="pageSize" (selectedChange)="changePageSize($event)">
+            <nb-option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</nb-option>
+          </nb-select>
+        </div>
+        <div class="range">
+          {{ pageStart }}-{{ pageEnd }} de {{ displayItems.length }}
+        </div>
+        <div class="nav">
+          <button nbButton size="tiny" (click)="previousPage()" [disabled]="currentPage <= 1">Anterior</button>
+          <span>Pag. {{ currentPage }} / {{ totalPages }}</span>
+          <button nbButton size="tiny" (click)="nextPage()" [disabled]="currentPage >= totalPages">Siguiente</button>
+        </div>
+      </div>
+    </ng-container>
+  </nb-card-body>
+</nb-card>
+
+<nb-card>
+  <nb-card-header class="card-header">
+    <div>
+      <h3 class="title">Pago y procesamiento</h3>
+      <p class="subtitle">Total de venta: {{ totalVenta | currency:'MXN':'symbol':'1.2-2' }}</p>
+    </div>
+  </nb-card-header>
+  <nb-card-body>
+    <div class="filters-grid">
+      <div class="field">
+        <label>Tipo de pago</label>
+        <nb-select fullWidth [selected]="ventaForm.controls.tipoPago.value" (selectedChange)="ventaForm.controls.tipoPago.setValue($event)">
+          <nb-option *ngFor="let tipo of tiposPago" [value]="tipo.value">{{ tipo.label }}</nb-option>
+        </nb-select>
+      </div>
+      <div class="field">
+        <label>Monto</label>
+        <input nbInput fullWidth type="number" step="0.01" min="0.01" [formControl]="ventaForm.controls.montoPago" />
+      </div>
+      <div class="field">
+        <label>Referencia pago</label>
+        <input nbInput fullWidth [formControl]="ventaForm.controls.referenciaPago" />
+      </div>
+    </div>
+
+    <div class="actions-row">
+      <button nbButton status="success" (click)="procesarVenta()" [disabled]="procesandoVenta || !items.length">
+        {{ procesandoVenta ? 'Procesando...' : 'Procesar venta' }}
+      </button>
+    </div>
+
+    <nb-alert status="danger" *ngIf="ventaError">{{ ventaError }}</nb-alert>
+    <nb-alert status="success" *ngIf="ventaExito">{{ ventaExito }}</nb-alert>
+
+    <div class="sale-result" *ngIf="ventaRespuesta">
+      <div><strong>Id generado:</strong> {{ ventaRespuesta.IdGenerado }}</div>
+      <div><strong>Folio:</strong> {{ ventaRespuesta.Header?.FolioInterno }}</div>
+      <div><strong>Cliente:</strong> {{ ventaRespuesta.Header?.NombreCliente }}</div>
+      <div><strong>Total:</strong> {{ ventaRespuesta.Header?.TotalVenta | currency:'MXN':'symbol':'1.2-2' }}</div>
+    </div>
+  </nb-card-body>
+</nb-card>
