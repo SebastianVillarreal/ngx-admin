@@ -1,6 +1,8 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import * as XLSX from 'xlsx';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 import { DepartamentosService } from '../../catalogos/departamentos/departamentos.service';
 import { FamiliasService } from '../../catalogos/familias/familias.service';
@@ -26,7 +28,8 @@ type SortDirection = 'asc' | 'desc';
   styleUrls: ['./historico-existencias.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HistoricoExistenciasComponent implements OnInit {
+export class HistoricoExistenciasComponent implements OnInit, OnDestroy {
+  private readonly destroy$ = new Subject<void>();
   departamentos: SeleccionOption[] = [];
   familias: SeleccionOption[] = [];
 
@@ -225,10 +228,12 @@ export class HistoricoExistenciasComponent implements OnInit {
   }
 
   private suscribirCambiosDepartamento(): void {
-    this.filtroForm.get('departamento')?.valueChanges.subscribe((value) => {
-      const idDepartamento = String(value || '').trim();
-      this.cargarFamilias(idDepartamento);
-    });
+    this.filtroForm.get('departamento')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((value) => {
+        const idDepartamento = String(value || '').trim();
+        this.cargarFamilias(idDepartamento);
+      });
   }
 
   private cargarFamilias(idDepartamento: string): void {
@@ -343,5 +348,9 @@ export class HistoricoExistenciasComponent implements OnInit {
   private markForCheck(): void {
     this.cdr.markForCheck();
   }
-}
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+}

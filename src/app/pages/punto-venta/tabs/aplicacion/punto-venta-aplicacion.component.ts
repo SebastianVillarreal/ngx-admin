@@ -1,8 +1,10 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NbDialogRef, NbDialogService } from '@nebular/theme';
 import * as XLSX from 'xlsx';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { environment } from '../../../../../environments/environment';
 import { ArticuloDto, ArticulosService } from '../../../compras/articulos/articulos.service';
 import { Cliente, ClientesService } from '../../../cuentas-por-cobrar/clientes/clientes.service';
@@ -77,7 +79,8 @@ interface InsertarVentaResponse {
   templateUrl: './punto-venta-aplicacion.component.html',
   styleUrls: ['./punto-venta-aplicacion.component.scss'],
 })
-export class PuntoVentaAplicacionComponent implements OnInit {
+export class PuntoVentaAplicacionComponent implements OnInit, OnDestroy {
+  private readonly destroy$ = new Subject<void>();
   @ViewChild('clientesDialog', { static: true }) clientesDialog!: TemplateRef<any>;
   ventaForm: FormGroup;
   readonly sessionUsuario: number;
@@ -145,7 +148,9 @@ export class PuntoVentaAplicacionComponent implements OnInit {
   ngOnInit(): void {
     this.applyTransforms();
     this.updateFolioPreview();
-    this.ventaForm.get('caja')?.valueChanges.subscribe(() => this.updateFolioPreview());
+    this.ventaForm.get('caja')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.updateFolioPreview());
   }
 
   openClientesModal(): void {
@@ -659,5 +664,10 @@ export class PuntoVentaAplicacionComponent implements OnInit {
     const start = (this.clientesPage - 1) * this.clientesPageSize;
     const end = start + this.clientesPageSize;
     this.paginatedClientesItems = this.clientesItems.slice(start, end);
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

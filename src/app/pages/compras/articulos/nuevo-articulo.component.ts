@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NbToastrService } from '@nebular/theme';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { ArticulosService, DepartamentoDto, FamiliaDto } from './articulos.service';
 
 // Petición base para crear articulo; ajustar propiedades según API real
@@ -26,8 +28,9 @@ export interface NewArticuloRequest {
   templateUrl: './nuevo-articulo.component.html',
   styleUrls: ['./nuevo-articulo.component.scss'],
 })
-export class NuevoArticuloComponent implements OnInit {
+export class NuevoArticuloComponent implements OnInit, OnDestroy {
   cargando = false;
+  private readonly destroy$ = new Subject<void>();
 
   // Mock de catálogos; reemplazar por servicios en cuanto estén
   unidades = [
@@ -68,14 +71,16 @@ export class NuevoArticuloComponent implements OnInit {
     this.cargarDepartamentos();
 
     // Cuando cambie el depto, limpiar familias y cargar nuevas
-    this.form.get('departamento')!.valueChanges.subscribe((val) => {
-      const id = Number(val);
-      this.form.patchValue({ familia: '' }, { emitEvent: false });
-      this.familias = [];
-      if (id) {
-        this.cargarFamilias(id);
-      }
-    });
+    this.form.get('departamento')!.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((val) => {
+        const id = Number(val);
+        this.form.patchValue({ familia: '' }, { emitEvent: false });
+        this.familias = [];
+        if (id) {
+          this.cargarFamilias(id);
+        }
+      });
   }
 
   get f() { return this.form.controls; }
@@ -142,5 +147,10 @@ export class NuevoArticuloComponent implements OnInit {
     this.articulosSvc.getFamilias(idDepartamento).subscribe((rows) => {
       this.familias = rows;
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }
