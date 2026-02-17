@@ -1,0 +1,142 @@
+<nb-card>
+  <nb-card-header class="card-header">
+    <div>
+      <h2 class="title">Reportes de punto de venta</h2>
+      <p class="subtitle">Consulta de tickets y detalle de operaciones.</p>
+    </div>
+    <button nbButton status="primary" (click)="loadTickets()" [disabled]="loading">
+      Actualizar tickets
+    </button>
+  </nb-card-header>
+  <nb-card-body>
+    <div class="filters-grid">
+      <div class="field">
+        <label>Sucursal</label>
+        <input nbInput fullWidth [(ngModel)]="filtros.Sucursal" [disabled]="loading" />
+      </div>
+      <div class="field">
+        <label>Tipo</label>
+        <input nbInput fullWidth [(ngModel)]="filtros.Tipo" [disabled]="loading" />
+      </div>
+      <div class="field">
+        <label>Fecha inicial</label>
+        <input nbInput fullWidth type="date" [(ngModel)]="filtros.FechaInicial" [disabled]="loading" />
+      </div>
+      <div class="field">
+        <label>Fecha final</label>
+        <input nbInput fullWidth type="date" [(ngModel)]="filtros.FechaFinal" [disabled]="loading" />
+      </div>
+    </div>
+  </nb-card-body>
+</nb-card>
+
+<nb-card>
+  <nb-card-body>
+    <nb-tabset fullWidth>
+      <nb-tab tabTitle="Tickets">
+        <nb-card>
+          <nb-card-header class="card-header secondary">
+            <div class="header-tools">
+              <div class="search-control">
+                <nb-icon icon="search-outline"></nb-icon>
+                <input
+                  nbInput
+                  fullWidth
+                  placeholder="Buscar en resultados"
+                  [(ngModel)]="searchTerm"
+                  (ngModelChange)="onSearch($event)"
+                  [disabled]="loading || !tickets.length"
+                />
+              </div>
+              <button nbButton status="success" size="small" (click)="exportToExcel()" [disabled]="loading || !displayTickets.length">
+                Exportar
+              </button>
+            </div>
+          </nb-card-header>
+          <nb-card-body>
+            <div class="state" *ngIf="loading">
+              <nb-spinner status="primary"></nb-spinner>
+              <span>Cargando tickets...</span>
+            </div>
+
+            <nb-alert status="danger" *ngIf="!loading && error">
+              <div class="error-wrap">
+                <span>{{ error }}</span>
+                <button nbButton status="danger" size="tiny" outline (click)="loadTickets()">Reintentar</button>
+              </div>
+            </nb-alert>
+
+            <ng-container *ngIf="!loading && !error">
+              <div class="empty-state" *ngIf="!tickets.length">
+                <nb-icon icon="inbox-outline"></nb-icon>
+                <p>No hay tickets disponibles.</p>
+              </div>
+
+              <div class="empty-state" *ngIf="tickets.length && !displayTickets.length">
+                <nb-icon icon="search-outline"></nb-icon>
+                <p>Sin coincidencias para "{{ searchTerm }}".</p>
+              </div>
+
+              <ng-container *ngIf="displayTickets.length">
+                <div class="table-wrap">
+                  <table class="listas-table">
+                    <thead>
+                      <tr>
+                        <th (click)="toggleSort('Folio')">Folio {{ sortIndicator('Folio') }}</th>
+                        <th (click)="toggleSort('Fecha')">Fecha {{ sortIndicator('Fecha') }}</th>
+                        <th (click)="toggleSort('Hora')">Hora {{ sortIndicator('Hora') }}</th>
+                        <th (click)="toggleSort('Cliente')">Cliente {{ sortIndicator('Cliente') }}</th>
+                        <th (click)="toggleSort('Cajero')">Cajero {{ sortIndicator('Cajero') }}</th>
+                        <th (click)="toggleSort('NombreSucursal')">Sucursal {{ sortIndicator('NombreSucursal') }}</th>
+                        <th (click)="toggleSort('Total')">Total {{ sortIndicator('Total') }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let item of paginatedTickets; trackBy: trackById">
+                        <td>{{ item.Folio }}</td>
+                        <td>{{ item.Fecha }}</td>
+                        <td>{{ item.Hora }}</td>
+                        <td>{{ item.Cliente }}</td>
+                        <td>{{ item.Cajero }}</td>
+                        <td>{{ item.NombreSucursal }}</td>
+                        <td>{{ item.Total | number: '1.2-2' }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="pagination">
+                  <div class="page-size">
+                    <span>Mostrar</span>
+                    <nb-select size="small" [(selected)]="pageSize" (selectedChange)="changePageSize($event)">
+                      <nb-option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</nb-option>
+                    </nb-select>
+                  </div>
+                  <div class="range">
+                    {{ pageStart }}-{{ pageEnd }} de {{ displayTickets.length }}
+                  </div>
+                  <div class="nav">
+                    <button nbButton size="tiny" (click)="previousPage()" [disabled]="currentPage <= 1">Anterior</button>
+                    <span>Pag. {{ currentPage }} / {{ totalPages }}</span>
+                    <button nbButton size="tiny" (click)="nextPage()" [disabled]="currentPage >= totalPages">Siguiente</button>
+                  </div>
+                </div>
+              </ng-container>
+            </ng-container>
+          </nb-card-body>
+        </nb-card>
+      </nb-tab>
+
+      <nb-tab tabTitle="Detalle">
+        <nb-card>
+          <nb-card-body>
+            <div class="empty-state">
+              <nb-icon icon="file-text-outline"></nb-icon>
+              <p>Selecciona un reporte para ver el detalle.</p>
+            </div>
+          </nb-card-body>
+        </nb-card>
+      </nb-tab>
+    </nb-tabset>
+  </nb-card-body>
+</nb-card>

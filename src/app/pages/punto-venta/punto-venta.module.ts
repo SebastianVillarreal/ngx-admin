@@ -9,6 +9,7 @@ import {
   NbInputModule,
   NbSelectModule,
   NbSpinnerModule,
+  NbTabsetModule,
 } from '@nebular/theme';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ThemeModule } from '../../@theme/theme.module';
@@ -30,6 +31,7 @@ import { PuntoVentaReportesComponent } from './tabs/reportes/punto-venta-reporte
     NbIconModule,
     NbAlertModule,
     NbSpinnerModule,
+    NbTabsetModule,
     FormsModule,
     ReactiveFormsModule,
     PuntoVentaRoutingModule,
