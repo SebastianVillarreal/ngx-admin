@@ -19,6 +19,12 @@ interface ArticulosAntibioticoResponse {
   };
 }
 
+interface InsertArticuloAntibioticoResponse {
+  StatusCode: number;
+  success: boolean;
+  message: string;
+}
+
 type SortColumn = 'Codigo' | 'Descripcion';
 
 @Component({
@@ -34,11 +40,16 @@ export class PuntoVentaLibroAntibioticosComponent implements OnInit, OnDestroy {
   searchTerm = '';
   loading = false;
   error = '';
+  insertCodigo = '';
+  insertLoading = false;
+  insertError = '';
+  insertSuccess = '';
   sortColumn: SortColumn = 'Descripcion';
   sortDirection: 'asc' | 'desc' = 'asc';
   pageSizeOptions = [10, 25, 50];
   pageSize = 10;
   currentPage = 1;
+  private readonly insertEndpoint = 'http://localhost:5000/api/InsertArticuloAntibiotico';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -88,6 +99,41 @@ export class PuntoVentaLibroAntibioticosComponent implements OnInit, OnDestroy {
     this.searchTerm = term;
     this.currentPage = 1;
     this.applyTransforms();
+  }
+
+  insertarCodigo(): void {
+    const codigo = this.insertCodigo.trim();
+    this.insertError = '';
+    this.insertSuccess = '';
+
+    if (!codigo) {
+      this.insertError = 'Captura un codigo valido.';
+      return;
+    }
+
+    this.insertLoading = true;
+    this.http
+      .post<InsertArticuloAntibioticoResponse>(this.insertEndpoint, { Codigo: codigo })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (res) => {
+          const ok = (res?.StatusCode ?? 200) === 200 && res?.success !== false;
+          if (!ok) {
+            this.insertError = res?.message || 'No se pudo insertar el codigo.';
+            return;
+          }
+          this.insertSuccess = res?.message || 'Codigo insertado correctamente.';
+          this.insertCodigo = '';
+          this.loadArticulos();
+        },
+        error: (err) => {
+          this.insertError = err?.error?.message || err?.message || 'No se pudo insertar el codigo.';
+          this.insertLoading = false;
+        },
+        complete: () => {
+          this.insertLoading = false;
+        },
+      });
   }
 
   toggleSort(column: SortColumn): void {

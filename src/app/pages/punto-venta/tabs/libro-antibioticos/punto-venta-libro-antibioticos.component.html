@@ -8,6 +8,36 @@
       Actualizar
     </button>
   </nb-card-header>
+  <nb-card-body>
+    <div class="filters-grid">
+      <div class="field">
+        <label>Nuevo codigo</label>
+        <input
+          nbInput
+          fullWidth
+          placeholder="Captura el codigo"
+          [(ngModel)]="insertCodigo"
+          [disabled]="insertLoading"
+        />
+      </div>
+      <div class="field">
+        <label>&nbsp;</label>
+        <button nbButton status="success" (click)="insertarCodigo()" [disabled]="insertLoading">
+          Insertar
+        </button>
+      </div>
+    </div>
+
+    <nb-alert status="info" *ngIf="insertLoading">
+      Insertando codigo...
+    </nb-alert>
+    <nb-alert status="danger" *ngIf="!insertLoading && insertError">
+      {{ insertError }}
+    </nb-alert>
+    <nb-alert status="success" *ngIf="!insertLoading && insertSuccess">
+      {{ insertSuccess }}
+    </nb-alert>
+  </nb-card-body>
 </nb-card>
 
 <nb-card>
