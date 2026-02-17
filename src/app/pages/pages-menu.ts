@@ -317,8 +317,30 @@ export const MENU_ITEMS: NbMenuItem[] = [
         link: '/pages/punto-venta/libro-antibioticos',
       },
       {
+        title: 'Codigos Kiosco',
+        link: '/pages/punto-venta/codigos-kiosco',
+      },
+      {
         title: 'Reportes',
-        link: '/pages/punto-venta/reportes',
+        link: '/pages/punto-venta/reportes/tickets',
+        children: [
+          {
+            title: 'Tickets',
+            link: '/pages/punto-venta/reportes/tickets',
+          },
+          {
+            title: 'Devoluciones pagadas',
+            link: '/pages/punto-venta/reportes/devoluciones-pagadas',
+          },
+          {
+            title: 'Poliza de ingresos',
+            link: '/pages/punto-venta/reportes/poliza-ingresos',
+          },
+          {
+            title: 'Operaciones Cashback',
+            link: '/pages/punto-venta/reportes/operaciones-cashback',
+          },
+        ],
       },
     ],
   },
