@@ -9,6 +9,7 @@ interface ValoresEntradaResponse {
   message: string;
   response?: {
     data?: {
+      Id?: number;
       ClaveProveedor: string;
       NombreProveedor: string;
       NombreSucursal: string;
@@ -56,6 +57,28 @@ interface UpdateRenglonResponse {
 }
 
 type CampoEditable = 'CostoFactura' | 'Cantidad';
+
+interface TotalesEntradaItem {
+  Id: number;
+  SubTotal: number;
+  Total: number;
+  Ieps: number;
+  Iva: number;
+  Descuento: number;
+  Retencion: number;
+  RetencionIva: number;
+  MontoRetencion: number;
+  MontoRetencionIva: number;
+}
+
+interface TotalesEntradaResponse {
+  StatusCode: number;
+  success: boolean;
+  message: string;
+  response?: {
+    data?: TotalesEntradaItem[];
+  };
+}
 
 @Component({
   selector: 'ngx-entradas',
@@ -175,11 +198,46 @@ export class EntradasComponent {
           this.estatus = d.Estatus || '';
           this.facturaMarcada = !!this.factura;
 
+          const idEntrada = Number(d.Id ?? d.Entrada ?? 0);
+          if (idEntrada > 0) {
+            this.cargarTotalesEntrada(idEntrada);
+          }
+
           // Cargar renglones para la tabla
           this.cargarRenglones(this.notaEntrada);
         },
         error: (err) => {
           console.error('Error obteniendo valores de entrada', err);
+        },
+      });
+  }
+
+  private cargarTotalesEntrada(id: number): void {
+    const body = { Id: String(id) };
+    this.http
+      .post<TotalesEntradaResponse>(`${environment.apiBase}/GetTotalesEntrada`, body)
+      .subscribe({
+        next: (res) => {
+          if (!res?.success || res.StatusCode !== 200) {
+            console.warn('Totales de entrada no exitoso', res);
+            return;
+          }
+          const total = (res.response?.data || [])[0];
+          if (!total) {
+            return;
+          }
+
+          this.subtotal = Number(total.SubTotal ?? 0);
+          this.total = Number(total.Total ?? 0);
+          this.ieps = Number(total.Ieps ?? 0);
+          this.iva = Number(total.Iva ?? 0);
+          this.descuento = Number(total.Descuento ?? 0);
+          this.tasaRetencion = Number(total.Retencion ?? 0);
+          this.tasaRetencionIva = Number(total.RetencionIva ?? 0);
+          this.montoRetIva = Number(total.MontoRetencionIva ?? 0);
+        },
+        error: (err) => {
+          console.error('Error obteniendo totales de entrada', err);
         },
       });
   }
