@@ -26,6 +26,10 @@
         <label>Fecha final</label>
         <input nbInput fullWidth type="date" [(ngModel)]="filtros.FechaFinal" [disabled]="loading" />
       </div>
+      <div class="field">
+        <label>Codigo (Detalle)</label>
+        <input nbInput fullWidth [(ngModel)]="detalleCodigo" [disabled]="detalleLoading" />
+      </div>
     </div>
   </nb-card-body>
 </nb-card>
@@ -88,7 +92,9 @@
                         <th (click)="toggleSort('Cliente')">Cliente {{ sortIndicator('Cliente') }}</th>
                         <th (click)="toggleSort('Cajero')">Cajero {{ sortIndicator('Cajero') }}</th>
                         <th (click)="toggleSort('NombreSucursal')">Sucursal {{ sortIndicator('NombreSucursal') }}</th>
+                        <th>FolioInterno</th>
                         <th (click)="toggleSort('Total')">Total {{ sortIndicator('Total') }}</th>
+                        <th>Accion</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -99,7 +105,13 @@
                         <td>{{ item.Cliente }}</td>
                         <td>{{ item.Cajero }}</td>
                         <td>{{ item.NombreSucursal }}</td>
+                        <td>{{ item.FolioInterno }}</td>
                         <td>{{ item.Total | number: '1.2-2' }}</td>
+                        <td>
+                          <button nbButton size="tiny" status="info" (click)="openTicketDetalleModal(item)" [disabled]="loading">
+                            Ver ticket
+                          </button>
+                        </td>
                       </tr>
                     </tbody>
                   </table>
@@ -129,14 +141,190 @@
 
       <nb-tab tabTitle="Detalle">
         <nb-card>
-          <nb-card-body>
-            <div class="empty-state">
-              <nb-icon icon="file-text-outline"></nb-icon>
-              <p>Selecciona un reporte para ver el detalle.</p>
+          <nb-card-header class="card-header secondary">
+            <div class="header-tools">
+              <div class="search-control">
+                <nb-icon icon="search-outline"></nb-icon>
+                <input
+                  nbInput
+                  fullWidth
+                  placeholder="Buscar en detalle"
+                  [(ngModel)]="detalleSearchTerm"
+                  (ngModelChange)="onDetalleSearch($event)"
+                  [disabled]="detalleLoading || !detalleItems.length"
+                />
+              </div>
+              <div class="nav">
+                <button nbButton status="primary" size="small" (click)="loadDetalle()" [disabled]="detalleLoading">
+                  Buscar detalle
+                </button>
+                <button
+                  nbButton
+                  status="success"
+                  size="small"
+                  (click)="exportDetalleToExcel()"
+                  [disabled]="detalleLoading || !detalleDisplayItems.length"
+                >
+                  Exportar
+                </button>
+              </div>
             </div>
+          </nb-card-header>
+          <nb-card-body>
+            <div class="state" *ngIf="detalleLoading">
+              <nb-spinner status="primary"></nb-spinner>
+              <span>Cargando detalle...</span>
+            </div>
+
+            <nb-alert status="danger" *ngIf="!detalleLoading && detalleError">
+              <div class="error-wrap">
+                <span>{{ detalleError }}</span>
+                <button nbButton status="danger" size="tiny" outline (click)="loadDetalle()">Reintentar</button>
+              </div>
+            </nb-alert>
+
+            <ng-container *ngIf="!detalleLoading && !detalleError">
+              <div class="empty-state" *ngIf="!detalleItems.length">
+                <nb-icon icon="file-text-outline"></nb-icon>
+                <p>Sin resultados de detalle.</p>
+              </div>
+
+              <div class="empty-state" *ngIf="detalleItems.length && !detalleDisplayItems.length">
+                <nb-icon icon="search-outline"></nb-icon>
+                <p>Sin coincidencias para "{{ detalleSearchTerm }}".</p>
+              </div>
+
+              <ng-container *ngIf="detalleDisplayItems.length">
+                <div class="table-wrap">
+                  <table class="listas-table">
+                    <thead>
+                      <tr>
+                        <th (click)="toggleDetalleSort('codigo')">Codigo {{ detalleSortIndicator('codigo') }}</th>
+                        <th (click)="toggleDetalleSort('descripcion')">Descripcion {{ detalleSortIndicator('descripcion') }}</th>
+                        <th (click)="toggleDetalleSort('Fecha')">Fecha {{ detalleSortIndicator('Fecha') }}</th>
+                        <th (click)="toggleDetalleSort('Hora')">Hora {{ detalleSortIndicator('Hora') }}</th>
+                        <th (click)="toggleDetalleSort('Cliente')">Cliente {{ detalleSortIndicator('Cliente') }}</th>
+                        <th (click)="toggleDetalleSort('Cajero')">Cajero {{ detalleSortIndicator('Cajero') }}</th>
+                        <th (click)="toggleDetalleSort('NombreSucursal')">Sucursal {{ detalleSortIndicator('NombreSucursal') }}</th>
+                        <th (click)="toggleDetalleSort('Total')">Total {{ detalleSortIndicator('Total') }}</th>
+                        <th>FolioInterno</th>
+                        <th>Caja</th>
+                        <th>Estatus</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let item of detallePaginatedItems; trackBy: trackByDetalleFolio">
+                        <td>{{ item.codigo }}</td>
+                        <td>{{ item.descripcion }}</td>
+                        <td>{{ item.Fecha }}</td>
+                        <td>{{ item.Hora }}</td>
+                        <td>{{ item.Cliente }}</td>
+                        <td>{{ item.Cajero }}</td>
+                        <td>{{ item.NombreSucursal }}</td>
+                        <td>{{ item.Total | number: '1.2-2' }}</td>
+                        <td>{{ item.FolioInterno }}</td>
+                        <td>{{ item.Caja }}</td>
+                        <td>{{ item.DescEstatus }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="pagination">
+                  <div class="page-size">
+                    <span>Mostrar</span>
+                    <nb-select size="small" [(selected)]="detallePageSize" (selectedChange)="changeDetallePageSize($event)">
+                      <nb-option *ngFor="let size of detallePageSizeOptions" [value]="size">{{ size }}</nb-option>
+                    </nb-select>
+                  </div>
+                  <div class="range">
+                    {{ detallePageStart }}-{{ detallePageEnd }} de {{ detalleDisplayItems.length }}
+                  </div>
+                  <div class="nav">
+                    <button nbButton size="tiny" (click)="previousDetallePage()" [disabled]="detalleCurrentPage <= 1">Anterior</button>
+                    <span>Pag. {{ detalleCurrentPage }} / {{ detalleTotalPages }}</span>
+                    <button nbButton size="tiny" (click)="nextDetallePage()" [disabled]="detalleCurrentPage >= detalleTotalPages">Siguiente</button>
+                  </div>
+                </div>
+              </ng-container>
+            </ng-container>
           </nb-card-body>
         </nb-card>
       </nb-tab>
     </nb-tabset>
   </nb-card-body>
 </nb-card>
+
+<ng-template #ticketDetalleDialog let-ref="dialogRef">
+  <nb-card class="ticket-modal-card">
+    <nb-card-header class="card-header secondary">
+      <div>
+        <h3 class="title">Detalle ticket {{ selectedTicketFolioInterno }}</h3>
+      </div>
+      <button nbButton size="tiny" status="basic" type="button" (click)="closeTicketDetalleModal(ref)">Cerrar</button>
+    </nb-card-header>
+    <nb-card-body>
+      <div class="state" *ngIf="ticketDetalleLoading">
+        <nb-spinner status="primary"></nb-spinner>
+        <span>Cargando detalle del ticket...</span>
+      </div>
+
+      <nb-alert status="danger" *ngIf="!ticketDetalleLoading && ticketDetalleError">
+        <div class="error-wrap">
+          <span>{{ ticketDetalleError }}</span>
+        </div>
+      </nb-alert>
+
+      <div class="empty-state" *ngIf="!ticketDetalleLoading && !ticketDetalleError && !ticketDetalleLineas.length">
+        <nb-icon icon="inbox-outline"></nb-icon>
+        <p>Este ticket no tiene renglones de detalle.</p>
+      </div>
+
+      <div class="table-wrap" *ngIf="!ticketDetalleLoading && !ticketDetalleError && ticketDetalleLineas.length">
+        <table class="listas-table">
+          <thead>
+            <tr>
+              <th>Codigo</th>
+              <th>Descripcion</th>
+              <th>Cantidad</th>
+              <th>Unidad</th>
+              <th>Precio</th>
+              <th>PrecioOriginal</th>
+              <th>Descuento</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let linea of ticketDetallePaginatedLineas; trackBy: trackByDetalleLinea">
+              <td>{{ linea.Articulo || linea.Codigo }}</td>
+              <td>{{ linea.Descripcion || linea.DescripcionArticulo }}</td>
+              <td>{{ linea.Cantidad | number: '1.2-3' }}</td>
+              <td>{{ linea.Unidad }}</td>
+              <td>{{ linea.Precio | number: '1.2-2' }}</td>
+              <td>{{ linea.PrecioOriginal | number: '1.2-2' }}</td>
+              <td>{{ linea.Descuento | number: '1.2-2' }}</td>
+              <td>{{ (linea.Precio * linea.Cantidad) | number: '1.2-2' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination" *ngIf="!ticketDetalleLoading && !ticketDetalleError && ticketDetalleLineas.length">
+        <div class="page-size">
+          <span>Mostrar</span>
+          <nb-select size="small" [selected]="ticketDetallePageSize" (selectedChange)="changeTicketDetallePageSize($event)">
+            <nb-option *ngFor="let size of ticketDetallePageSizeOptions" [value]="size">{{ size }}</nb-option>
+          </nb-select>
+        </div>
+        <div class="range">
+          {{ ticketDetallePageStart }}-{{ ticketDetallePageEnd }} de {{ ticketDetalleLineas.length }}
+        </div>
+        <div class="nav">
+          <button nbButton size="tiny" type="button" (click)="previousTicketDetallePage()" [disabled]="ticketDetalleCurrentPage <= 1">Anterior</button>
+          <span>Pag. {{ ticketDetalleCurrentPage }} / {{ ticketDetalleTotalPages }}</span>
+          <button nbButton size="tiny" type="button" (click)="nextTicketDetallePage()" [disabled]="ticketDetalleCurrentPage >= ticketDetalleTotalPages">Siguiente</button>
+        </div>
+      </div>
+    </nb-card-body>
+  </nb-card>
+</ng-template>
