@@ -31,12 +31,22 @@ const routes: Routes = [
         ],
       },
       {
-        path: 'solicitud-de-etiquets',
+        path: 'solicitud-de-etiquetas',
         component: SolicitudEtiquetsComponent,
       },
       {
-        path: 'solicitud-de-etiquets/lista',
+        path: 'solicitud-de-etiquetas/lista',
         component: SolicitudEtiquetsListaComponent,
+      },
+      {
+        path: 'solicitud-de-etiquets',
+        redirectTo: 'solicitud-de-etiquetas',
+        pathMatch: 'full',
+      },
+      {
+        path: 'solicitud-de-etiquets/lista',
+        redirectTo: 'solicitud-de-etiquetas/lista',
+        pathMatch: 'full',
       },
       {
         path: '',

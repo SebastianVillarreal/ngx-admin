@@ -25,7 +25,7 @@ export const MENU_ITEMS: NbMenuItem[] = [
       },
       {
         title: 'Sucursales',
-        link: '/pages/sistemas/solicitud-de-etiquets',
+        link: '/pages/sistemas/solicitud-de-etiquetas',
       },
     ],
   },
@@ -112,8 +112,18 @@ export const MENU_ITEMS: NbMenuItem[] = [
         link: '/pages/sistemas/ofertas',
       },
       {
-        title: 'Solicitud de etiquets',
-        link: '/pages/sistemas/solicitud-de-etiquets',
+        title: 'Solicitud de etiquetas',
+        link: '/pages/sistemas/solicitud-de-etiquetas',
+        children: [
+          {
+            title: 'Formulario de insercion',
+            link: '/pages/sistemas/solicitud-de-etiquetas',
+          },
+          {
+            title: 'Lista de solicitudes',
+            link: '/pages/sistemas/solicitud-de-etiquetas/lista',
+          },
+        ],
       },
     ],
   },
