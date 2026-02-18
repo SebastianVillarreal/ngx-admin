@@ -9,6 +9,7 @@ import { OfertasBuscarComponent } from './ofertas/tabs/ofertas-buscar.component'
 import { OfertasHistoricoComponent } from './ofertas/tabs/ofertas-historico.component';
 import { SolicitudEtiquetsComponent } from './solicitud-de-etiquets/solicitud-de-etiquets.component';
 import { SolicitudEtiquetsListaComponent } from './solicitud-de-etiquets/lista/solicitud-de-etiquets-lista.component';
+import { DeptoBasculasComponent } from './depto-basculas/depto-basculas.component';
 
 const routes: Routes = [
   {
@@ -37,6 +38,10 @@ const routes: Routes = [
       {
         path: 'solicitud-de-etiquetas/lista',
         component: SolicitudEtiquetsListaComponent,
+      },
+      {
+        path: 'depto-basculas',
+        component: DeptoBasculasComponent,
       },
       {
         path: 'solicitud-de-etiquets',

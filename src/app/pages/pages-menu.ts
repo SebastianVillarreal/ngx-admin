@@ -125,6 +125,10 @@ export const MENU_ITEMS: NbMenuItem[] = [
           },
         ],
       },
+      {
+        title: 'Depto Basculas',
+        link: '/pages/sistemas/depto-basculas',
+      },
     ],
   },
   {
