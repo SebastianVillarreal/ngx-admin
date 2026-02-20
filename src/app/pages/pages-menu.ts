@@ -110,6 +110,16 @@ export const MENU_ITEMS: NbMenuItem[] = [
       {
         title: 'Ofertas',
         link: '/pages/sistemas/ofertas',
+        children: [
+          {
+            title: 'Ofertas regulares',
+            link: '/pages/sistemas/ofertas',
+          },
+          {
+            title: 'Ofertas porcentaje',
+            link: '/pages/sistemas/ofertas-porcentaje',
+          },
+        ],
       },
       {
         title: 'Solicitud de etiquetas',

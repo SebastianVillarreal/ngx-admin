@@ -1,0 +1,121 @@
+<nb-card>
+  <nb-card-header class="card-header">
+    <div>
+      <h2 class="title">Ofertas porcentaje</h2>
+      <p class="subtitle">Configura una oferta por porcentaje y selecciona las familias a afectar.</p>
+    </div>
+    <button nbButton status="primary" (click)="guardarOfertaPorcentaje()" [disabled]="saving || loading">
+      {{ saving ? 'Guardando...' : 'Guardar oferta' }}
+    </button>
+  </nb-card-header>
+  <nb-card-body>
+    <div class="filters-grid">
+      <div class="field">
+        <label>IdSucursal</label>
+        <input nbInput fullWidth [(ngModel)]="idSucursal" />
+      </div>
+      <div class="field">
+        <label>Referencia</label>
+        <input nbInput fullWidth [(ngModel)]="referencia" />
+      </div>
+      <div class="field">
+        <label>PorcentajeDescuento</label>
+        <input nbInput fullWidth type="number" min="0" [(ngModel)]="porcentajeDescuento" />
+      </div>
+      <div class="field">
+        <label>FechaInicial</label>
+        <input nbInput fullWidth type="date" [(ngModel)]="fechaInicial" />
+      </div>
+      <div class="field">
+        <label>FechaFinal</label>
+        <input nbInput fullWidth type="date" [(ngModel)]="fechaFinal" />
+      </div>
+    </div>
+  </nb-card-body>
+</nb-card>
+
+<nb-card>
+  <nb-card-header class="card-header secondary">
+    <div class="header-tools">
+      <div class="search-control">
+        <nb-icon icon="search-outline"></nb-icon>
+        <input
+          nbInput
+          fullWidth
+          placeholder="Buscar por departamento o familia"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearch($event)"
+          [disabled]="loading || !items.length"
+        />
+      </div>
+      <button nbButton status="success" size="small" (click)="exportToExcel()" [disabled]="loading || !displayItems.length">
+        Exportar
+      </button>
+    </div>
+  </nb-card-header>
+  <nb-card-body>
+    <div class="state" *ngIf="loading">
+      <nb-spinner status="primary"></nb-spinner>
+      <span>Cargando familias...</span>
+    </div>
+
+    <nb-alert status="danger" *ngIf="!loading && error">
+      <div class="error-wrap">
+        <span>{{ error }}</span>
+        <button nbButton status="danger" size="tiny" outline (click)="retry()">Reintentar</button>
+      </div>
+    </nb-alert>
+
+    <ng-container *ngIf="!loading && !error">
+      <div class="empty-state" *ngIf="!items.length">
+        <nb-icon icon="inbox-outline"></nb-icon>
+        <p>No hay familias disponibles.</p>
+      </div>
+
+      <div class="empty-state" *ngIf="items.length && !displayItems.length">
+        <nb-icon icon="search-outline"></nb-icon>
+        <p>Sin coincidencias para "{{ searchTerm }}".</p>
+      </div>
+
+      <ng-container *ngIf="displayItems.length">
+        <div class="table-wrap">
+          <table class="listas-table">
+            <thead>
+              <tr>
+                <th (click)="toggleSort('NombreDepartamento')">Departamento {{ sortIndicator('NombreDepartamento') }}</th>
+                <th (click)="toggleSort('Nombre')">Familia {{ sortIndicator('Nombre') }}</th>
+                <th>Seleccionar</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of paginatedItems; trackBy: trackById">
+                <td>{{ item.NombreDepartamento }}</td>
+                <td>{{ item.Nombre }}</td>
+                <td>
+                  <nb-checkbox [(ngModel)]="selectedFamilies[item.Id]"></nb-checkbox>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pagination">
+          <div class="page-size">
+            <span>Mostrar</span>
+            <nb-select size="small" [(selected)]="pageSize" (selectedChange)="changePageSize($event)">
+              <nb-option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</nb-option>
+            </nb-select>
+          </div>
+          <div class="range">
+            {{ pageStart }}-{{ pageEnd }} de {{ displayItems.length }}
+          </div>
+          <div class="nav">
+            <button nbButton size="tiny" (click)="previousPage()" [disabled]="currentPage <= 1">Anterior</button>
+            <span>Pag. {{ currentPage }} / {{ totalPages }}</span>
+            <button nbButton size="tiny" (click)="nextPage()" [disabled]="currentPage >= totalPages">Siguiente</button>
+          </div>
+        </div>
+      </ng-container>
+    </ng-container>
+  </nb-card-body>
+</nb-card>
