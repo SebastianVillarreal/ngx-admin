@@ -11,5 +11,6 @@ export class OfertasComponent {
     { title: 'Ofertas Activas', route: 'activas' },
     { title: 'Buscar Oferta', route: 'buscar' },
     { title: 'Histórico', route: 'historico' },
+    { title: 'Reporte Ofertas', route: 'reporte' },
   ];
 }

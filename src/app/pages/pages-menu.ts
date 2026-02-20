@@ -119,6 +119,10 @@ export const MENU_ITEMS: NbMenuItem[] = [
             title: 'Ofertas porcentaje',
             link: '/pages/sistemas/ofertas-porcentaje',
           },
+          {
+            title: 'Reporte ofertas',
+            link: '/pages/sistemas/ofertas/reporte',
+          },
         ],
       },
       {
