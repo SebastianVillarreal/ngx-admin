@@ -12,6 +12,9 @@ import { ListaPreciosDetalleComponent } from './proveedores/lista-precios-detall
 import { ProveedoresListasPreciosComponent } from './proveedores/listas-precios.component';
 import { MargenesFamiliasComponent } from './margenes-familias/margenes-familias.component';
 import { PreciosProgramadosComponent } from './precios-programados/precios-programados.component';
+import { IepsEspecialComponent } from './ieps-especial/ieps-especial.component';
+import { IepsEspecialCrudComponent } from './ieps-especial/tabs/ieps-especial-crud.component';
+import { IepsEspecialReporteComponent } from './ieps-especial/tabs/ieps-especial-reporte.component';
 
 const routes: Routes = [
   {
@@ -61,6 +64,15 @@ const routes: Routes = [
       {
         path: 'precios-programados',
         component: PreciosProgramadosComponent,
+      },
+      {
+        path: 'ieps-especial',
+        component: IepsEspecialComponent,
+        children: [
+          { path: 'crud', component: IepsEspecialCrudComponent },
+          { path: 'reporte', component: IepsEspecialReporteComponent },
+          { path: '', redirectTo: 'crud', pathMatch: 'full' },
+        ],
       },
       {
         path: '',

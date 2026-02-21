@@ -3,13 +3,16 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
   NbActionsModule,
+  NbAlertModule,
   NbAutocompleteModule,
   NbButtonModule,
   NbCardModule,
   NbCheckboxModule,
   NbIconModule,
   NbInputModule,
+  NbRouteTabsetModule,
   NbSelectModule,
+  NbSpinnerModule,
 } from '@nebular/theme';
 import { Ng2SmartTableModule } from 'ng2-smart-table';
 
@@ -28,6 +31,9 @@ import { ProveedoresComponent } from './proveedores/proveedores.component';
 import { ProveedoresListasPreciosComponent } from './proveedores/listas-precios.component';
 import { MargenesFamiliasComponent } from './margenes-familias/margenes-familias.component';
 import { PreciosProgramadosComponent } from './precios-programados/precios-programados.component';
+import { IepsEspecialComponent } from './ieps-especial/ieps-especial.component';
+import { IepsEspecialCrudComponent } from './ieps-especial/tabs/ieps-especial-crud.component';
+import { IepsEspecialReporteComponent } from './ieps-especial/tabs/ieps-especial-reporte.component';
 
 @NgModule({
   imports: [
@@ -40,6 +46,9 @@ import { PreciosProgramadosComponent } from './precios-programados/precios-progr
     NbCheckboxModule,
     NbSelectModule,
     NbIconModule,
+    NbAlertModule,
+    NbSpinnerModule,
+    NbRouteTabsetModule,
     NbActionsModule,
     NbAutocompleteModule,
     FormsModule,
@@ -60,6 +69,9 @@ import { PreciosProgramadosComponent } from './precios-programados/precios-progr
     ProveedoresListasPreciosComponent,
     MargenesFamiliasComponent,
     PreciosProgramadosComponent,
+    IepsEspecialComponent,
+    IepsEspecialCrudComponent,
+    IepsEspecialReporteComponent,
   ],
 })
 export class ComprasModule { }

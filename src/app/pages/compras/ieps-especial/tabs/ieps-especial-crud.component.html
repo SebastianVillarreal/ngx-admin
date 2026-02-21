@@ -1,0 +1,149 @@
+<nb-card>
+  <nb-card-header class="card-header">
+    <div>
+      <h2 class="title">Compras | Ieps Especial | CRUD</h2>
+      <p class="subtitle">Gestión de artículos con Ieps Especial.</p>
+    </div>
+    <button nbButton status="primary" (click)="nuevo()">
+      Nuevo
+    </button>
+  </nb-card-header>
+  <nb-card-body>
+    <div class="filters-grid">
+      <div class="field">
+        <label>Artículo</label>
+        <input nbInput fullWidth [(ngModel)]="form.Articulo" />
+      </div>
+      <div class="field">
+        <label>Porcentaje alcohol</label>
+        <input nbInput fullWidth [(ngModel)]="form.PorcentajeAlcohol" />
+      </div>
+      <div class="field">
+        <label>Margen</label>
+        <input nbInput fullWidth [(ngModel)]="form.Margen" />
+      </div>
+      <div class="field">
+        <label>IEPS</label>
+        <input nbInput fullWidth [(ngModel)]="form.Ieps" />
+      </div>
+      <div class="field">
+        <label>Unidad</label>
+        <input nbInput fullWidth [(ngModel)]="form.Unidad" />
+      </div>
+    </div>
+
+    <nb-alert status="danger" *ngIf="formError" class="mt-2">
+      {{ formError }}
+    </nb-alert>
+
+    <div class="form-actions">
+      <button nbButton status="success" (click)="guardar()" [disabled]="saving">
+        {{ isEditing ? 'Actualizar' : 'Guardar' }}
+      </button>
+      <button nbButton status="basic" *ngIf="isEditing" (click)="cancelarEdicion()" [disabled]="saving">
+        Cancelar
+      </button>
+    </div>
+  </nb-card-body>
+</nb-card>
+
+<nb-card>
+  <nb-card-header class="card-header secondary">
+    <div class="header-tools">
+      <div class="search-control">
+        <nb-icon icon="search-outline"></nb-icon>
+        <input
+          nbInput
+          fullWidth
+          placeholder="Buscar en resultados"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearch($event)"
+          [disabled]="loading || !items.length"
+        />
+      </div>
+      <button nbButton status="success" size="small" (click)="exportToExcel()" [disabled]="loading || !displayItems.length">
+        Exportar
+      </button>
+    </div>
+  </nb-card-header>
+  <nb-card-body>
+    <div class="state" *ngIf="loading">
+      <nb-spinner status="primary"></nb-spinner>
+      <span>Cargando artículos con Ieps Especial...</span>
+    </div>
+
+    <nb-alert status="danger" *ngIf="!loading && error">
+      <div class="error-wrap">
+        <span>{{ error }}</span>
+        <button nbButton status="danger" size="tiny" outline (click)="retry()">Reintentar</button>
+      </div>
+    </nb-alert>
+
+    <ng-container *ngIf="!loading && !error">
+      <div class="empty-state" *ngIf="!items.length">
+        <nb-icon icon="inbox-outline"></nb-icon>
+        <p>No hay registros de Ieps Especial.</p>
+      </div>
+
+      <div class="empty-state" *ngIf="items.length && !displayItems.length">
+        <nb-icon icon="search-outline"></nb-icon>
+        <p>Sin coincidencias para "{{ searchTerm }}".</p>
+      </div>
+
+      <ng-container *ngIf="displayItems.length">
+        <div class="table-wrap">
+          <table class="listas-table">
+            <thead>
+              <tr>
+                <th (click)="toggleSort('Id')">Id {{ sortIndicator('Id') }}</th>
+                <th (click)="toggleSort('Articulo')">Artículo {{ sortIndicator('Articulo') }}</th>
+                <th (click)="toggleSort('Descripcion')">Descripción {{ sortIndicator('Descripcion') }}</th>
+                <th (click)="toggleSort('IepsEspecial')">Ieps Especial {{ sortIndicator('IepsEspecial') }}</th>
+                <th (click)="toggleSort('Ieps')">Ieps {{ sortIndicator('Ieps') }}</th>
+                <th (click)="toggleSort('Iva')">Iva {{ sortIndicator('Iva') }}</th>
+                <th (click)="toggleSort('Costo')">Costo {{ sortIndicator('Costo') }}</th>
+                <th (click)="toggleSort('PorcentajeAlcohol')">% Alcohol {{ sortIndicator('PorcentajeAlcohol') }}</th>
+                <th (click)="toggleSort('Familia')">Familia {{ sortIndicator('Familia') }}</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of paginatedItems; trackBy: trackById">
+                <td>{{ item.Id }}</td>
+                <td>{{ item.Articulo }}</td>
+                <td>{{ item.Descripcion }}</td>
+                <td>{{ item.IepsEspecial | number: '1.2-2' }}</td>
+                <td>{{ item.Ieps | number: '1.2-2' }}</td>
+                <td>{{ item.Iva | number: '1.2-2' }}</td>
+                <td>{{ item.Costo | number: '1.2-2' }}</td>
+                <td>{{ item.PorcentajeAlcohol | number: '1.2-2' }}</td>
+                <td>{{ item.Familia }}</td>
+                <td>
+                  <button nbButton size="tiny" status="info" (click)="editar(item)">Editar</button>
+                  <button nbButton size="tiny" status="danger" class="btn-sep" (click)="eliminar(item)">Eliminar</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pagination">
+          <div class="page-size">
+            <span>Mostrar</span>
+            <nb-select size="small" [(selected)]="pageSize" (selectedChange)="changePageSize($event)">
+              <nb-option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</nb-option>
+            </nb-select>
+          </div>
+          <div class="range">
+            {{ pageStart }}-{{ pageEnd }} de {{ displayItems.length }}
+          </div>
+          <div class="nav">
+            <button nbButton size="tiny" (click)="previousPage()" [disabled]="currentPage <= 1">Anterior</button>
+            <span>Pag. {{ currentPage }} / {{ totalPages }}</span>
+            <button nbButton size="tiny" (click)="nextPage()" [disabled]="currentPage >= totalPages">Siguiente</button>
+          </div>
+        </div>
+      </ng-container>
+    </ng-container>
+  </nb-card-body>
+</nb-card>

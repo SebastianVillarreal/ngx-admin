@@ -87,6 +87,20 @@ export const MENU_ITEMS: NbMenuItem[] = [
         title: 'Precios programados',
         link: '/pages/compras/precios-programados',
       },
+      {
+        title: 'Ieps Especial',
+        link: '/pages/compras/ieps-especial',
+        children: [
+          {
+            title: 'CRUD',
+            link: '/pages/compras/ieps-especial/crud',
+          },
+          {
+            title: 'Reporte',
+            link: '/pages/compras/ieps-especial/reporte',
+          },
+        ],
+      },
     ],
   },
   {
