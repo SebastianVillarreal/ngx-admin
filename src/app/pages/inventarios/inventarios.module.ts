@@ -29,6 +29,7 @@ import { TraspasosConDiferenciaComponent } from './traspasos-con-diferencia/tras
 import { ExistenciasComponent } from './existencias/existencias.component';
 import { HistoricoExistenciasComponent } from './historico-existencias/historico-existencias.component';
 import { ExistenciasNegativasComponent } from './existencias-negativas/existencias-negativas.component';
+import { ReporteMovimientosComponent } from './reportes/reporte-movimientos/reporte-movimientos.component';
 
 @NgModule({
   imports: [
@@ -62,6 +63,7 @@ import { ExistenciasNegativasComponent } from './existencias-negativas/existenci
     ExistenciasComponent,
     HistoricoExistenciasComponent,
     ExistenciasNegativasComponent,
+    ReporteMovimientosComponent,
   ],
 })
 export class InventariosModule {}

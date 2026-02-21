@@ -290,10 +290,6 @@ export const MENU_ITEMS: NbMenuItem[] = [
             title: 'Editar y autorizar',
             link: '/pages/inventarios/movimientos/editar-autorizar',
           },
-          {
-            title: 'Historico',
-            link: '/pages/inventarios/movimientos/historico',
-          },
         ],
       },
       {
@@ -345,6 +341,20 @@ export const MENU_ITEMS: NbMenuItem[] = [
           {
             title: 'Existencias negativas',
             link: '/pages/inventarios/existencias/existencias-negativas',
+          },
+        ],
+      },
+      {
+        title: 'Reportes',
+        link: '/pages/inventarios/reportes/historico',
+        children: [
+          {
+            title: 'Historico',
+            link: '/pages/inventarios/reportes/historico',
+          },
+          {
+            title: 'Reporte Movimientos',
+            link: '/pages/inventarios/reportes/reporte-movimientos',
           },
         ],
       },

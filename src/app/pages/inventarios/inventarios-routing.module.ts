@@ -15,6 +15,7 @@ import { TraspasosConDiferenciaComponent } from './traspasos-con-diferencia/tras
 import { ExistenciasComponent } from './existencias/existencias.component';
 import { HistoricoExistenciasComponent } from './historico-existencias/historico-existencias.component';
 import { ExistenciasNegativasComponent } from './existencias-negativas/existencias-negativas.component';
+import { ReporteMovimientosComponent } from './reportes/reporte-movimientos/reporte-movimientos.component';
 
 const routes: Routes = [
   {
@@ -33,6 +34,14 @@ const routes: Routes = [
   {
     path: 'movimientos/historico',
     component: HistoricoComponent,
+  },
+  {
+    path: 'reportes/historico',
+    component: HistoricoComponent,
+  },
+  {
+    path: 'reportes/reporte-movimientos',
+    component: ReporteMovimientosComponent,
   },
   {
     path: 'verificador',

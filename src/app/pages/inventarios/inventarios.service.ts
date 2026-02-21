@@ -251,6 +251,39 @@ interface HistoricoMovimientosApiResponse {
   };
 }
 
+export interface MovimientosTipoPayload {
+  IdSucursal: string;
+  Tipo: string;
+  Fecha: string;
+  FechaFin: string;
+}
+
+export interface MovimientoTipoItem {
+  Id: number;
+  IdSucursal: number;
+  Sucursal: string;
+  TipoMovimeinto: string;
+  Folio: number;
+  Estatus: string;
+  IdEstatus: number;
+  FechaCreacion: string;
+  FechaAutorizacion: string;
+  FechaAfectacion: string;
+  ClaveProveedor: string;
+  Referencia: string;
+  UsuarioAutoriza: string;
+  Comentarios: string;
+}
+
+interface MovimientosTipoApiResponse {
+  StatusCode: number;
+  success: boolean;
+  message: string;
+  response?: {
+    data?: MovimientoTipoItem[];
+  };
+}
+
 export interface CodigoAjusteItem {
   Codigo: string;
   Cantidad: string;
@@ -305,6 +338,7 @@ export class InventariosService {
   private readonly updateCantidadRenglonEndpoint = `${environment.apiBase}/UpdateCantidadRenglonMov`;
   private readonly autorizarMovimientoEndpoint = `${environment.apiBase}/AutorizarMovimiento`;
   private readonly historicoMovimientosEndpoint = `${environment.apiBase}/GetHistoricoMovimientos`;
+  private readonly movimientosTipoEndpoint = `${environment.apiBase}/GetMovimientosTipo`;
   private readonly cargarCodigosAjusteEndpoint = `${environment.apiBase}/INV_CargarCodigosAjuste`;
   private readonly aplicarAjustesPorListaEndpoint = `${environment.apiBase}/INV_AplicarAjustesPorLista`;
 
@@ -428,6 +462,16 @@ export class InventariosService {
       catchError((error) => {
         console.error('GetHistoricoMovimientos error', error);
         return throwError(() => new Error('No se pudo consultar el histórico de movimientos.'));
+      }),
+    );
+  }
+
+  fetchMovimientosTipo(payload: MovimientosTipoPayload): Observable<MovimientoTipoItem[]> {
+    return this.http.post<MovimientosTipoApiResponse>(this.movimientosTipoEndpoint, payload).pipe(
+      map((res) => res.response?.data ?? []),
+      catchError((error) => {
+        console.error('GetMovimientosTipo error', error);
+        return throwError(() => new Error('No se pudo consultar el reporte de movimientos.'));
       }),
     );
   }
