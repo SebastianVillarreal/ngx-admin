@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
-import { Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
+import * as XLSX from 'xlsx';
 
 import {
   GetRenglonesMovimientoPayload,
@@ -16,35 +16,28 @@ interface SelectOption {
   label: string;
 }
 
+type SortColumn = 'Id' | 'NombreSucursal' | 'Folio' | 'TipoMovimiento' | 'Fecha' | 'Referencia' | 'NombreEstatus';
+type SortDirection = 'asc' | 'desc';
+
 @Component({
   selector: 'ngx-historico-movimientos',
   templateUrl: './historico.component.html',
   styleUrls: ['./historico.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HistoricoComponent implements OnInit, OnDestroy {
+export class HistoricoComponent implements OnInit {
   readonly sucursales: SelectOption[] = [
     { value: '1', label: 'Matriz' },
     { value: '2', label: 'Sucursal Norte' },
     { value: '3', label: 'Sucursal Sur' },
   ];
 
-  readonly sentidos: SelectOption[] = [
-    { value: 'entrada', label: 'Entrada' },
-    { value: 'salida', label: 'Salida' },
-  ];
-
   readonly historicoForm = this.fb.group({
     sucursal: ['', Validators.required],
     fechaInicio: ['', Validators.required],
     fechaFin: ['', Validators.required],
-    sentido: ['', Validators.required],
-    tipoMovimiento: ['', Validators.required],
   });
 
-  tiposMovimiento: SelectOption[] = [];
-  tiposMovimientoLoading = false;
-  tiposMovimientoError = '';
   buscando = false;
   historicoMovimientos: HistoricoMovimiento[] = [];
   historicoError = '';
@@ -58,8 +51,10 @@ export class HistoricoComponent implements OnInit, OnDestroy {
   readonly pageSizeOptions: number[] = [10, 25, 50];
   pageSize = this.pageSizeOptions[0];
   paginaActual = 1;
-
-  private sentidoSubscription?: Subscription;
+  searchTerm = '';
+  displayMovimientos: HistoricoMovimiento[] = [];
+  sortColumn: SortColumn = 'Fecha';
+  sortDirection: SortDirection = 'desc';
 
   constructor(
     private readonly fb: FormBuilder,
@@ -68,17 +63,7 @@ export class HistoricoComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.sentidoSubscription = this.historicoForm.get('sentido')?.valueChanges.subscribe((sentido) => {
-      this.onSentidoChange(sentido);
-    });
-  }
-
-  ngOnDestroy(): void {
-    this.sentidoSubscription?.unsubscribe();
-  }
-
-  trackByTipo(_: number, option: SelectOption): string {
-    return option.value;
+    // Sin inicialización adicional.
   }
 
   trackByHistorico(_: number, movimiento: HistoricoMovimiento): number {
@@ -94,38 +79,43 @@ export class HistoricoComponent implements OnInit, OnDestroy {
   }
 
   get historicoPaginado(): HistoricoMovimiento[] {
-    if (!this.historicoMovimientos.length) {
+    if (!this.displayMovimientos.length) {
       return [];
     }
     const inicio = (this.paginaActual - 1) * this.pageSize;
-    return this.historicoMovimientos.slice(inicio, inicio + this.pageSize);
+    return this.displayMovimientos.slice(inicio, inicio + this.pageSize);
   }
 
   get totalPaginas(): number {
-    if (!this.historicoMovimientos.length) {
+    if (!this.displayMovimientos.length) {
       return 0;
     }
-    return Math.ceil(this.historicoMovimientos.length / this.pageSize);
+    return Math.ceil(this.displayMovimientos.length / this.pageSize);
   }
 
   get paginaDesde(): number {
-    if (!this.historicoMovimientos.length) {
+    if (!this.displayMovimientos.length) {
       return 0;
     }
     return (this.paginaActual - 1) * this.pageSize + 1;
   }
 
   get paginaHasta(): number {
-    if (!this.historicoMovimientos.length) {
+    if (!this.displayMovimientos.length) {
       return 0;
     }
-    return Math.min(this.paginaDesde + this.pageSize - 1, this.historicoMovimientos.length);
+    return Math.min(this.paginaDesde + this.pageSize - 1, this.displayMovimientos.length);
+  }
+
+  get sinCoincidenciasBusqueda(): boolean {
+    return this.historicoMovimientos.length > 0 && this.displayMovimientos.length === 0 && !!this.searchTerm.trim();
   }
 
   ejecutarBusqueda(): void {
     this.busquedaMensaje = '';
     this.busquedaError = '';
     this.historicoError = '';
+    this.searchTerm = '';
     this.detalleSeleccionado = undefined;
     this.resetDetalleState();
     this.resetPaginacion();
@@ -134,7 +124,7 @@ export class HistoricoComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const { fechaInicio, fechaFin, sucursal, sentido, tipoMovimiento } = this.historicoForm.getRawValue();
+    const { fechaInicio, fechaFin, sucursal } = this.historicoForm.getRawValue();
     if (fechaInicio && fechaFin && fechaFin < fechaInicio) {
       this.busquedaError = 'La fecha final debe ser posterior o igual a la fecha inicial.';
       return;
@@ -144,15 +134,15 @@ export class HistoricoComponent implements OnInit, OnDestroy {
       Fecha: fechaInicio ?? '',
       FechaFin: fechaFin ?? '',
       IdSucursal: sucursal ?? '',
-      TipoMovimiento: tipoMovimiento ?? '',
+      TipoMovimiento: '',
     };
 
     this.buscando = true;
     this.historicoMovimientos = [];
+    this.displayMovimientos = [];
     this.consultaRealizada = false;
-  this.resetPaginacion();
+    this.resetPaginacion();
     const sucursalLabel = this.getOptionLabel(this.sucursales, sucursal);
-    const tipoLabel = this.getOptionLabel(this.tiposMovimiento, tipoMovimiento);
 
     this.inventariosService
       .fetchHistoricoMovimientos(payload)
@@ -166,19 +156,66 @@ export class HistoricoComponent implements OnInit, OnDestroy {
         next: (movimientos) => {
           this.historicoError = '';
           this.historicoMovimientos = movimientos;
+          this.applyTransforms();
           this.consultaRealizada = true;
           this.ensurePaginaEnRango();
           const total = movimientos.length;
           const fechas = `${this.formatFecha(fechaInicio)} al ${this.formatFecha(fechaFin)}`;
-          this.busquedaMensaje = `Se encontraron ${total} movimiento(s) en ${sucursalLabel} (${tipoLabel || 'N/D'}) del ${fechas}.`;
+          this.busquedaMensaje = `Se encontraron ${total} movimiento(s) en ${sucursalLabel} del ${fechas}.`;
         },
         error: (error: Error) => {
           this.historicoError = error.message;
           this.busquedaMensaje = '';
           this.consultaRealizada = false;
+          this.displayMovimientos = [];
           this.resetPaginacion();
         },
       });
+  }
+
+  onSearch(term: string): void {
+    this.searchTerm = term;
+    this.resetPaginacion();
+    this.applyTransforms();
+  }
+
+  toggleSort(column: SortColumn): void {
+    if (this.sortColumn === column) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortColumn = column;
+      this.sortDirection = 'asc';
+    }
+    this.resetPaginacion();
+    this.applyTransforms();
+  }
+
+  sortIndicator(column: SortColumn): string {
+    if (this.sortColumn !== column) {
+      return '';
+    }
+    return this.sortDirection === 'asc' ? '▲' : '▼';
+  }
+
+  exportToExcel(): void {
+    if (!this.displayMovimientos.length) {
+      return;
+    }
+
+    const rows = this.displayMovimientos.map((movimiento) => ({
+      Id: movimiento.Id,
+      Sucursal: movimiento.NombreSucursal || `Sucursal ${movimiento.IdSucursal || ''}`,
+      Folio: movimiento.Folio,
+      'Tipo de movimiento': movimiento.TipoMovimiento,
+      Fecha: this.formatFecha(movimiento.Fecha),
+      Referencia: movimiento.Referencia || '',
+      Estatus: movimiento.NombreEstatus || '',
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(rows);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'HistoricoMovimientos');
+    XLSX.writeFile(workbook, 'historico-movimientos.xlsx');
   }
 
   verDetalle(movimiento: HistoricoMovimiento): void {
@@ -252,51 +289,6 @@ export class HistoricoComponent implements OnInit, OnDestroy {
     }
   }
 
-  private onSentidoChange(sentido: string | null): void {
-    this.historicoForm.get('tipoMovimiento')?.reset('');
-    this.tiposMovimiento = [];
-    this.tiposMovimientoError = '';
-
-    const clave = this.mapSentidoToClave(sentido);
-    if (!clave) {
-      return;
-    }
-
-    this.tiposMovimientoLoading = true;
-    this.inventariosService
-      .fetchTipoMovimientos(clave)
-      .pipe(
-        finalize(() => {
-          this.tiposMovimientoLoading = false;
-          this.cdr.markForCheck();
-        }),
-      )
-      .subscribe({
-        next: (items) => {
-          this.tiposMovimiento = (items || []).map((item) => ({
-            value: item.Clave,
-            label: item.Nombre,
-          }));
-          if (this.tiposMovimiento.length === 1) {
-            this.historicoForm.get('tipoMovimiento')?.setValue(this.tiposMovimiento[0].value);
-          }
-        },
-        error: (error: Error) => {
-          this.tiposMovimientoError = error.message;
-        },
-      });
-  }
-
-  private mapSentidoToClave(sentido: string | null | undefined): string {
-    if (sentido === 'entrada') {
-      return '1';
-    }
-    if (sentido === 'salida') {
-      return '2';
-    }
-    return '';
-  }
-
   private getOptionLabel(options: SelectOption[], value: string | null | undefined): string {
     if (!value) {
       return '';
@@ -325,8 +317,56 @@ export class HistoricoComponent implements OnInit, OnDestroy {
     this.paginaActual = 1;
   }
 
+  private applyTransforms(): void {
+    const term = this.searchTerm.trim().toLowerCase();
+    const filtered = term
+      ? this.historicoMovimientos.filter((item) => this.matchesTerm(item, term))
+      : [...this.historicoMovimientos];
+
+    this.displayMovimientos = filtered.sort((a, b) => this.compareRows(a, b));
+    this.ensurePaginaEnRango();
+    this.cdr.markForCheck();
+  }
+
+  private matchesTerm(item: HistoricoMovimiento, term: string): boolean {
+    return String(item.Id).toLowerCase().includes(term)
+      || String(item.Folio).toLowerCase().includes(term)
+      || String(item.IdSucursal).toLowerCase().includes(term)
+      || (item.NombreSucursal || '').toLowerCase().includes(term)
+      || (item.TipoMovimiento || '').toLowerCase().includes(term)
+      || (item.Referencia || '').toLowerCase().includes(term)
+      || (item.NombreEstatus || '').toLowerCase().includes(term)
+      || this.formatFecha(item.Fecha).toLowerCase().includes(term);
+  }
+
+  private compareRows(a: HistoricoMovimiento, b: HistoricoMovimiento): number {
+    const factor = this.sortDirection === 'asc' ? 1 : -1;
+    let result = 0;
+
+    switch (this.sortColumn) {
+      case 'Id':
+      case 'Folio':
+        result = Number(a[this.sortColumn]) - Number(b[this.sortColumn]);
+        break;
+      case 'Fecha':
+        result = new Date(a.Fecha || '').getTime() - new Date(b.Fecha || '').getTime();
+        break;
+      case 'NombreSucursal':
+      case 'TipoMovimiento':
+      case 'Referencia':
+      case 'NombreEstatus':
+      default:
+        result = String(a[this.sortColumn] || '').localeCompare(String(b[this.sortColumn] || ''), 'es', {
+          sensitivity: 'base',
+        });
+        break;
+    }
+
+    return result * factor;
+  }
+
   private ensurePaginaEnRango(): void {
-    if (!this.historicoMovimientos.length) {
+    if (!this.displayMovimientos.length) {
       this.paginaActual = 1;
       return;
     }

@@ -57,51 +57,6 @@
         </small>
       </div>
 
-      <div class="form-field">
-        <label for="sentido">Entrada / salida</label>
-        <nb-select
-          fullWidth
-          id="sentido"
-          placeholder="Selecciona el sentido"
-          formControlName="sentido"
-          [status]="historicoForm.get('sentido')?.invalid && historicoForm.get('sentido')?.touched ? 'danger' : 'basic'"
-        >
-          <nb-option *ngFor="let sentido of sentidos" [value]="sentido.value">
-            {{ sentido.label }}
-          </nb-option>
-        </nb-select>
-        <small class="error-text" *ngIf="historicoForm.get('sentido')?.invalid && historicoForm.get('sentido')?.touched">
-          Selecciona si consultarás entradas o salidas.
-        </small>
-      </div>
-
-      <div class="form-field">
-        <label for="tipoMovimiento">Tipo de movimiento</label>
-        <div class="field-status" *ngIf="tiposMovimientoLoading">
-          <nb-spinner status="primary" size="tiny"></nb-spinner>
-          <span>Cargando…</span>
-        </div>
-        <nb-select
-          fullWidth
-          id="tipoMovimiento"
-          placeholder="Selecciona el tipo"
-          formControlName="tipoMovimiento"
-          [disabled]="tiposMovimientoLoading || !tiposMovimiento.length"
-          [status]="
-            historicoForm.get('tipoMovimiento')?.invalid && historicoForm.get('tipoMovimiento')?.touched ? 'danger' : 'basic'
-          "
-        >
-          <nb-option *ngFor="let tipo of tiposMovimiento; trackBy: trackByTipo" [value]="tipo.value">
-            {{ tipo.label }}
-          </nb-option>
-        </nb-select>
-        <small class="error-text" *ngIf="tiposMovimientoError">
-          {{ tiposMovimientoError }}
-        </small>
-        <small class="error-text" *ngIf="historicoForm.get('tipoMovimiento')?.invalid && historicoForm.get('tipoMovimiento')?.touched">
-          Selecciona un tipo de movimiento.
-        </small>
-      </div>
     </form>
 
     <div class="resultados">
@@ -119,7 +74,10 @@
       </nb-alert>
 
       <nb-alert *ngIf="historicoError" status="danger">
-        {{ historicoError }}
+        <div class="error-wrap">
+          <span>{{ historicoError }}</span>
+          <button nbButton status="danger" size="tiny" outline (click)="ejecutarBusqueda()">Reintentar</button>
+        </div>
       </nb-alert>
 
       <div class="empty-state" *ngIf="sinResultados">
@@ -127,17 +85,42 @@
         <p>No se encontraron movimientos para los filtros seleccionados.</p>
       </div>
 
-      <div class="tabla-wrapper" *ngIf="historicoMovimientos.length">
-        <table class="historico-table">
+      <div class="empty-state" *ngIf="sinCoincidenciasBusqueda">
+        <nb-icon icon="search-outline"></nb-icon>
+        <p>Sin coincidencias para "{{ searchTerm }}".</p>
+      </div>
+
+      <div class="table-tools card-header secondary" *ngIf="historicoMovimientos.length">
+        <div class="header-tools">
+          <div class="search-control">
+            <nb-icon icon="search-outline"></nb-icon>
+            <input
+              nbInput
+              fullWidth
+              placeholder="Buscar en resultados"
+              [(ngModel)]="searchTerm"
+              (ngModelChange)="onSearch($event)"
+              [disabled]="buscando || !historicoMovimientos.length"
+            />
+          </div>
+          <button nbButton status="success" size="small" (click)="exportToExcel()" [disabled]="buscando || !displayMovimientos.length">
+            Exportar
+          </button>
+        </div>
+      </div>
+
+      <div class="tabla-wrapper" *ngIf="displayMovimientos.length">
+        <div class="table-wrap">
+        <table class="historico-table listas-table">
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Sucursal</th>
-              <th>Folio</th>
-              <th>Tipo de movimiento</th>
-              <th>Fecha</th>
-              <th>Referencia</th>
-              <th>Estatus</th>
+              <th (click)="toggleSort('Id')">ID {{ sortIndicator('Id') }}</th>
+              <th (click)="toggleSort('NombreSucursal')">Sucursal {{ sortIndicator('NombreSucursal') }}</th>
+              <th (click)="toggleSort('Folio')">Folio {{ sortIndicator('Folio') }}</th>
+              <th (click)="toggleSort('TipoMovimiento')">Tipo de movimiento {{ sortIndicator('TipoMovimiento') }}</th>
+              <th (click)="toggleSort('Fecha')">Fecha {{ sortIndicator('Fecha') }}</th>
+              <th (click)="toggleSort('Referencia')">Referencia {{ sortIndicator('Referencia') }}</th>
+              <th (click)="toggleSort('NombreEstatus')">Estatus {{ sortIndicator('NombreEstatus') }}</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -158,32 +141,21 @@
             </tr>
           </tbody>
         </table>
-        <div class="paginacion">
-          <div class="paginacion-info">
-            Mostrando {{ paginaDesde }}-{{ paginaHasta }} de {{ historicoMovimientos.length }} movimiento(s)
+        </div>
+        <div class="pagination">
+          <div class="range">
+            Mostrando {{ paginaDesde }}-{{ paginaHasta }} de {{ displayMovimientos.length }} movimiento(s)
           </div>
-          <div class="paginacion-controles">
-            <div class="paginacion-select">
-              <span>Filas</span>
-              <nb-select size="tiny" [selected]="pageSize" (selectedChange)="onPageSizeChange($event)">
+          <div class="nav">
+            <div class="page-size">
+              <span>Mostrar</span>
+              <nb-select size="small" [selected]="pageSize" (selectedChange)="onPageSizeChange($event)">
                 <nb-option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</nb-option>
               </nb-select>
             </div>
-            <div class="paginacion-nav">
-              <button nbButton status="basic" size="tiny" (click)="paginaAnterior()" [disabled]="paginaActual === 1">
-                Anterior
-              </button>
-              <span>Pag. {{ paginaActual }} de {{ totalPaginas }}</span>
-              <button
-                nbButton
-                status="basic"
-                size="tiny"
-                (click)="paginaSiguiente()"
-                [disabled]="paginaActual === totalPaginas"
-              >
-                Siguiente
-              </button>
-            </div>
+            <button nbButton size="tiny" (click)="paginaAnterior()" [disabled]="paginaActual <= 1">Anterior</button>
+            <span>Pag. {{ paginaActual }} / {{ totalPaginas }}</span>
+            <button nbButton size="tiny" (click)="paginaSiguiente()" [disabled]="paginaActual >= totalPaginas">Siguiente</button>
           </div>
         </div>
       </div>
