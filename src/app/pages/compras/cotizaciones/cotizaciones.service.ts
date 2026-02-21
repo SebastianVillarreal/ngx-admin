@@ -91,12 +91,31 @@ export interface CotizacionResumen {
   Estatus: number;
 }
 
+export interface CotizacionSinFinalizarItem {
+  Id: number;
+  IdSucursal: number;
+  IdProveedor: number;
+  IdUsuario: number;
+  Proveedor: string;
+  Comprador: string;
+  Fecha: string;
+}
+
 interface CotizacionesApiResponse {
   StatusCode: number;
   success: boolean;
   message: string;
   response?: {
     data?: CotizacionResumen[];
+  };
+}
+
+interface CotizacionesSinFinalizarApiResponse {
+  StatusCode: number;
+  success: boolean;
+  message: string;
+  response?: {
+    data?: CotizacionSinFinalizarItem[];
   };
 }
 
@@ -107,6 +126,7 @@ export class CotizacionesService {
   private readonly insertarDetalleEndpoint = '/api/InsertarDetalleCotizacion';
   private readonly finalizarEndpoint = '/api/FinalizarCotizacion';
   private readonly cotizacionesEndpoint = '/api/GetCotizaciones';
+  private readonly cotizacionesSinFinalizarEndpoint = '/api/GetCotizacionesSF';
   private readonly pedidoSugeridoEndpoint = '/api/HerramientaCompras_Nuevo';
 
   constructor(private readonly http: HttpClient) {}
@@ -158,6 +178,16 @@ export class CotizacionesService {
       catchError((error) => {
         console.error('GetCotizaciones error', error);
         return throwError(() => new Error('No se pudieron obtener las cotizaciones.'));
+      }),
+    );
+  }
+
+  obtenerCotizacionesSinFinalizar(): Observable<CotizacionSinFinalizarItem[]> {
+    return this.http.get<CotizacionesSinFinalizarApiResponse>(this.cotizacionesSinFinalizarEndpoint).pipe(
+      map((res) => res.response?.data ?? []),
+      catchError((error) => {
+        console.error('GetCotizacionesSF error', error);
+        return throwError(() => new Error('No se pudieron obtener las cotizaciones sin finalizar.'));
       }),
     );
   }

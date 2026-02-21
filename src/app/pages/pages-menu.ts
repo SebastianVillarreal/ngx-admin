@@ -63,6 +63,10 @@ export const MENU_ITEMS: NbMenuItem[] = [
             title: 'Pedido sugerido',
             link: '/pages/compras/cotizaciones/pedido-sugerido',
           },
+          {
+            title: 'Sin finalizar',
+            link: '/pages/compras/cotizaciones/sin-finalizar',
+          },
         ],
       },
       {
@@ -335,8 +339,8 @@ export const MENU_ITEMS: NbMenuItem[] = [
             link: '/pages/inventarios/existencias',
           },
           {
-            title: 'Historico existencias',
-            link: '/pages/inventarios/existencias/historico-existencias',
+            title: 'Existencias Filtros',
+            link: '/pages/inventarios/existencias/existencias-filtros',
           },
           {
             title: 'Existencias negativas',

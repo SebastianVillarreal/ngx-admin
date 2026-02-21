@@ -191,12 +191,33 @@ export interface ExistenciaInventario {
   Departamento: string;
 }
 
+export interface ExistenciaHoyItem {
+  TotalEntradas: number;
+  TotalSalidas: number;
+  ExistenciaHoy: number;
+  Codigo: string;
+  Descripcion: string;
+  Familia: string;
+  Departamento: string;
+  Cantidad: number;
+  UnidadMedida: string;
+}
+
 interface ExistenciasInventarioApiResponse {
   StatusCode: number;
   success: boolean;
   message: string;
   response?: {
     data?: ExistenciaInventario[];
+  };
+}
+
+interface ExistenciaHoyApiResponse {
+  StatusCode: number;
+  success: boolean;
+  message: string;
+  response?: {
+    data?: ExistenciaHoyItem[];
   };
 }
 
@@ -231,6 +252,7 @@ export class TraspasosService {
   private readonly traspasosEnviadosEndpoint = '/api/GetTraspasosEnviados';
   private readonly traspasosConDiferenciaEndpoint = '/api/GetDiferenciasTraspasos';
   private readonly existenciasEndpoint = '/api/INV_GetFechasCierre';
+  private readonly existenciaHoyEndpoint = '/api/GetExistenciaHoy';
   private readonly existenciasNegativasEndpoint = '/api/GetExistenciasNegativas';
 
   constructor(private readonly http: HttpClient) {}
@@ -394,6 +416,26 @@ export class TraspasosService {
       catchError((error) => {
         console.error('INV_GetFechasCierre error', error);
         const message = error?.message || 'No se pudieron obtener las existencias.';
+        return throwError(() => new Error(message));
+      }),
+    );
+  }
+
+  obtenerExistenciaHoy(familia?: string, departamento?: string, codigo?: string | null): Observable<ExistenciaHoyItem[]> {
+    const familiaParam = (familia || '').trim() || '0';
+    const departamentoParam = (departamento || '').trim() || '0';
+    const codigoParam = (codigo || '').trim() || 'null';
+
+    const params = new HttpParams()
+      .set('familia', familiaParam)
+      .set('departamento', departamentoParam)
+      .set('codigo', codigoParam);
+
+    return this.http.get<ExistenciaHoyApiResponse>(this.existenciaHoyEndpoint, { params }).pipe(
+      map((res) => res.response?.data ?? []),
+      catchError((error) => {
+        console.error('GetExistenciaHoy error', error);
+        const message = error?.message || 'No se pudieron obtener las existencias del día.';
         return throwError(() => new Error(message));
       }),
     );

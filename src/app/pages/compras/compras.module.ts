@@ -26,6 +26,7 @@ import { NuevoArticuloComponent } from './articulos/nuevo-articulo.component';
 import { CotizacionesComponent } from './cotizaciones/cotizaciones.component';
 import { CotizacionesListaComponent } from './cotizaciones/cotizaciones-lista.component';
 import { CotizacionesPedidoSugeridoComponent } from './cotizaciones/cotizaciones-pedido-sugerido.component';
+import { CotizacionesSinFinalizarComponent } from './cotizaciones/cotizaciones-sin-finalizar.component';
 import { ListaPreciosDetalleComponent } from './proveedores/lista-precios-detalle.component';
 import { ProveedoresComponent } from './proveedores/proveedores.component';
 import { ProveedoresListasPreciosComponent } from './proveedores/listas-precios.component';
@@ -64,6 +65,7 @@ import { IepsEspecialReporteComponent } from './ieps-especial/tabs/ieps-especial
     CotizacionesComponent,
     CotizacionesListaComponent,
     CotizacionesPedidoSugeridoComponent,
+    CotizacionesSinFinalizarComponent,
     ListaPreciosDetalleComponent,
     ProveedoresComponent,
     ProveedoresListasPreciosComponent,

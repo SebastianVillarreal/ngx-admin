@@ -1,8 +1,8 @@
 <nb-card>
   <nb-card-header class="card-header">
     <div>
-      <h2 class="title">Historico existencias</h2>
-      <p class="subtitle">Consulta historica de existencias por familia, departamento y fecha.</p>
+      <h2 class="title">Existencias Filtros</h2>
+      <p class="subtitle">Consulta existencias de hoy por departamento, familia y codigo.</p>
     </div>
     <button nbButton status="primary" type="button" (click)="onBuscar()" [disabled]="cargando">
       Consultar
@@ -17,7 +17,6 @@
           fullWidth
           formControlName="departamento"
           [disabled]="departamentosLoading || !departamentos.length"
-          [status]="filtroForm.get('departamento')?.invalid && filtroForm.get('departamento')?.touched ? 'danger' : 'basic'"
         >
           <nb-option *ngFor="let departamento of departamentos" [value]="departamento.value">
             {{ departamento.label }}
@@ -31,7 +30,6 @@
           fullWidth
           formControlName="familia"
           [disabled]="familiasLoading || !familias.length"
-          [status]="filtroForm.get('familia')?.invalid && filtroForm.get('familia')?.touched ? 'danger' : 'basic'"
         >
           <nb-option *ngFor="let familia of familias" [value]="familia.value">
             {{ familia.label }}
@@ -40,8 +38,8 @@
       </div>
 
       <div class="field">
-        <label>Fecha</label>
-        <input nbInput fullWidth type="date" formControlName="fecha" />
+        <label>Codigo (opcional)</label>
+        <input nbInput fullWidth type="text" formControlName="codigo" placeholder="Ej. 200" />
       </div>
     </form>
 
@@ -90,7 +88,7 @@
   <nb-card-body>
     <div class="state" *ngIf="cargando">
       <nb-spinner status="primary"></nb-spinner>
-      <span>Cargando historico de existencias...</span>
+      <span>Cargando existencias de hoy...</span>
     </div>
 
     <ng-container *ngIf="!cargando && !error">
@@ -109,22 +107,28 @@
           <table class="historico-table">
             <thead>
               <tr>
-                <th (click)="toggleSort('Fecha')">Fecha {{ sortIndicator('Fecha') }}</th>
                 <th (click)="toggleSort('Codigo')">Codigo {{ sortIndicator('Codigo') }}</th>
                 <th (click)="toggleSort('Descripcion')">Descripcion {{ sortIndicator('Descripcion') }}</th>
-                <th (click)="toggleSort('Familia')">Familia {{ sortIndicator('Familia') }}</th>
                 <th (click)="toggleSort('Departamento')">Departamento {{ sortIndicator('Departamento') }}</th>
-                <th (click)="toggleSort('Cantidad')">Cantidad {{ sortIndicator('Cantidad') }}</th>
+                <th (click)="toggleSort('Familia')">Familia {{ sortIndicator('Familia') }}</th>
+                <th (click)="toggleSort('UnidadMedida')">U. Medida {{ sortIndicator('UnidadMedida') }}</th>
+                <th (click)="toggleSort('Cantidad')">Inicial {{ sortIndicator('Cantidad') }}</th>
+                <th (click)="toggleSort('TotalEntradas')">Entradas {{ sortIndicator('TotalEntradas') }}</th>
+                <th (click)="toggleSort('TotalSalidas')">Salidas {{ sortIndicator('TotalSalidas') }}</th>
+                <th (click)="toggleSort('ExistenciaHoy')">Existencia hoy {{ sortIndicator('ExistenciaHoy') }}</th>
               </tr>
             </thead>
             <tbody>
               <tr *ngFor="let item of paginatedItems; trackBy: trackByCodigo">
-                <td>{{ item.Fecha }}</td>
                 <td>{{ item.Codigo }}</td>
                 <td>{{ item.Descripcion }}</td>
-                <td>{{ item.Familia }}</td>
                 <td>{{ item.Departamento }}</td>
+                <td>{{ item.Familia }}</td>
+                <td>{{ item.UnidadMedida }}</td>
                 <td>{{ item.Cantidad | number: '1.0-4' }}</td>
+                <td>{{ item.TotalEntradas | number: '1.0-4' }}</td>
+                <td>{{ item.TotalSalidas | number: '1.0-4' }}</td>
+                <td>{{ item.ExistenciaHoy | number: '1.0-4' }}</td>
               </tr>
             </tbody>
           </table>

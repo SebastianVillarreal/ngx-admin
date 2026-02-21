@@ -71,7 +71,7 @@ const routes: Routes = [
     component: ExistenciasComponent,
   },
   {
-    path: 'existencias/historico-existencias',
+    path: 'existencias/existencias-filtros',
     component: HistoricoExistenciasComponent,
   },
   {

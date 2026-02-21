@@ -253,6 +253,20 @@ interface EstadoCuentaApiResponse {
   };
 }
 
+export interface UsuarioCorteAbonos {
+  IdUsuario: number;
+  NombreUsuario: string;
+}
+
+interface UsuariosApiResponse {
+  StatusCode: number;
+  success: boolean;
+  message: string;
+  response?: {
+    data?: UsuarioCorteAbonos[];
+  };
+}
+
 @Injectable({ providedIn: 'root' })
 export class CreditosService {
   private readonly endpoint = `${environment.apiBase}/GetClientesCreditos`;
@@ -265,6 +279,7 @@ export class CreditosService {
   private readonly foliosAbonoEndpoint = `${environment.apiBase}/GetFoliosAbono`;
   private readonly historicoTcEndpoint = `${environment.apiBase}/GetHistoricoTC`;
   private readonly estadoCuentaEndpoint = `${environment.apiBase}/GetEstadoCuentaCliente`;
+  private readonly usuariosEndpoint = `${environment.apiBase}/GetUsuarios`;
 
   constructor(private readonly http: HttpClient) {}
 
@@ -409,6 +424,16 @@ export class CreditosService {
       catchError((error) => {
         console.error('GetEstadoCuentaCliente error', error);
         return throwError(() => new Error('No se pudo recuperar el estado de cuenta.'));
+      }),
+    );
+  }
+
+  fetchUsuariosCorteAbonos(): Observable<UsuarioCorteAbonos[]> {
+    return this.http.post<UsuariosApiResponse>(this.usuariosEndpoint, {}).pipe(
+      map((res) => res.response?.data ?? []),
+      catchError((error) => {
+        console.error('GetUsuarios error', error);
+        return throwError(() => new Error('No se pudo cargar el catalogo de usuarios.'));
       }),
     );
   }

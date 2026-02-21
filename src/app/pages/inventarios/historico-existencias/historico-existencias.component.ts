@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
+import { FormBuilder } from '@angular/forms';
 import * as XLSX from 'xlsx';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { DepartamentosService } from '../../catalogos/departamentos/departamentos.service';
 import { FamiliasService } from '../../catalogos/familias/familias.service';
-import { ExistenciaInventario, TraspasosService } from '../traspasos/traspasos.service';
+import { ExistenciaHoyItem, TraspasosService } from '../traspasos/traspasos.service';
 
 interface SeleccionOption {
   value: string;
@@ -16,10 +16,10 @@ interface SeleccionOption {
 interface FiltroFormValue {
   departamento: string;
   familia: string;
-  fecha: string;
+  codigo: string;
 }
 
-type SortColumn = 'Fecha' | 'Codigo' | 'Descripcion' | 'Familia' | 'Departamento' | 'Cantidad';
+type SortColumn = 'Codigo' | 'Descripcion' | 'Departamento' | 'Familia' | 'UnidadMedida' | 'Cantidad' | 'TotalEntradas' | 'TotalSalidas' | 'ExistenciaHoy';
 type SortDirection = 'asc' | 'desc';
 
 @Component({
@@ -34,14 +34,14 @@ export class HistoricoExistenciasComponent implements OnInit, OnDestroy {
   familias: SeleccionOption[] = [];
 
   readonly filtroForm = this.fb.group({
-    departamento: this.fb.control('', Validators.required),
-    familia: this.fb.control('', Validators.required),
-    fecha: this.fb.control('', Validators.required),
+    departamento: this.fb.control('0'),
+    familia: this.fb.control('0'),
+    codigo: this.fb.control(''),
   });
 
-  items: ExistenciaInventario[] = [];
-  displayItems: ExistenciaInventario[] = [];
-  paginatedItems: ExistenciaInventario[] = [];
+  items: ExistenciaHoyItem[] = [];
+  displayItems: ExistenciaHoyItem[] = [];
+  paginatedItems: ExistenciaHoyItem[] = [];
 
   cargando = false;
   departamentosLoading = false;
@@ -67,7 +67,6 @@ export class HistoricoExistenciasComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.establecerFechaInicial();
     this.suscribirCambiosDepartamento();
     this.cargarDepartamentos();
   }
@@ -75,14 +74,7 @@ export class HistoricoExistenciasComponent implements OnInit, OnDestroy {
   onBuscar(): void {
     this.error = '';
 
-    if (this.filtroForm.invalid) {
-      this.filtroForm.markAllAsTouched();
-      this.error = 'Completa el departamento, la familia y la fecha para continuar.';
-      this.markForCheck();
-      return;
-    }
-
-    const { departamento, familia, fecha } = this.filtroForm.value as FiltroFormValue;
+    const { departamento, familia, codigo } = this.filtroForm.getRawValue() as FiltroFormValue;
 
     this.cargando = true;
     this.items = [];
@@ -91,7 +83,7 @@ export class HistoricoExistenciasComponent implements OnInit, OnDestroy {
     this.currentPage = 1;
     this.markForCheck();
 
-    this.traspasosService.obtenerExistencias(familia, departamento, fecha).subscribe({
+    this.traspasosService.obtenerExistenciaHoy(familia, departamento, codigo || null).subscribe({
       next: (data) => {
         this.items = data || [];
         this.applyTransforms();
@@ -185,22 +177,25 @@ export class HistoricoExistenciasComponent implements OnInit, OnDestroy {
     }
 
     const rows = this.displayItems.map((item) => ({
-      Fecha: item.Fecha,
       Codigo: item.Codigo,
-      Cantidad: item.Cantidad,
       Descripcion: item.Descripcion,
-      Familia: item.Familia,
       Departamento: item.Departamento,
+      Familia: item.Familia,
+      'Unidad de medida': item.UnidadMedida,
+      Inicial: item.Cantidad,
+      Entradas: item.TotalEntradas,
+      Salidas: item.TotalSalidas,
+      'Existencia hoy': item.ExistenciaHoy,
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(rows);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'HistoricoExistencias');
-    XLSX.writeFile(workbook, 'historico-existencias.xlsx');
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'ExistenciaHoy');
+    XLSX.writeFile(workbook, 'existencia-hoy-filtros.xlsx');
   }
 
-  trackByCodigo(_: number, item: ExistenciaInventario): string {
-    return `${item.Codigo}-${item.Fecha}`;
+  trackByCodigo(_: number, item: ExistenciaHoyItem): string {
+    return `${item.Codigo}-${item.Departamento}-${item.Familia}`;
   }
 
   private cargarDepartamentos(): void {
@@ -215,7 +210,8 @@ export class HistoricoExistenciasComponent implements OnInit, OnDestroy {
           value: String(item.Id),
           label: item.Nombre || `Departamento #${item.Id}`,
         }));
-        this.filtroForm.patchValue({ departamento: this.departamentos[0]?.value ?? '' });
+        this.departamentos = [{ value: '0', label: 'Ninguno' }, ...this.departamentos];
+        this.filtroForm.patchValue({ departamento: '0' });
         this.departamentosLoading = false;
         this.markForCheck();
       },
@@ -239,11 +235,11 @@ export class HistoricoExistenciasComponent implements OnInit, OnDestroy {
   private cargarFamilias(idDepartamento: string): void {
     this.familiasLoading = true;
     this.familiasError = '';
-    this.familias = [];
-    this.filtroForm.patchValue({ familia: '' }, { emitEvent: false });
+    this.familias = [{ value: '0', label: 'Ninguno' }];
+    this.filtroForm.patchValue({ familia: '0' }, { emitEvent: false });
     this.markForCheck();
 
-    if (!idDepartamento) {
+    if (!idDepartamento || idDepartamento === '0') {
       this.familiasLoading = false;
       this.markForCheck();
       return;
@@ -255,10 +251,10 @@ export class HistoricoExistenciasComponent implements OnInit, OnDestroy {
           value: String(item.Id),
           label: item.Nombre || `Familia #${item.Id}`,
         }));
-        this.filtroForm.patchValue({ familia: this.familias[0]?.value ?? '' }, { emitEvent: false });
+        this.familias = [{ value: '0', label: 'Ninguno' }, ...this.familias];
+        this.filtroForm.patchValue({ familia: '0' }, { emitEvent: false });
         this.familiasLoading = false;
         this.markForCheck();
-        this.onBuscar();
       },
       error: (error) => {
         this.familiasLoading = false;
@@ -283,16 +279,19 @@ export class HistoricoExistenciasComponent implements OnInit, OnDestroy {
     this.paginatedItems = this.displayItems.slice(start, end);
   }
 
-  private matchesSearch(item: ExistenciaInventario, term: string): boolean {
-    return (item.Fecha || '').toLowerCase().includes(term)
-      || (item.Codigo || '').toLowerCase().includes(term)
+  private matchesSearch(item: ExistenciaHoyItem, term: string): boolean {
+    return (item.Codigo || '').toLowerCase().includes(term)
       || (item.Descripcion || '').toLowerCase().includes(term)
       || (item.Familia || '').toLowerCase().includes(term)
       || (item.Departamento || '').toLowerCase().includes(term)
-      || String(item.Cantidad).toLowerCase().includes(term);
+      || (item.UnidadMedida || '').toLowerCase().includes(term)
+      || String(item.Cantidad).toLowerCase().includes(term)
+      || String(item.TotalEntradas).toLowerCase().includes(term)
+      || String(item.TotalSalidas).toLowerCase().includes(term)
+      || String(item.ExistenciaHoy).toLowerCase().includes(term);
   }
 
-  private compareRows(a: ExistenciaInventario, b: ExistenciaInventario): number {
+  private compareRows(a: ExistenciaHoyItem, b: ExistenciaHoyItem): number {
     const factor = this.sortDirection === 'asc' ? 1 : -1;
     let result = 0;
 
@@ -300,13 +299,20 @@ export class HistoricoExistenciasComponent implements OnInit, OnDestroy {
       case 'Cantidad':
         result = Number(a.Cantidad) - Number(b.Cantidad);
         break;
-      case 'Fecha':
-        result = this.parseSlashDate(a.Fecha) - this.parseSlashDate(b.Fecha);
+      case 'TotalEntradas':
+        result = Number(a.TotalEntradas) - Number(b.TotalEntradas);
+        break;
+      case 'TotalSalidas':
+        result = Number(a.TotalSalidas) - Number(b.TotalSalidas);
+        break;
+      case 'ExistenciaHoy':
+        result = Number(a.ExistenciaHoy) - Number(b.ExistenciaHoy);
         break;
       case 'Codigo':
       case 'Descripcion':
       case 'Familia':
       case 'Departamento':
+      case 'UnidadMedida':
       default:
         result = String(a[this.sortColumn] || '').localeCompare(String(b[this.sortColumn] || ''), 'es', {
           sensitivity: 'base',
@@ -315,34 +321,6 @@ export class HistoricoExistenciasComponent implements OnInit, OnDestroy {
     }
 
     return result * factor;
-  }
-
-  private parseSlashDate(value: string): number {
-    const parts = (value || '').split('/');
-    if (parts.length !== 3) {
-      return 0;
-    }
-    const [dayStr, monthStr, yearStr] = parts;
-    const day = Number(dayStr);
-    const month = Number(monthStr);
-    const year = Number(yearStr);
-    const parsed = new Date(year, month - 1, day);
-    return Number.isNaN(parsed.getTime()) ? 0 : parsed.getTime();
-  }
-
-  private establecerFechaInicial(): void {
-    const hoy = new Date();
-    this.filtroForm.patchValue({
-      fecha: this.formatearFecha(hoy),
-    });
-    this.markForCheck();
-  }
-
-  private formatearFecha(fecha: Date): string {
-    const year = fecha.getFullYear();
-    const month = `${fecha.getMonth() + 1}`.padStart(2, '0');
-    const day = `${fecha.getDate()}`.padStart(2, '0');
-    return `${year}-${month}-${day}`;
   }
 
   private markForCheck(): void {

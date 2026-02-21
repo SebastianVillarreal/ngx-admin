@@ -13,7 +13,12 @@
     <form [formGroup]="form" class="form-grid">
       <div class="form-field">
         <label>*Usuario</label>
-        <nb-select fullWidth formControlName="usuario" placeholder="Selecciona un usuario">
+        <nb-select
+          fullWidth
+          formControlName="usuario"
+          placeholder="Selecciona un usuario"
+          [disabled]="usuariosLoading || !usuarios.length"
+        >
           <nb-option *ngFor="let usuario of usuarios" [value]="usuario.value">{{ usuario.label }}</nb-option>
         </nb-select>
       </div>
@@ -22,6 +27,13 @@
         <input nbInput fullWidth type="date" formControlName="fecha" />
       </div>
     </form>
+    <nb-alert status="info" class="mt" *ngIf="usuariosLoading">
+      Cargando usuarios...
+    </nb-alert>
+    <nb-alert status="danger" class="mt" *ngIf="!usuariosLoading && usuariosError">
+      {{ usuariosError }}
+      <button nbButton ghost size="tiny" status="danger" (click)="reintentarUsuarios()">Reintentar</button>
+    </nb-alert>
     <nb-alert status="info" class="mt">
       Selecciona un usuario y una fecha para generar el corte. El botón de exportar se habilitará automáticamente.
     </nb-alert>
